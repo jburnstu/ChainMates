@@ -79,5 +79,13 @@ namespace ReactApp1.Server.Services
             await _context.SaveChangesAsync();
             return comment;      
         }
+
+        public async Task<Comment> UpdateComment(Comment comment, CommentPatchDto dto)
+        {
+            comment.Content = dto.Content;
+            comment.CommentStatusId = dto.CommentStatusId;
+            await _context.SaveChangesAsync();
+            return comment;
+        }
     }
 }
