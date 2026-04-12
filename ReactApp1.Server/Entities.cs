@@ -165,8 +165,8 @@ namespace ReactApp1.Server
         public DbSet<CommentStatus> CommentStatus { get; set; }
         public DbSet<CommentType> CommentType { get; set; }
         public DbSet<StoryComment> StoryComment { get; set; }
-        public DbSet<StoryComment> SegmentComment { get; set; }
-        public DbSet<StoryComment> CommentComment { get; set; }
+        public DbSet<SegmentComment> SegmentComment { get; set; }
+        public DbSet<CommentComment> CommentComment { get; set; }
 
         //public DbSet<SegmentCommentBySegment> SegmentCommentBySegment { get; set; }
         //public DbSet<SegmentCommentByComment> SegmentCommentByComment { get; set; }
@@ -226,7 +226,10 @@ namespace ReactApp1.Server
                 nestedBuilder =>
                 {
                     nestedBuilder
-                        .HasKey(c => new { c.Id, c.CommentTypeId });
+                        .HasKey(c => c.Id);
+
+                    nestedBuilder
+                        .HasAlternateKey(c => new { c.Id, c.CommentTypeId });
 
                     nestedBuilder
                         .HasOne(c => c.Author)

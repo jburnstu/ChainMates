@@ -32,7 +32,7 @@ namespace ReactApp1.Server.Services
 
         }
 
-        public Task<Comment> CreateComment(CommentCreationDto dto, int authorId)
+        public async Task<Comment> CreateComment(CommentCreationDto dto, int authorId)
         {
 
             var comment = new Comment
@@ -43,8 +43,7 @@ namespace ReactApp1.Server.Services
                 Content = ""
             };
 
-            await _context.Comment.Add(comment);
-
+            _context.Comment.Add(comment);
 
             switch (dto.CommentTypeId)
             {
@@ -55,24 +54,30 @@ namespace ReactApp1.Server.Services
                         CommentTypeId = dto.CommentTypeId,
                         ParentStoryId = dto.ParentId
                     };
+                    _context.StoryComment.Add(storyComment);
                     break;
                 case 2:
-                    var segmentComment = new StoryComment
+                    var segmentComment = new SegmentComment
                     {
                         CommentId = comment.Id,
                         CommentTypeId = dto.CommentTypeId,
                         ParentSegmentId = dto.ParentId
                     };
+                    _context.SegmentComment.Add(segmentComment);
                     break;
                 case 3:
-                    var commentComment = new StoryComment
+                    var commentComment = new CommentComment
                     {
                         CommentId = comment.Id,
                         CommentTypeId = dto.CommentTypeId,
                         ParentCommentId = dto.ParentId
                     };
+                    _context.CommentComment.Add(commentComment);
                     break;
             }
+            ;
+            await _context.SaveChangesAsync();
+            return comment;      
         }
     }
 }
