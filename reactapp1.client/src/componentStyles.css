@@ -1,0 +1,244 @@
+:root {
+    --col-1: #FCF0CC;
+    --col-1-A: #ddc98e;
+    --col-2: #EDAFB8;
+    --col-2-A: #ecc3ca;
+    --col-3: #A07178;
+    --col-3-A: #513b3e;
+    --col-4: #95B8D1;
+    --col-5: #333333;
+}
+
+
+button {
+    color: var(--col-2-A);
+    background-color: var(--col-3-A);
+}
+
+* {
+    margin: 2px;
+    padding: 0.1%;
+    border-radius: 5px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+textarea {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+div.container {
+    display: grid;
+    grid-template-areas:
+        'universalHeader'
+        'dashboardContainer'
+    ;
+    grid-template-rows: 1fr 9fr;
+    gap: 3px;
+    background-color: var(--col-4);
+    padding: 5px;
+    height: 100%;
+    margin: 0.5%;
+    border-radius: 3%;
+}
+
+.universalHeader {
+    grid-area: universalHeader;
+    background-color: var(--col-1);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    max-height: 30px;
+}
+
+.universalHeader>h1,
+nav {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+
+div.dashboardContainer {
+    grid-area: dashboardContainer;
+    display: grid;
+    grid-template-areas:
+        "sidebar storyTabs"
+        "sidebar storyContainer";
+    grid-template-rows: min-content auto;
+    grid-template-columns: min-content auto;
+    height: 100%;
+}
+
+div.sidebar {
+    grid-area: sidebar;
+    background-color: var(--col-5);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+div.sidebar>button {
+    flex-grow: 1;
+}
+
+nav.storyTabs {
+    grid-area: storyTabs;
+    display: flex;
+    justify-content: space-evenly;
+    background-color: var(--col-3);
+}
+
+.storyTabLink {
+    flex-grow: 1;
+    width: 100%;
+}
+
+.storyTabButton {
+    flex-grow: 1;
+    width: 100%;
+}
+
+
+div.storyContainer {
+    grid-area: storyContainer;
+    display: grid;
+    grid-template-areas:
+        "storyHeader storyHeader"
+        "storyContent comments"
+        "submissions comments";
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: min-content auto min-content;
+    gap: 3px;
+    background-color: var(--col-5);
+    padding: 5px;
+    height: 100%;
+    width: 100%;
+}
+
+div.storyHeader {
+    background-color: var(--col-1);
+    grid-area: storyHeader;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+div.storyHeader>div {
+    background-color: var(--col-1-A);
+}
+
+div.storyHeader>div:first-child {
+    flex-grow: 50;
+}
+
+div.storyContent {
+    grid-area: storyContent;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--col-4);
+    height: 100%;
+    overflow: scroll;
+}
+
+div.submissions {
+    grid-area: submissions;
+    display: flex;
+    justify-content: space-evenly;
+    background-color: var(--col-1);
+    height: min-content
+}
+
+div.submissions>div {
+    flex-grow: 1;
+}
+
+.segmentDisplay {
+    grid-area: read-only-content;
+    background-color: var(--col-2);
+    min-height: 50px;
+    width: 90%;
+    padding: 5px;
+    margin: 5px;
+    overflow: auto;
+}
+
+.currentSegmentDisplay {
+    grid-area: input-content;
+    background-color: var(--col-1);
+    min-height: 50px;
+    width: 90%;
+    padding: 5px;
+    margin: 5px;
+}
+
+
+div.modalPortal {
+    position: 'fixed';
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: 'rgba(0, 0, 0, 0.5)';
+    display: 'flex';
+    align-items: 'center';
+    justify-content: 'center';
+}
+
+div.modalButtonContainer {
+    background: 'white';
+    padding: '20px';
+    border-radius: '8px'
+}
+
+.newStoryModalFieldset {
+    background-color: var(--col-3-A);
+    display: flex;
+    flex-direction: column;
+}
+
+
+.allDisplayStoriesContainer {
+    display: flex;
+    flex-direction: row;
+    width: fit-content;
+    justify-content: space-evenly;
+}
+
+
+.displayStoryContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+
+div.comments {
+    grid-area: comments;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--col-5);
+    height: 100%;
+}
+
+
+.segmentInfoContainer {
+    background-color: var(--col-3);
+}
+
+.segmentCommentContainer {
+    background-color: var(--col-1);
+}
+
+.commentCommentContainer {
+    background-color: var(--col-2);
+}
+
+
+.hidden {
+    display: none;
+}
