@@ -1,7 +1,7 @@
 ﻿using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ReactApp1.Server.DTOs;
+using ReactApp1.Server.DTOs.Segment;
 using ReactApp1.Server.Services;
 using System.Diagnostics;
 

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mono.TextTemplating;
 using ReactApp1.Server;
-using ReactApp1.Server.DTOs;
+using ReactApp1.Server.DTOs.Segment;
 using System;
 using System.Diagnostics;
 

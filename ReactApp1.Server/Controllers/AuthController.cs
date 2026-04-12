@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using ReactApp1.Server;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using ReactApp1.Server.DTOs;
 using System.Diagnostics;
+using ReactApp1.Server.DTOs.Auth;
 
 [ApiController]
 [Route("chainmates/auth")]

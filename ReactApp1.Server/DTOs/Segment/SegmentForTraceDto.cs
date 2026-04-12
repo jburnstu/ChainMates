@@ -1,4 +1,6 @@
-﻿namespace ReactApp1.Server.DTOs
+﻿using ReactApp1.Server.DTOs.Author;
+
+namespace ReactApp1.Server.DTOs.Segment
 {
     public class SegmentForTraceDto
     {

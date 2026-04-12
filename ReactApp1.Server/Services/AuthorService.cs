@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 using ReactApp1.Server;
-using ReactApp1.Server.DTOs;
+using ReactApp1.Server.DTOs.Author;
 
 namespace ReactApp1.Server.Services
 {

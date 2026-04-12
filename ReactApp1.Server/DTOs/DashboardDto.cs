@@ -1,4 +1,7 @@
-﻿namespace ReactApp1.Server.DTOs
+﻿using ReactApp1.Server.DTOs.Author;
+using ReactApp1.Server.DTOs.Segment;
+
+namespace ReactApp1.Server.DTOs
 {
     public class DashboardDto
     {

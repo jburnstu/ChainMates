@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ReactApp1.Server.DTOs;
+using ReactApp1.Server.DTOs.Comment;
 using ReactApp1.Server.Services;
 using System.Diagnostics;
 

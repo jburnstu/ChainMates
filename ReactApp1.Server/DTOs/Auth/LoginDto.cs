@@ -1,4 +1,4 @@
-﻿namespace ReactApp1.Server.DTOs
+﻿namespace ReactApp1.Server.DTOs.Auth
 {
     public class LoginDto
     {

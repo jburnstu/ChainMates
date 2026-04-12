@@ -1,4 +1,4 @@
-﻿namespace ReactApp1.Server.DTOs
+﻿namespace ReactApp1.Server.DTOs.Story
 {
     public class StoryDto
     {

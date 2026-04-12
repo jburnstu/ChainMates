@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using ReactApp1.Server;
-using ReactApp1.Server.DTOs;
+using ReactApp1.Server.DTOs.Story;
 using System.Diagnostics;
 
 namespace ReactApp1.Server.Services
