@@ -2,7 +2,7 @@
 {
     public class CommentCreationDto
     {
-        public int CommentTypeId { get; set; }
-        public int ParentId { get; set; }
+        public required  int CommentTypeId { get; set; }
+        public required int ParentId { get; set; }
     }
 }

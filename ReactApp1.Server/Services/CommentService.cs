@@ -35,6 +35,44 @@ namespace ReactApp1.Server.Services
         public Task<Comment> CreateComment(CommentCreationDto dto, int authorId)
         {
 
+            var comment = new Comment
+            {
+                AuthorId = authorId,
+                CommentTypeId = dto.CommentTypeId,
+                CommentStatusId = 1,
+                Content = ""
+            };
+
+            await _context.Comment.Add(comment);
+
+
+            switch (dto.CommentTypeId)
+            {
+                case 1:
+                    var storyComment = new StoryComment
+                    {
+                        CommentId = comment.Id,
+                        CommentTypeId = dto.CommentTypeId,
+                        ParentStoryId = dto.ParentId
+                    };
+                    break;
+                case 2:
+                    var segmentComment = new StoryComment
+                    {
+                        CommentId = comment.Id,
+                        CommentTypeId = dto.CommentTypeId,
+                        ParentSegmentId = dto.ParentId
+                    };
+                    break;
+                case 3:
+                    var commentComment = new StoryComment
+                    {
+                        CommentId = comment.Id,
+                        CommentTypeId = dto.CommentTypeId,
+                        ParentCommentId = dto.ParentId
+                    };
+                    break;
+            }
         }
     }
 }

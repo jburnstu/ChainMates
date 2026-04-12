@@ -212,12 +212,12 @@ namespace ReactApp1.Server
         public DbSet<StoryComment> SegmentComment { get; set; }
         public DbSet<StoryComment> CommentComment { get; set; }
 
-        public DbSet<SegmentCommentBySegment> SegmentCommentBySegment { get; set; }
-        public DbSet<SegmentCommentByComment> SegmentCommentByComment { get; set; }
+        //public DbSet<SegmentCommentBySegment> SegmentCommentBySegment { get; set; }
+        //public DbSet<SegmentCommentByComment> SegmentCommentByComment { get; set; }
 
-        public DbSet<CommentCommentBySegment> CommentCommentBySegment { get; set; }
+        //public DbSet<CommentCommentBySegment> CommentCommentBySegment { get; set; }
 
-        public DbSet<SegmentCommentCommentByComment> SegmentCommentCommentByComment { get; set; }
+        //public DbSet<SegmentCommentCommentByComment> SegmentCommentCommentByComment { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
@@ -333,17 +333,17 @@ namespace ReactApp1.Server
     .HasNoKey()
     .ToView("moderatable_segment_by_author");
 
-            modelBuilder.Entity<SegmentCommentBySegment>()
-    .HasNoKey();
+            //        modelBuilder.Entity<SegmentCommentBySegment>()
+            //.HasNoKey();
 
-            modelBuilder.Entity<SegmentCommentByComment>()
-    .HasNoKey();
+            //        modelBuilder.Entity<SegmentCommentByComment>()
+            //.HasNoKey();
 
-            modelBuilder.Entity<CommentCommentBySegment>()
-    .HasNoKey();
+            //        modelBuilder.Entity<CommentCommentBySegment>()
+            //.HasNoKey();
 
-            modelBuilder.Entity<SegmentCommentCommentByComment>()
-    .HasNoKey();
+            //        modelBuilder.Entity<SegmentCommentCommentByComment>()
+            //.HasNoKey();
         }
     }
 }
