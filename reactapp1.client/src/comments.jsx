@@ -40,9 +40,7 @@ function SegmentInfoPanel(props) {
 
     const [isModerationOpen, setIsModerationOpen] = useState(false);
 
-    function createComment() { }
-    function submitComment() { }
-    function abandonComment() { }
+
 
     return (<div className={`segmentInfoContainer ${props.selections[segmentInfo.earlier_segment_id] ? undefined : 'hidden'}`} >
         <div>{segmentInfo.earlier_segment_author.display_name}</div>
@@ -54,15 +52,9 @@ function SegmentInfoPanel(props) {
             {segmentInfo.comments.map(segmentCommentObj =>
                 <SegmentComment key={segmentCommentObj.id} segmentCommentInfo={segmentCommentObj} />)}
         </div>
-        <div className="addCommentContainer">
-            <button onClick={createComment}>+</button>
-            <textarea></textarea>
-            <button onClick={submitComment}>!</button>
-            <button onClick={abandonComment}>X</button>
-        </div>
+        <CommentCreationPanel parentType="segment" parentID={segmentInfo.earlier_segment_id}/>
     </ div >)
 }
-
 
 function SegmentComment(props) {
 
@@ -77,7 +69,7 @@ function SegmentComment(props) {
                     <CommentComment key={commentCommentObj.id} commentCommentInfo={commentCommentObj} />
                 )}
             </div>
-            <div className="addCommentCommentContainer"></div>
+            <CommentCreationPanel parentType="comment" parentID={segmenCommentInfo.id} />
         </div>)
 }
 
@@ -87,5 +79,65 @@ function CommentComment(props) {
         <div className="commentCommentContainer">{props.commentCommentInfo.author.display_name}
             <textarea readOnly value={props.commentCommentInfo.text_content} />
         </div>
+
     )
 }
+
+function CommentCreationPanel(props) {
+
+    const [currentContent, setCurrentContent] = useState("");
+
+    let typeID;
+    switch (props.parentType) {
+        case "story":
+            typeID = 1;
+            break;
+        case "segment":
+            typeID = 2;
+            break;
+        case "comment":
+            typeID = 3;
+            break;
+    }
+
+    function onChange() {
+        setCurrentContent(value);
+    }
+
+    async function createComment() {
+        let commentCreationData = await contactAPI("comments/", "post", true,
+            {
+                commentTypeId: typeID,
+                parentId: props.parentID
+            });         
+    }
+
+    async function submitComment() {
+
+
+        let commentSubmissionData = await contactAPI("comments/", "patch", true,
+            {
+                content: currentContent,
+                commentTypeId: 2
+            });
+    }
+
+    async function deleteComment() {
+
+        let commentSubmissionData = await contactAPI("comments/", "patch", true,
+            {
+                content: currentContent,
+                commentTypeId: 3
+            });
+    }
+
+    return (
+        <div className="addCommentContainer">
+        <button onClick={createComment}>+</button>
+            <textarea value={currentContent} onChange={onChange}></textarea>
+        <button onClick={submitComment}>!</button>
+        <button onClick={abandonComment}>X</button>
+    </div>)
+
+}
+              
