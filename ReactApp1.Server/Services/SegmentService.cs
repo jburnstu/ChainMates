@@ -1,10 +1,11 @@
 ﻿using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Mono.TextTemplating;
+using NuGet.Protocol.Core.Types;
 using ReactApp1.Server;
+using ReactApp1.Server.DTOs.Author;
 using ReactApp1.Server.DTOs.Segment;
 using ReactApp1.Server.DTOs.Story;
-using ReactApp1.Server.DTOs.Author;
 using System;
 using System.Diagnostics;
 
@@ -13,11 +14,16 @@ namespace ReactApp1.Server.Services
     public class SegmentService
     {
 
-        private readonly AppDbContext _context;
+        private readonly AppDbContext? _context;
         private readonly Random _rnd;
         public SegmentService(AppDbContext context)
         {
             _context = context;
+            _rnd = new Random();
+        }
+
+        public SegmentService()
+        {
             _rnd = new Random();
         }
 
@@ -54,22 +60,6 @@ namespace ReactApp1.Server.Services
             segment.Content = dto.Content ?? segment.Content;
             await _context.SaveChangesAsync();
             return segment;
-        }
-
-        public async Task<List<int>> GetJoinableSegmentIdsByAuthor(int authorId)
-        {
-            return await _context.JoinableSegmentByAuthor
-                .Where(jsba => jsba.AuthorId == authorId)
-                .Select(jsba => jsba.SegmentId)
-                .ToListAsync();
-        }
-
-        public async Task<List<int>> GetModeratableSegmentIdsByAuthor(int authorId)
-        {
-            return await _context.ModeratableSegmentByAuthor
-                .Where(jsba => jsba.AuthorId == authorId)
-                .Select(jsba => jsba.SegmentId)
-                .ToListAsync();
         }
 
 
@@ -113,7 +103,7 @@ namespace ReactApp1.Server.Services
             };
 
             List<SegmentForTraceIncludingCommentsDto> segmentHistoryList = new List<SegmentForTraceIncludingCommentsDto>();
-                    
+
             List<int> earlierSegmentIdList = await _context.SegmentTrace
                 .Where(st => st.FinalSegmentId == segmentId)
                 .Select(st => st.EarlierSegmentId).ToListAsync();
@@ -160,7 +150,7 @@ namespace ReactApp1.Server.Services
             return segment;
         }
 
-        public async Task<ModerationAssignment>  CreateModerationAssignment(ModerationAssignmentDto dto, int authorId)
+        public async Task<ModerationAssignment> CreateModerationAssignment(ModerationAssignmentDto dto, int authorId)
         {
             Debug.WriteLine("CreateModerationAssignment");
 
@@ -171,8 +161,8 @@ namespace ReactApp1.Server.Services
                 IsClosed = false
             };
             _context.ModerationAssignment.Add(moderationAssignment);
-            
-            
+
+
             var segment = await _context.Segment
                 .SingleAsync(s => s.Id == dto.SegmentId);
             segment.SegmentStatusId = 3;
@@ -193,7 +183,8 @@ namespace ReactApp1.Server.Services
                .Select(jsba => jsba.SegmentId);
 
             var count = await query.CountAsync();
-            if (count == 0) {
+            if (count == 0)
+            {
                 Debug.WriteLine("Count 0 -- new story");
                 StoryService storyService = new StoryService(_context);
                 var newStory = await storyService.CreateRandomStory(authorId);
@@ -206,7 +197,8 @@ namespace ReactApp1.Server.Services
                 },
                 authorId, false); //check this
             }
-            else {
+            else
+            {
                 Debug.WriteLine("count non-zero");
                 previousSegmentId = await query
                     .Skip(_rnd.Next(count))
@@ -222,7 +214,7 @@ namespace ReactApp1.Server.Services
                     PreviousSegmentId = previousSegmentId,
                     Content = ""
                 },
-                authorId,false);
+                authorId, false);
             }
             return segment;
         }
@@ -307,5 +299,43 @@ namespace ReactApp1.Server.Services
             }
 
         }
+
+        public async Task<List<SegmentTrace>> GetSegmentTraces()
+        {
+            return await _context.SegmentTrace.ToListAsync();
+        }
+
+        public List<int> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
+        {
+
+            var blockedSegmentIds = traces
+                .Where(t => t.EarlierSegmentAuthorId == authorId)
+                .Select(t => t.FinalSegmentId)
+                .ToHashSet();
+
+            return (List<int>)traces
+                .Where(t => t.FinalSegmentStatusId == 4)
+                .Select(t => t.FinalSegmentId)
+                .Distinct()
+                .Where(id => !blockedSegmentIds.Contains(id));
+                
+        }
+
+        public List<int> GetModeratableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
+        {
+
+            var blockedSegmentIds = traces
+                .Where(t => t.EarlierSegmentAuthorId == authorId)
+                .Select(t => t.FinalSegmentId)
+                .ToHashSet();
+
+            return (List<int>)traces
+                .Where(t => t.FinalSegmentStatusId == 2)
+                .Select(t => t.FinalSegmentId)
+                .Distinct()
+                .Where(id => !blockedSegmentIds.Contains(id));
+
+        }
+
     }
 }

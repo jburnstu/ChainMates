@@ -52,5 +52,11 @@ namespace ReactApp1.Server.Services
             return author;
         }
 
+        public async Task<Author> CreateRandomAuthor()
+        {
+
+        }
+
+
     }
 }
