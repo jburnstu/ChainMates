@@ -46,7 +46,7 @@ public class AuthController : ControllerBase
             Console.WriteLine("Set-Cookie after login: " + sc.ToString());
         }
 
-        return Ok();
+        return Ok("Successfully Logged In");
     }
 
     [HttpPost("register")]
@@ -83,6 +83,6 @@ public class AuthController : ControllerBase
 
         await HttpContext.SignInAsync("Cookies", principal);
 
-        return Ok();
+        return Ok("Successfully Registered");
     }
 }

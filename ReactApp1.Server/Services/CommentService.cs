@@ -34,7 +34,7 @@ namespace ReactApp1.Server.Services
 
 
 
-        public async Task<Comment> CreateComment(CommentCreationDto dto, int authorId)
+        public async Task<int> CreateComment(CommentCreationDto dto, int authorId)
         {
 
             var comment = new Comment
@@ -46,7 +46,10 @@ namespace ReactApp1.Server.Services
             };
 
             _context.Comment.Add(comment);
-
+            await _context.SaveChangesAsync();
+            Debug.WriteLine("Made it past first save");
+            Debug.WriteLine(comment.Id);
+            Debug.WriteLine(dto.ParentId);
             switch (dto.CommentTypeId)
             {
                 case 1:
@@ -56,7 +59,7 @@ namespace ReactApp1.Server.Services
                         CommentTypeId = dto.CommentTypeId,
                         ParentStoryId = dto.ParentId
                     };
-                    _context.StoryComment.Add(storyComment);
+                    await _context.StoryComment.AddAsync(storyComment);
                     break;
                 case 2:
                     var segmentComment = new SegmentComment
@@ -65,7 +68,7 @@ namespace ReactApp1.Server.Services
                         CommentTypeId = dto.CommentTypeId,
                         ParentSegmentId = dto.ParentId
                     };
-                    _context.SegmentComment.Add(segmentComment);
+                    await _context.SegmentComment.AddAsync(segmentComment);
                     break;
                 case 3:
                     var commentComment = new CommentComment
@@ -74,13 +77,58 @@ namespace ReactApp1.Server.Services
                         CommentTypeId = dto.CommentTypeId,
                         ParentCommentId = dto.ParentId
                     };
-                    _context.CommentComment.Add(commentComment);
+                    await _context.CommentComment.AddAsync(commentComment);
                     break;
+            };
+            Debug.WriteLine("nearly at second save");
+            try
+            {
+                await _context.SaveChangesAsync();
             }
-            ;
-            await _context.SaveChangesAsync();
-            return comment;      
+            catch (Exception e)
+            {
+                Console.WriteLine(e.InnerException.Message);
+            }
+            return comment.Id;
+                 
         }
+
+
+        public async Task<CommentPatchDto> UpdateComment(Comment comment, CommentPatchDto dto)
+        {
+            comment.Content = dto.Content;
+            comment.CommentStatusId = dto.CommentStatusId;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.InnerException.Message);
+            }
+            return dto;
+        }
+
+        public async Task<CommentCreationAndSubmissionDto> CreateAndSubmitComment(CommentCreationAndSubmissionDto dto, int authorId)
+        {
+            Debug.WriteLine("In createAndSubmitComment");
+            int commentId = await CreateComment(new CommentCreationDto
+            {
+                CommentTypeId = dto.CommentTypeId,
+                ParentId = dto.ParentId
+
+            }, authorId);
+
+            var comment = await _context.Comment.SingleAsync(c => c.Id == commentId);
+
+            await UpdateComment(comment, new CommentPatchDto
+            {
+                CommentStatusId = 2,
+                Content = dto.Content
+            });
+            return dto;
+        }
+
 
         public async Task<List<CommentForTraceDto>> GetStoryCommentAndChildrenForTrace(int storyId)
         {
@@ -90,18 +138,15 @@ namespace ReactApp1.Server.Services
                                        join a in _context.Author
                                        on c.AuthorId equals a.Id
                                        where sc.ParentStoryId == storyId
-                                       select new
+                                       select new CommentForTraceDto
                                        {
-                                           CommentId = c.Id,
-                                           InnerDto = new CommentForTraceDto
-                                           {
-                                               CommentTypeId = 1,
-                                               DisplayName = a.DisplayName,
-                                               Content = c.Content
-                                           }
+                                           Id = c.Id,
+                                           CommentTypeId = 1,
+                                           DisplayName = a.DisplayName,
+                                           Content = c.Content
                                        }
-                        ).ToListAsync();
-            var listOfStoryCommentIds = storyComments.Select(sc => sc.CommentId).ToList();
+                             ).ToListAsync();
+            var listOfStoryCommentIds = storyComments.Select(sc => sc.Id).ToList();
 
             var childComments = await (from cc in _context.CommentComment
                                        join c in _context.Comment
@@ -114,6 +159,7 @@ namespace ReactApp1.Server.Services
                                            ParentCommentId = cc.ParentCommentId,
                                            InnerDto = new CommentForTraceDto
                                            {
+                                               Id = c.Id,
                                                CommentTypeId = 3,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
@@ -121,14 +167,14 @@ namespace ReactApp1.Server.Services
                                        }
                             ).ToListAsync();
 
-            var lookup = storyComments.ToDictionary(sc => sc.CommentId, sc => sc.InnerDto);
+            var lookup = storyComments.ToDictionary(sc => sc.Id, sc => sc);
             foreach (var child in childComments) { 
-                if (lookup.TryGetValue(child.ParentCommentId, out var ParentInnerDto)) 
+                if (lookup.TryGetValue(child.ParentCommentId, out var parentDto)) 
                 {
-                    ParentInnerDto.ChildComments.Add(child.InnerDto);
+                    parentDto.ChildComments.Add(child.InnerDto);
                 }
             }
-            return storyComments.Select(sc => sc.InnerDto).ToList();
+            return storyComments.ToList();
         }
 
         public async Task<List<CommentForTraceDto>> GetSegmentCommentAndChildrenForTrace(int segmentId)
@@ -139,18 +185,15 @@ namespace ReactApp1.Server.Services
                                        join a in _context.Author
                                        on c.AuthorId equals a.Id
                                        where sc.ParentSegmentId == segmentId
-                                         select new
-                                       {
-                                           CommentId = c.Id,
-                                           InnerDto = new CommentForTraceDto
+                                       select new CommentForTraceDto
                                            {
-                                               CommentTypeId = 1,
+                                               Id = c.Id,
+                                               CommentTypeId = 2,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
-                                           }
-                                       }
+                                           }                                      
                         ).ToListAsync();
-            var listOfSegmentCommentIds = segmentComments.Select(sc => sc.CommentId).ToList();
+            var listOfSegmentCommentIds = segmentComments.Select(sc => sc.Id).ToList();
 
             var childComments = await (from cc in _context.CommentComment
                                        join c in _context.Comment
@@ -163,6 +206,7 @@ namespace ReactApp1.Server.Services
                                            ParentCommentId = cc.ParentCommentId,
                                            InnerDto = new CommentForTraceDto
                                            {
+                                               Id = c.Id,
                                                CommentTypeId = 3,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
@@ -170,7 +214,7 @@ namespace ReactApp1.Server.Services
                                        }
                             ).ToListAsync();
 
-            var lookup = segmentComments.ToDictionary(sc => sc.CommentId, sc => sc.InnerDto);
+            var lookup = segmentComments.ToDictionary(sc => sc.Id, sc => sc);
             foreach (var child in childComments)
             {
                 if (lookup.TryGetValue(child.ParentCommentId, out var ParentInnerDto))
@@ -178,33 +222,9 @@ namespace ReactApp1.Server.Services
                     ParentInnerDto.ChildComments.Add(child.InnerDto);
                 }
             }
-            return segmentComments.Select(sc => sc.InnerDto).ToList();
+            return segmentComments.Select(sc => sc).ToList();
         }
 
 
-        public async Task<Comment> UpdateComment(Comment comment, CommentPatchDto dto)
-        {
-            comment.Content = dto.Content;
-            comment.CommentStatusId = dto.CommentStatusId;
-            await _context.SaveChangesAsync();
-            return comment;
-        }
-
-        public async Task<Comment> CreateAndSubmitComment(CommentCreationAndSubmissionDto dto, int authorId)
-        {
-            var comment = await CreateComment(new CommentCreationDto
-            {
-                CommentTypeId = dto.CommentTypeId,
-                ParentId = dto.ParentId
-
-            }, authorId);
-
-            await UpdateComment(comment, new CommentPatchDto
-            {
-                CommentStatusId = 2,
-                Content = dto.Content
-            });
-            return comment;
-        }
     }
 }

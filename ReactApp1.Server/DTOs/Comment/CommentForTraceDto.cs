@@ -2,6 +2,8 @@
 {
     public class CommentForTraceDto
     {
+
+        public int Id { get; set; }
         public required  int CommentTypeId { get; set; }
 
         public string DisplayName { get; set; }

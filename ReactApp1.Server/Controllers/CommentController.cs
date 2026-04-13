@@ -38,37 +38,11 @@ namespace ReactApp1.Server.Controllers
             {
                 return Unauthorized();
             }
-
+            Debug.WriteLine("InCommentController");
+            Debug.WriteLine(dto.ParentId);
             var data = await _service.CreateAndSubmitComment(dto, authorId);
             return Ok(data);
 
         }
-
-
-        //// POST api/<StoryController>
-        //[HttpPost]
-        //public async Task<IActionResult> Post([FromBody] CommentCreationDto dto)
-        //{
-        //    int authorId = _currentUserService.UserId ?? 0;
-
-        //    if (authorId == 0)
-        //    {
-        //        return Unauthorized();
-        //    }
-
-        //    var data = await _service.CreateComment(dto, authorId);
-        //    return Ok(data);
-
-        //}
-
-        //[HttpPatch("{id}")]
-        //public async Task<IActionResult> Patch([FromBody] CommentPatchDto dto, int id)
-        //{
-
-        //    var comment = await _service.GetCommentById(id);
-        //    var data = await _service.UpdateComment(comment, dto);
-        //    return Ok(data);
-
-        //}
     }
 }

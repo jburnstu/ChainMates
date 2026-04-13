@@ -14,71 +14,74 @@ export function Comments(props) {
     // console.log(selections)
 
     let storyDict = props.storyDict;
-    let segmentTraceWithInfo = storyDict.segment_trace
+    let segmentTraceWithInfo = storyDict.segmentHistoryList
     // segmentTraceWithInfo.map(segmentObj =>
-    //     console.log(segmentObj.earlier_segment_id))
+    //     console.log(segmentObj.id))
 
     return (
         <div className="comments">
             <StoryCommentPanel />
             {segmentTraceWithInfo.map(segmentObj =>
-                <SegmentInfoPanel key={segmentObj.earlier_segment_id} selections={selections} segmentInfo={segmentObj} />
+                <SegmentInfoPanel key={segmentObj.id} selections={selections} segmentInfo={segmentObj} />
             )}
         </div>
     )
 }
 
-function StoryCommentPanel() { }
+function StoryCommentPanel(props) {
+}
 
 
 function SegmentInfoPanel(props) {
 
     let segmentInfo = props.segmentInfo;
-    // console.log(segmentInfo);
+     console.log(segmentInfo);
     // console.log(props.selections)
-    // console.log(props.selections[segmentInfo.earlier_segment_id]);
+    // console.log(props.selections[segmentInfo.id]);
 
     const [isModerationOpen, setIsModerationOpen] = useState(false);
 
 
 
-    return (<div className={`segmentInfoContainer ${props.selections[segmentInfo.earlier_segment_id] ? undefined : 'hidden'}`} >
-        <div>{segmentInfo.earlier_segment_author.display_name}</div>
+    return (<div className={`segmentInfoContainer ${props.selections[segmentInfo.id] ? undefined : 'hidden'}`} >
+        <div>{segmentInfo.displayName}</div>
         <div className="moderationContainer">
             <button onClick={() => setIsModerationOpen(!isModerationOpen)}>LOOK AT MODERATION</button>
             <div className={isModerationOpen ? undefined : 'hidden'}>MODERATION PANEL</div>
         </div>
         <div className="segmentCommentsContainer">
-            {segmentInfo.comments.map(segmentCommentObj =>
+            {segmentInfo.childComments.map(segmentCommentObj =>
                 <SegmentComment key={segmentCommentObj.id} segmentCommentInfo={segmentCommentObj} />)}
         </div>
-        <CommentCreationPanel parentType="segment" parentID={segmentInfo.earlier_segment_id}/>
+        <CommentCreationPanel parentType="segment" parentID={segmentInfo.id}/>
     </ div >)
 }
 
 function SegmentComment(props) {
 
     let segmentCommentInfo = props.segmentCommentInfo;
-    // console.log(segmentCommentInfo)
+    console.log(segmentCommentInfo);
 
     return (
-        <div className="segmentCommentContainer">{segmentCommentInfo.author.display_name}
-            <textarea readOnly value={segmentCommentInfo.text_content} />
+        <div className="segmentCommentContainer">{segmentCommentInfo.displayName}
+            <textarea readOnly value={segmentCommentInfo.content} />
             <div className="commentCommentsContainer">
-                {segmentCommentInfo.comments.map(commentCommentObj =>
+                {segmentCommentInfo.childComments.map(commentCommentObj =>
                     <CommentComment key={commentCommentObj.id} commentCommentInfo={commentCommentObj} />
                 )}
             </div>
-            <CommentCreationPanel parentType="comment" parentID={segmenCommentInfo.id} />
+            <CommentCreationPanel parentType="comment" parentID={segmentCommentInfo.id} />
         </div>)
 }
 
 function CommentComment(props) {
-    return (
-        <div className="commentCommentContainer">{props.commentCommentInfo.author.display_name}
-            <textarea readOnly value={props.commentCommentInfo.text_content} />
-        </div>
 
+    console.log(props.commentCommentInfo);
+
+    return (
+        <div className="commentCommentContainer">{props.commentCommentInfo.displayName}
+            <textarea readOnly value={props.commentCommentInfo.content} />
+        </div>
     )
 }
 
@@ -99,8 +102,10 @@ function CommentCreationPanel(props) {
             break;
     }
 
-    function onChange() {
-        setCurrentContent(value);
+    console.log(props.parentID, typeID);
+
+    function onChange(e) {
+        setCurrentContent(e.target.value);
     }
 
     async function createAndSubmitComment() {

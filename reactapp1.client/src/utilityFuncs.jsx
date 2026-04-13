@@ -42,7 +42,7 @@ export async function contactAPI(urlTarget, method, authorized = false, bodyDict
     else {
         console.log("SUCCESS at url ", `${urlStub}${urlTarget}`);
     }
-    console.log(response);
+    //console.log(response);
     return response.json();
 };
 

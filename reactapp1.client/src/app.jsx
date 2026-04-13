@@ -354,7 +354,7 @@ function Story(props) {
                 }
             </div>
             <SubmissionButtons writeOrReview={writeOrReview} currentContent={currentContent} segmentID={storyID} removeCurrentStory={removeCurrentStory} />
-
+            <Comments selections={selectedSegmentDict} storyDict={storyDict} />
         </div>
     )
 }
@@ -421,7 +421,3 @@ function SubmissionButtons(props) {
         </div>
     )
 }
-
-
-
-                      //  <Comments selections={selectedSegmentDict} storyDict={storyDict} />
