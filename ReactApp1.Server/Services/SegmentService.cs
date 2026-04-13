@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Mono.TextTemplating;
 using ReactApp1.Server;
 using ReactApp1.Server.DTOs.Segment;
+using ReactApp1.Server.DTOs.Story;
+using ReactApp1.Server.DTOs.Author;
 using System;
 using System.Diagnostics;
 
@@ -71,12 +73,14 @@ namespace ReactApp1.Server.Services
         }
 
 
-        public async Task<SegmentForTraceDto?> GetSegmentForTraceById(int segmentId)
+        public async Task<SegmentForTraceIncludingCommentsDto?> GetSegmentForTraceById(int segmentId)
         {
+            CommentService commentService = new CommentService(_context);
+            var childComments = await commentService.GetSegmentCommentAndChildrenForTrace(segmentId);
 
             return await _context.Segment
                 .Where(st => st.Id == segmentId)
-                .Select(st => new SegmentForTraceDto
+                .Select(st => new SegmentForTraceIncludingCommentsDto
                 {
                     Id = st.Id,
                     Content = st.Content,
@@ -84,16 +88,19 @@ namespace ReactApp1.Server.Services
                     {
                         Id = st.AuthorId,
                         DisplayName = st.Author.DisplayName
-                    }
+                    },
+                    ChildComments = childComments
                 }
                 ).FirstOrDefaultAsync();
         }
 
-        public async Task<SegmentHistoryDto?> GetSegmentTraceBySegment(int segmentId)
+        public async Task<SegmentHistoryIncludingCommentsDto?> GetSegmentTraceBySegment(int segmentId)
         {
             StoryService storyService = new StoryService(_context);
+            CommentService commentService = new CommentService(_context);
             var story = await storyService.GetStoryBySegment(segmentId);
-            var storyDto = new StoryDto
+            var storyComments = await commentService.GetStoryCommentAndChildrenForTrace(story.Id);
+            var storyDto = new StoryIncludingCommentsDto
             {
                 //Id = story.Id,
                 Title = story.Title,
@@ -101,10 +108,11 @@ namespace ReactApp1.Server.Services
                 MaxSegmentLength = story.MaxSegmentLength,
                 MinSegmentLength = story.MinSegmentLength,
                 MaxBranches = story.MaxBranches,
-                IsItMature = story.IsItMature
+                IsItMature = story.IsItMature,
+                ChildComments = storyComments
             };
 
-            List<SegmentForTraceDto> segmentHistoryList = new List<SegmentForTraceDto>();
+            List<SegmentForTraceIncludingCommentsDto> segmentHistoryList = new List<SegmentForTraceIncludingCommentsDto>();
                     
             List<int> earlierSegmentIdList = await _context.SegmentTrace
                 .Where(st => st.FinalSegmentId == segmentId)
@@ -112,12 +120,12 @@ namespace ReactApp1.Server.Services
 
             foreach (int earlierSegmentId in earlierSegmentIdList)
             {
-                SegmentForTraceDto segmentDto = await GetSegmentForTraceById(earlierSegmentId);
+                SegmentForTraceIncludingCommentsDto segmentDto = await GetSegmentForTraceById(earlierSegmentId);
                 segmentHistoryList.Add(segmentDto);
             }
 
 
-            return new SegmentHistoryDto
+            return new SegmentHistoryIncludingCommentsDto
             {
                 Id = segmentId,
                 StoryData = storyDto,

@@ -80,6 +80,106 @@ namespace ReactApp1.Server.Services
             return comment;      
         }
 
+        public async Task<List<CommentForTraceDto>> GetStoryCommentAndChildrenForTrace(int storyId)
+        {
+            var storyComments = await (from sc in _context.StoryComment
+                                       join c in _context.Comment
+                                       on sc.CommentId equals c.Id
+                                       join a in _context.Author
+                                       on c.AuthorId equals a.Id
+                                       where sc.ParentStoryId == storyId
+                                       select new
+                                       {
+                                           CommentId = c.Id,
+                                           InnerDto = new CommentForTraceDto
+                                           {
+                                               CommentTypeId = 1,
+                                               DisplayName = a.DisplayName,
+                                               Content = c.Content
+                                           }
+                                       }
+                        ).ToListAsync();
+            var listOfStoryCommentIds = storyComments.Select(sc => sc.CommentId).ToList();
+
+            var childComments = await (from cc in _context.CommentComment
+                                       join c in _context.Comment
+                                       on cc.CommentId equals c.Id
+                                       join a in _context.Author
+                                       on c.AuthorId equals a.Id
+                                       where listOfStoryCommentIds.Contains(cc.ParentCommentId)
+                                       select new
+                                       {
+                                           ParentCommentId = cc.ParentCommentId,
+                                           InnerDto = new CommentForTraceDto
+                                           {
+                                               CommentTypeId = 3,
+                                               DisplayName = a.DisplayName,
+                                               Content = c.Content
+                                           }
+                                       }
+                            ).ToListAsync();
+
+            var lookup = storyComments.ToDictionary(sc => sc.CommentId, sc => sc.InnerDto);
+            foreach (var child in childComments) { 
+                if (lookup.TryGetValue(child.ParentCommentId, out var ParentInnerDto)) 
+                {
+                    ParentInnerDto.ChildComments.Add(child.InnerDto);
+                }
+            }
+            return storyComments.Select(sc => sc.InnerDto).ToList();
+        }
+
+        public async Task<List<CommentForTraceDto>> GetSegmentCommentAndChildrenForTrace(int segmentId)
+        {
+            var segmentComments = await (from sc in _context.SegmentComment
+                                       join c in _context.Comment
+                                       on sc.CommentId equals c.Id
+                                       join a in _context.Author
+                                       on c.AuthorId equals a.Id
+                                       where sc.ParentSegmentId == segmentId
+                                         select new
+                                       {
+                                           CommentId = c.Id,
+                                           InnerDto = new CommentForTraceDto
+                                           {
+                                               CommentTypeId = 1,
+                                               DisplayName = a.DisplayName,
+                                               Content = c.Content
+                                           }
+                                       }
+                        ).ToListAsync();
+            var listOfSegmentCommentIds = segmentComments.Select(sc => sc.CommentId).ToList();
+
+            var childComments = await (from cc in _context.CommentComment
+                                       join c in _context.Comment
+                                       on cc.CommentId equals c.Id
+                                       join a in _context.Author
+                                       on c.AuthorId equals a.Id
+                                       where listOfSegmentCommentIds.Contains(cc.ParentCommentId)
+                                       select new
+                                       {
+                                           ParentCommentId = cc.ParentCommentId,
+                                           InnerDto = new CommentForTraceDto
+                                           {
+                                               CommentTypeId = 3,
+                                               DisplayName = a.DisplayName,
+                                               Content = c.Content
+                                           }
+                                       }
+                            ).ToListAsync();
+
+            var lookup = segmentComments.ToDictionary(sc => sc.CommentId, sc => sc.InnerDto);
+            foreach (var child in childComments)
+            {
+                if (lookup.TryGetValue(child.ParentCommentId, out var ParentInnerDto))
+                {
+                    ParentInnerDto.ChildComments.Add(child.InnerDto);
+                }
+            }
+            return segmentComments.Select(sc => sc.InnerDto).ToList();
+        }
+
+
         public async Task<Comment> UpdateComment(Comment comment, CommentPatchDto dto)
         {
             comment.Content = dto.Content;

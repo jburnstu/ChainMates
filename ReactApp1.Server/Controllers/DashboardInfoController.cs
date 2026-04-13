@@ -20,11 +20,11 @@ public class DashboardInfoController : ControllerBase
     protected AuthorService authorService;
     protected SegmentService segmentService;
     protected StoryService storyService;
-    protected List<SegmentHistoryDto> writeDicts;
-    protected List<SegmentHistoryDto> reviewDicts;
+    protected List<SegmentHistoryIncludingCommentsDto> writeDicts;
+    protected List<SegmentHistoryIncludingCommentsDto> reviewDicts;
     protected AuthorDto authorInfo;
     protected StartingUrlDto startingUrlDto;
-    public DashboardDto dashboardInfo;
+    public DashboardIncludingCommentsDto dashboardInfo;
 
     public DashboardInfoController(AppDbContext context, CurrentUserService currentUserService)
     {
@@ -33,8 +33,8 @@ public class DashboardInfoController : ControllerBase
         authorService = new AuthorService(_context);
         storyService = new StoryService(_context);
         segmentService = new SegmentService(_context);
-        writeDicts = new List<SegmentHistoryDto>();
-        reviewDicts = new List<SegmentHistoryDto>();
+        writeDicts = new List<SegmentHistoryIncludingCommentsDto>();
+        reviewDicts = new List<SegmentHistoryIncludingCommentsDto>();
     }
 
 
@@ -75,7 +75,7 @@ public class DashboardInfoController : ControllerBase
             StoryId = null
         };
 
-        dashboardInfo = new DashboardDto
+        dashboardInfo = new DashboardIncludingCommentsDto
         {
             AuthorInfo = authorInfo,
             WriteDicts = writeDicts,
