@@ -32,6 +32,8 @@ namespace ReactApp1.Server.Services
 
         }
 
+
+
         public async Task<Comment> CreateComment(CommentCreationDto dto, int authorId)
         {
 
@@ -185,6 +187,23 @@ namespace ReactApp1.Server.Services
             comment.Content = dto.Content;
             comment.CommentStatusId = dto.CommentStatusId;
             await _context.SaveChangesAsync();
+            return comment;
+        }
+
+        public async Task<Comment> CreateAndSubmitComment(CommentCreationAndSubmissionDto dto, int authorId)
+        {
+            var comment = await CreateComment(new CommentCreationDto
+            {
+                CommentTypeId = dto.CommentTypeId,
+                ParentId = dto.ParentId
+
+            }, authorId);
+
+            await UpdateComment(comment, new CommentPatchDto
+            {
+                CommentStatusId = 2,
+                Content = dto.Content
+            });
             return comment;
         }
     }

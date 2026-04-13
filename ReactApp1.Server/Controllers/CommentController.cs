@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ReactApp1.Server.DTOs.Comment;
 using ReactApp1.Server.Services;
 using System.Diagnostics;
@@ -24,9 +25,12 @@ namespace ReactApp1.Server.Controllers
             _currentUserService = currentUserService;
         }
 
+
+
         // POST api/<StoryController>
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CommentCreationDto dto)
+        public async Task<IActionResult> Post([FromBody] CommentCreationAndSubmissionDto dto)
         {
             int authorId = _currentUserService.UserId ?? 0;
 
@@ -35,19 +39,36 @@ namespace ReactApp1.Server.Controllers
                 return Unauthorized();
             }
 
-            var data = await _service.CreateComment(dto, authorId);
+            var data = await _service.CreateAndSubmitComment(dto, authorId);
             return Ok(data);
 
         }
 
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> Patch([FromBody] CommentPatchDto dto, int id)
-        {
 
-            var comment = await _service.GetCommentById(id);
-            var data = await _service.UpdateComment(comment, dto);
-            return Ok(data);
+        //// POST api/<StoryController>
+        //[HttpPost]
+        //public async Task<IActionResult> Post([FromBody] CommentCreationDto dto)
+        //{
+        //    int authorId = _currentUserService.UserId ?? 0;
 
-        }
+        //    if (authorId == 0)
+        //    {
+        //        return Unauthorized();
+        //    }
+
+        //    var data = await _service.CreateComment(dto, authorId);
+        //    return Ok(data);
+
+        //}
+
+        //[HttpPatch("{id}")]
+        //public async Task<IActionResult> Patch([FromBody] CommentPatchDto dto, int id)
+        //{
+
+        //    var comment = await _service.GetCommentById(id);
+        //    var data = await _service.UpdateComment(comment, dto);
+        //    return Ok(data);
+
+        //}
     }
 }

@@ -74,7 +74,6 @@ function SegmentComment(props) {
 }
 
 function CommentComment(props) {
-
     return (
         <div className="commentCommentContainer">{props.commentCommentInfo.author.display_name}
             <textarea readOnly value={props.commentCommentInfo.text_content} />
@@ -84,8 +83,8 @@ function CommentComment(props) {
 }
 
 function CommentCreationPanel(props) {
-
     const [currentContent, setCurrentContent] = useState("");
+    const [isOpen, setIsOpen] = useState(false);
 
     let typeID;
     switch (props.parentType) {
@@ -104,40 +103,26 @@ function CommentCreationPanel(props) {
         setCurrentContent(value);
     }
 
-    async function createComment() {
-        let commentCreationData = await contactAPI("comments/", "post", true,
+    async function createAndSubmitComment() {
+        let commentSubmissionData = await contactAPI("comments/", "post", true,
             {
                 commentTypeId: typeID,
-                parentId: props.parentID
-            });         
-    }
-
-    async function submitComment() {
-
-
-        let commentSubmissionData = await contactAPI("comments/", "patch", true,
-            {
-                content: currentContent,
-                commentTypeId: 2
+                parentId: props.parentID,
+                content: currentContent 
             });
     }
 
-    async function deleteComment() {
-
-        let commentSubmissionData = await contactAPI("comments/", "patch", true,
-            {
-                content: currentContent,
-                commentTypeId: 3
-            });
-    }
 
     return (
         <div className="addCommentContainer">
-        <button onClick={createComment}>+</button>
-            <textarea value={currentContent} onChange={onChange}></textarea>
-        <button onClick={submitComment}>!</button>
-        <button onClick={abandonComment}>X</button>
-    </div>)
+            <button onClick={() => setIsOpen(true)}>+</button>
+            <div className= {isOpen? "" : "hidden" }>
+                <textarea value={currentContent} onChange={onChange}></textarea>
+                <button onClick={createAndSubmitComment}>!</button>
+                <button onClick={() => setIsOpen(false)}>X</button>
+            </div>
+        </div>
+    )
 
 }
               
