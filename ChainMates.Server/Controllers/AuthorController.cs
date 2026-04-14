@@ -11,6 +11,7 @@ namespace ChainMates.Server.Controllers
     {
         private readonly AuthorService _authorService;
         private readonly CurrentUserService _currentUserService;
+        private readonly int numberOfRecentSegments = 3;
         public AuthorController(AuthorService authorService, CurrentUserService currentUserService)
         {
             _authorService = authorService;
@@ -95,9 +96,19 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            var data = await _authorService.GetCircleIdsByAuthorId(authorId);
+            var data = await _authorService.GetCirclesByAuthorId(authorId);
             return Ok(data);
         }
+
+        [Authorize]
+        [HttpGet("({'authorId'})/recentsegments")]
+        public async Task<IActionResult> GetRecentSegmentsByAuthor(int authorId)
+        {
+            var data = await _authorService.GetRecentSegmentHistoriesByAuthorId(authorId,numberOfRecentSegments);
+            return Ok(data);
+        }
+
+
 
 
     }

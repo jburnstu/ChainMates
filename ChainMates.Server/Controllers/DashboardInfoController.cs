@@ -24,7 +24,8 @@ public class DashboardInfoController : ControllerBase
     protected List<SegmentHistoryIncludingCommentsDto> reviewDicts;
     protected AuthorDto authorInfo;
     protected StartingUrlDto startingUrlDto;
-    public DashboardIncludingCommentsDto dashboardInfo;
+    protected RelationInfoDto relationInfoDto;
+    public DashboardDto dashboardInfo;
 
     public DashboardInfoController(AppDbContext context, CurrentUserService currentUserService)
     {
@@ -75,12 +76,24 @@ public class DashboardInfoController : ControllerBase
             StoryId = null
         };
 
-        dashboardInfo = new DashboardIncludingCommentsDto
+        var followingAuthors = await authorService.GetFollowingAuthors(authorId);
+        var followedAuthors = await authorService.GetFollowedAuthors(authorId);
+        var circles = await authorService.GetCirclesByAuthorId(authorId);
+
+        relationInfoDto = new RelationInfoDto
+        {
+            FollowingAuthors = followingAuthors,
+            FollowedAuthors = followedAuthors,
+            Circles = circles
+        };
+
+        dashboardInfo = new DashboardDto
         {
             AuthorInfo = authorInfo,
             WriteDicts = writeDicts,
             ReviewDicts = reviewDicts,
-            StartingUrlDict = startingUrlDto
+            StartingUrlDict = startingUrlDto,
+            RelationInfo = relationInfoDto
         };
 
         return Ok(dashboardInfo);

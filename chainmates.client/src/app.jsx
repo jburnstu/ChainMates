@@ -23,23 +23,7 @@ export default function App() {
                 console.log(value);
                 setData(value)
             })
-            //.catch((error) => {
-            //    console.log("ERROR:", error);
-            //});
         }, []);
-        //fetch("/chainmates/dashboardInfo", {
-        //    credentials: "include"
-        //})
-        //    .then(res => {
-        //        if (!res.ok) {
-        //            console.log("RES NOT OK")
-        //            throw new Error();
-        //        }
-        //        return res.json();
-        //    })
-        //    .then(setData)
-        //    .catch((error) => {
-    //    console.log("ERROR:", error)});
 
     if (!data) {
         return <div>Loading...</div>
@@ -48,37 +32,30 @@ export default function App() {
     console.log(data);
     if (Object.keys(data).length == 0) {
         console.log("IN HERE")
-        if (authMode == "login") {
-            console.log("GONIG TO LOGIN")
-            return (
-                <Login
-                    onLogin={setData}
-                    switchToSignup={() => setAuthMode("signup")}
-                />
-            );
-        }
-
-        return (
-            <Signup
-                onSignup={setData}
-                switchToLogin={() => setAuthMode("login")}
-            />
-        );
+        switch (authMode) {
+            case "login":
+                console.log("GONIG TO LOGIN")
+                return (
+                    <Login
+                        onLogin={setData}
+                        switchToSignup={() => setAuthMode("signup")}
+                    />
+                );
+                break;
+            case "signup":
+            default:
+                return (
+                    <Signup
+                        onSignup={setData}
+                        switchToLogin={() => setAuthMode("login")}
+                    />
+                );
+                break;
     }
 
-    console.log(data)
-
-
     const rootPath = "/chainmates/";
-    
-
-    //const [authorDicts, setAuthorDicts] = useState([{ "id": authorID, "display_name": displayName }]);
-
-    console.log(data.startingUrlDict);
     const startingWriteOrReview = data.startingUrlDict.readOrWrite;
     let startingStoryID = data.startingUrlDict.storyId;
-    // console.log(startingWriteOrReview, typeof (startingWriteOrReview))
-    // console.log(getArrayObjByID(writeDicts, startingStoryID));
 
     let startingURL;
     if (startingWriteOrReview == null) {
@@ -99,7 +76,6 @@ export default function App() {
     // console.log(startingURL);
 
 
-
     async function changeStoryDicts(storyDict, writeOrReview = "write", addOrRemove = "add") {
 
         let dataKey;
@@ -110,9 +86,9 @@ export default function App() {
             case "review":
                 dataKey = "reviewDicts";
                 break;
-            //case "author":
-            //    dictArrayToChange = authorDicts;
-            //    break;
+            case "author":
+                dataKey = "relationInfo";
+                break;
         }
 
         let dictArrayToChange = data[dataKey];
@@ -142,8 +118,6 @@ export default function App() {
     }
 
 
-
-
     return (
             <BrowserRouter>
                 <Routes>
@@ -163,13 +137,13 @@ export default function App() {
                                 element={<Story writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
-                        {/*<Route path="author/"*/}
-                        {/*    element={<Dashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}*/}
-                        {/*    />}*/}
-                        {/*>*/}
-                        {/*    <Route path=":tabID/"*/}
-                        {/*        element={<AuthorProfile writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts} />} />*/}
-                        {/*</Route>*/}
+                        <Route path="author/"
+                            element={<Dashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}
+                            />}
+                        >
+                            <Route path=":tabID/"
+                                element={<AuthorProfile writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts} />} />
+                        </Route>
                     </Route>
                     <Route path="*" element={<NoMatch />} />
                 </Routes>
