@@ -313,11 +313,12 @@ namespace ChainMates.Server.Services
                 .Select(t => t.FinalSegmentId)
                 .ToHashSet();
 
-            return (List<int>)traces
+            return traces
                 .Where(t => t.FinalSegmentStatusId == 4)
                 .Select(t => t.FinalSegmentId)
                 .Distinct()
-                .Where(id => !blockedSegmentIds.Contains(id));
+                .Where(id => !blockedSegmentIds.Contains(id))
+                .ToList();
                 
         }
 
@@ -329,11 +330,12 @@ namespace ChainMates.Server.Services
                 .Select(t => t.FinalSegmentId)
                 .ToHashSet();
 
-            return (List<int>)traces
+            return traces
                 .Where(t => t.FinalSegmentStatusId == 2)
                 .Select(t => t.FinalSegmentId)
                 .Distinct()
-                .Where(id => !blockedSegmentIds.Contains(id));
+                .Where(id => !blockedSegmentIds.Contains(id))
+                .ToList();
 
         }
 

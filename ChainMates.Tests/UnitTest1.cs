@@ -4,10 +4,10 @@ using ChainMates.Server.Services;
 
 namespace ChainMates.Tests
 {
-    public class UnitTest1
+    public class SegmentServiceTests
     {
         [Fact]
-        public void Author_Blocks_All_Descendants()
+        public void AuthorBlocksAllDescendants()
         {
             var traces = new List<SegmentTrace>
             {
