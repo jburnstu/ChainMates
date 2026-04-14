@@ -91,7 +91,8 @@ namespace ReactApp1.Server.Controllers
             {
                 return Unauthorized();
             }
-            var data = await _service.GetJoinableSegmentIdsByAuthor(authorId);
+            var traces = await _service.GetSegmentTraces();
+            var data = _service.GetJoinableSegmentIdsByAuthor(authorId, traces);
             return Ok(data);
 
         }
@@ -107,20 +108,11 @@ namespace ReactApp1.Server.Controllers
             {
                 return Unauthorized();
             }
-            var data = await _service.GetModeratableSegmentIdsByAuthor(authorId);
+            var traces = await _service.GetSegmentTraces();
+            var data = _service.GetModeratableSegmentIdsByAuthor(authorId, traces);
             return Ok(data);
 
         }
-
-
-
-         //segment patch on id
-        // segment data post
-        // fullstoryinfo get on id
-        // moderationassignment post on data
-        // story post on data
-        // Segment trace get on is
-        // authorincludingavailability get on authorid (nothing)
 
         // POST api/moderationassignments/
         [Authorize]

@@ -1,5 +1,4 @@
-﻿using MyApp.Services;
-using ReactApp1.Server;
+﻿using ReactApp1.Server;
 using ReactApp1.Server.Services;
 
 
@@ -22,6 +21,7 @@ namespace ReactApp1.Tests
 
             Assert.DoesNotContain(2, result);
             Assert.DoesNotContain(3, result);
+            Assert.False(true);
         }
 
 
