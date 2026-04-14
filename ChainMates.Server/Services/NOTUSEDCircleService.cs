@@ -8,11 +8,11 @@ using System.Xml.Linq;
 
 namespace ChainMates.Server.Services
 {
-    public class AuthorService
+    public class NOTUSEDCircleService
     {
 
         private readonly AppDbContext _context;
-        public AuthorService(AppDbContext context)
+        public NOTUSEDCircleService(AppDbContext context)
         {
             _context = context;
         }
@@ -87,27 +87,6 @@ namespace ChainMates.Server.Services
 
             await _context.SaveChangesAsync();
             return authorRelation;
-        }
-
-        public async Task<List<Circle>> GetCircles()
-        {
-            return await _context.Circle.ToListAsync();
-        }
-        
-        public async Task<List<int>> GetCircleIdsByAuthorId(int authorId)
-        {
-            return await _context.CircleAssignment
-                .Where(ca => ca.AuthorId == authorId)
-                .Select(ca => ca.CircleId)
-                .ToListAsync();
-        }
-
-        public async Task<List<int>> GetAuthorIdsByCircleId(int circleId)
-        {
-            return await _context.CircleAssignment
-                .Where(ca => ca.CircleId == circleId)
-                .Select(ca => ca.AuthorId)
-                .ToListAsync();
         }
 
         public async Task<Circle> CreateCircle(string name, int? authorId)

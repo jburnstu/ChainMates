@@ -57,11 +57,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            Debug.WriteLine("THE DTO StoryId in SegController:");
-            Debug.WriteLine(dto.StoryId);
-            Debug.WriteLine(dto.Content);
             Segment segment = await _service.CreateSegment(dto, authorId, true);
-            Debug.WriteLine("SEGMENT PRINTOUT:", segment);
             return Ok(segment);
 
             }
