@@ -22,20 +22,28 @@ namespace ChainMates.Server
         public List<Segment> Segments { get; set; } = new();
         public List<ModerationAssignment> ModerationAssignments { get; set; } = new();
         public List<Comment> Comments { get; set; } = new();
+
+        public List<AuthorRelation> PrimaryRelations { get; set; }
+        public List<AuthorRelation> SecondaryRelations { get; set; }
+        public List<CircleAssignment> CircleAssignments { get; set; } = new();
     }
     public class Story
     {
         public int Id { get; set; }
+        public int AuthorId { get; set; }
+        public int? CircleId { get; set; }
         public string? Title { get; set; } = "";
         public int? MaxSegments { get; set; } = null;
         public int? MaxSegmentLength { get; set; } = null;
         public int? MinSegmentLength { get; set; } = null;
         public int? MaxBranches { get; set; } = null;
         public bool? IsItMature { get; set; } = false;
+
+        public Author Author { get; set; }
+        public Circle? Circle { get; set; }
         public List<Segment> Segments { get; set; } = new();
         public List<StoryComment> Comments { get; set; } = new();
-        public int AuthorId { get; set; }
-        public Author Author { get; set; }
+
     }
     public class Segment
     {
@@ -126,7 +134,7 @@ namespace ChainMates.Server
     public class SegmentTrace
     {
         public int FinalSegmentId { get; set; }
-        public int FinalUserId { get; set; }
+        public int FinalAuthorId { get; set; }
         public int FinalSegmentStatusId { get; set; }
         public int EarlierSegmentId { get; set; }
         public int EarlierSegmentContent { get; set; }
@@ -145,6 +153,39 @@ namespace ChainMates.Server
         public int AuthorId { get; set; }
         public int SegmentId { get; set; }
     }
+
+    public class AuthorRelation { 
+        public int AuthorId { get; set; }
+        public int RelatedAuthorId { get; set; }
+        public int AuthorRelationTypeId { get; set; }
+
+        public Author Author { get; set; }
+        public Author RelatedAuthor { get; set; }
+        public AuthorRelationType AuthorRelationType { get; set; }
+    }
+
+    public class AuthorRelationType     {
+        public int Id { get; set; }
+        public string Description { get; set; }
+
+        public List<AuthorRelation> AuthorRelations { get; set; }
+    }
+
+    public class Circle {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public List<CircleAssignment> CircleAssignments { get; set; }
+
+        public List<Story> Stories { get; set; }
+    }
+
+    public class CircleAssignment {
+        public int CircleId { get; set; }
+        public int AuthorId { get; set; }
+        public Circle Circle { get; set; }
+        public Author Author { get; set; }
+    }
+
 
 
     public class AppDbContext : DbContext
@@ -168,6 +209,14 @@ namespace ChainMates.Server
         public DbSet<SegmentComment> SegmentComment { get; set; }
         public DbSet<CommentComment> CommentComment { get; set; }
 
+
+        public DbSet<AuthorRelation> AuthorRelation { get; set; }
+        public DbSet<AuthorRelationType> AuthorRelationType { get; set; }
+
+
+        public DbSet<Circle> Circle { get; set; }
+        public DbSet<CircleAssignment> CircleAssignment { get; set; }
+
         //public DbSet<SegmentCommentBySegment> SegmentCommentBySegment { get; set; }
         //public DbSet<SegmentCommentByComment> SegmentCommentByComment { get; set; }
 
@@ -186,12 +235,23 @@ namespace ChainMates.Server
 
             modelBuilder.Entity<Author>();
 
-            modelBuilder.Entity<Story>();
-            modelBuilder.Entity<Story>()
-                .HasOne(s => s.Author)
-                .WithMany(a => a.Stories)
-                .HasForeignKey(s => s.AuthorId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Story>(
+                nestedBuilder =>
+                {
+                    nestedBuilder
+                        .HasOne(s => s.Author)
+                        .WithMany(a => a.Stories)
+                        .HasForeignKey(s => s.AuthorId)
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    nestedBuilder
+                        .HasOne(s => s.Circle)
+                        .WithMany(a => a.Stories)
+                        .HasForeignKey(s => s.CircleId)
+                        .IsRequired(false)
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                });
 
             modelBuilder.Entity<Segment>(
                 nestedBuilder =>
@@ -212,6 +272,7 @@ namespace ChainMates.Server
                         .HasOne(s => s.PreviousSegment)
                         .WithMany(s2 => s2.FollowingSegments)
                         .HasForeignKey(s => s.PreviousSegmentId)
+                        .IsRequired(false)
                         .OnDelete(DeleteBehavior.Restrict);
 
                     nestedBuilder
@@ -222,9 +283,9 @@ namespace ChainMates.Server
                 });
 
 
-            modelBuilder.Entity<Comment>(
-                nestedBuilder =>
-                {
+             modelBuilder.Entity<Comment>(
+                 nestedBuilder =>
+                 {
                     nestedBuilder
                         .HasKey(c => c.Id);
 
@@ -248,9 +309,9 @@ namespace ChainMates.Server
                         .WithMany(ct => ct.Comments)
                         .HasForeignKey(c => c.CommentTypeId)
                         .OnDelete(DeleteBehavior.Restrict);
-                });
+                        });
 
-            modelBuilder.Entity<StoryComment>(
+             modelBuilder.Entity<StoryComment>(
                 nestedBuilder =>
                 {
                     nestedBuilder
@@ -271,88 +332,131 @@ namespace ChainMates.Server
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity<SegmentComment>(
-                nestedBuilder =>
-                {
-                    nestedBuilder
-                        .HasKey(sc => new { sc.CommentId, sc.CommentTypeId });
+                modelBuilder.Entity<SegmentComment>(
+                    nestedBuilder =>
+                    {
+                        nestedBuilder
+                            .HasKey(sc => new { sc.CommentId, sc.CommentTypeId });
 
-                    nestedBuilder
-                        .HasOne(sc => sc.ParentSegment)
-                        .WithMany(s => s.Comments)
-                        .HasForeignKey(sc => sc.ParentSegmentId)
-                        .OnDelete(DeleteBehavior.Restrict);
+                        nestedBuilder
+                            .HasOne(sc => sc.ParentSegment)
+                            .WithMany(s => s.Comments)
+                            .HasForeignKey(sc => sc.ParentSegmentId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
-                    nestedBuilder
-                        .HasOne(sc => sc.Comment)
-                        .WithOne(c => c.SegmentComment)
-                        .HasPrincipalKey<Comment>(c => new { c.Id, c.CommentTypeId })
-                        .HasForeignKey<SegmentComment>(sc => new { sc.CommentId, sc.CommentTypeId })
-                        .IsRequired()
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
+                        nestedBuilder
+                            .HasOne(sc => sc.Comment)
+                            .WithOne(c => c.SegmentComment)
+                            .HasPrincipalKey<Comment>(c => new { c.Id, c.CommentTypeId })
+                            .HasForeignKey<SegmentComment>(sc => new { sc.CommentId, sc.CommentTypeId })
+                            .IsRequired()
+                            .OnDelete(DeleteBehavior.Restrict);
+                    });
 
-            modelBuilder.Entity<CommentComment>(
-                nestedBuilder =>
-                {
-                    nestedBuilder
-                        .HasKey(cc => new { cc.CommentId, cc.CommentTypeId });
+                modelBuilder.Entity<CommentComment>(
+                    nestedBuilder =>
+                    {
+                        nestedBuilder
+                            .HasKey(cc => new { cc.CommentId, cc.CommentTypeId });
 
-                    nestedBuilder
-                        .HasOne(cc => cc.ParentComment)
-                        .WithMany(c => c.ChildComments)
-                        .HasForeignKey(cc => cc.CommentId)
-                        .OnDelete(DeleteBehavior.Restrict);
+                        nestedBuilder
+                            .HasOne(cc => cc.ParentComment)
+                            .WithMany(c => c.ChildComments)
+                            .HasForeignKey(cc => cc.CommentId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
-                    nestedBuilder
-                        .HasOne(sc => sc.Comment)
-                        .WithOne(c => c.CommentComment)
-                        .HasPrincipalKey<Comment>(c => new { c.Id, c.CommentTypeId })
-                        .HasForeignKey<CommentComment>(sc => new { sc.CommentId, sc.CommentTypeId })
-                        .IsRequired()
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
+                        nestedBuilder
+                            .HasOne(sc => sc.Comment)
+                            .WithOne(c => c.CommentComment)
+                            .HasPrincipalKey<Comment>(c => new { c.Id, c.CommentTypeId })
+                            .HasForeignKey<CommentComment>(sc => new { sc.CommentId, sc.CommentTypeId })
+                            .IsRequired()
+                            .OnDelete(DeleteBehavior.Restrict);
+                    });
 
-            modelBuilder.Entity<ModerationAssignment>(
-                nestedBuilder =>
-                {
-                    nestedBuilder
-                        .HasKey(ma => new { ma.AuthorId, ma.SegmentId });
+                modelBuilder.Entity<ModerationAssignment>(
+                    nestedBuilder =>
+                    {
+                        nestedBuilder
+                            .HasKey(ma => new { ma.AuthorId, ma.SegmentId });
 
-                    nestedBuilder
-                        .HasOne(ma => ma.Segment)
-                        .WithMany(s => s.ModerationAssignments)
-                        .HasForeignKey(ma => ma.SegmentId);
+                        nestedBuilder
+                            .HasOne(ma => ma.Segment)
+                            .WithMany(s => s.ModerationAssignments)
+                            .HasForeignKey(ma => ma.SegmentId);
 
-                    nestedBuilder
-                        .HasOne(ma => ma.Author)
-                        .WithMany(s => s.ModerationAssignments)
-                        .HasForeignKey(ma => ma.AuthorId);
-                });
+                        nestedBuilder
+                            .HasOne(ma => ma.Author)
+                            .WithMany(s => s.ModerationAssignments)
+                            .HasForeignKey(ma => ma.AuthorId);
+                    });
 
-            modelBuilder.Entity<SegmentTrace>()
-                .HasNoKey()
-                .ToView("segment_trace");
+                    modelBuilder.Entity<AuthorRelation>(
+                        nestedBuilder =>
+                        {
+                            nestedBuilder
+                            .HasKey(ar => new { ar.AuthorId, ar.RelatedAuthorId });
 
-            modelBuilder.Entity<JoinableSegmentByAuthor>()
-                .HasNoKey()
-                .ToView("joinable_segment_by_author");
+                            nestedBuilder
+                            .HasOne(ar => ar.Author)
+                            .WithMany(a => a.PrimaryRelations)
+                            .HasForeignKey(ar => ar.AuthorId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<ModeratableSegmentByAuthor>()
-                .HasNoKey()
-                .ToView("moderatable_segment_by_author");
+                            nestedBuilder
+                             .HasOne(ar => ar.RelatedAuthor)
+                             .WithMany(a => a.SecondaryRelations)
+                             .HasForeignKey(ar => ar.RelatedAuthorId)
+                             .OnDelete(DeleteBehavior.Restrict);
 
-            //        modelBuilder.Entity<SegmentCommentBySegment>()
-            //.HasNoKey();
+                            nestedBuilder
+                             .HasOne(ar => ar.AuthorRelationType)
+                             .WithMany(art => art.AuthorRelations)
+                             .HasForeignKey(ar => ar.AuthorRelationTypeId)
+                             .OnDelete(DeleteBehavior.Restrict);
+                        });
 
-            //        modelBuilder.Entity<SegmentCommentByComment>()
-            //.HasNoKey();
+                    modelBuilder.Entity<CircleAssignment>(
+                        nestedBuilder =>
+                        {
+                            nestedBuilder
+                                .HasKey(ca => new { ca.CircleId, ca.AuthorId });
+                            
+                            nestedBuilder
+                                .HasOne(cm => cm.Circle)
+                                .WithMany(c => c.CircleAssignments)
+                                .HasForeignKey(cm => cm.CircleId);
 
-            //        modelBuilder.Entity<CommentCommentBySegment>()
-            //.HasNoKey();
+                            nestedBuilder
+                                .HasOne(cm => cm.Author)
+                                .WithMany(a => a.CircleAssignments)
+                                .HasForeignKey(cm => cm.CircleId);
 
-            //        modelBuilder.Entity<SegmentCommentCommentByComment>()
-            //.HasNoKey();
+                        });
+
+                    modelBuilder.Entity<SegmentTrace>()
+                        .HasNoKey()
+                        .ToView("segment_trace");
+
+                    modelBuilder.Entity<JoinableSegmentByAuthor>()
+                        .HasNoKey()
+                        .ToView("joinable_segment_by_author");
+
+                    modelBuilder.Entity<ModeratableSegmentByAuthor>()
+                        .HasNoKey()
+                        .ToView("moderatable_segment_by_author");
+
+                    //        modelBuilder.Entity<SegmentCommentBySegment>()
+                    //.HasNoKey();
+
+                    //        modelBuilder.Entity<SegmentCommentByComment>()
+                    //.HasNoKey();
+
+                    //        modelBuilder.Entity<CommentCommentBySegment>()
+                    //.HasNoKey();
+
+                    //        modelBuilder.Entity<SegmentCommentCommentByComment>()
+                    //.HasNoKey();
+                }
         }
     }
-}

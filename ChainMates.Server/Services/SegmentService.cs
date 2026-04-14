@@ -302,6 +302,7 @@ namespace ChainMates.Server.Services
 
         public async Task<List<SegmentTrace>> GetSegmentTraces()
         {
+
             return await _context.SegmentTrace.ToListAsync();
         }
 
