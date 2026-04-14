@@ -2,14 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Mono.TextTemplating;
 using NuGet.Protocol.Core.Types;
-using ReactApp1.Server;
-using ReactApp1.Server.DTOs.Author;
-using ReactApp1.Server.DTOs.Segment;
-using ReactApp1.Server.DTOs.Story;
+using ChainMates.Server;
+using ChainMates.Server.DTOs.Author;
+using ChainMates.Server.DTOs.Segment;
+using ChainMates.Server.DTOs.Story;
 using System;
 using System.Diagnostics;
 
-namespace ReactApp1.Server.Services
+namespace ChainMates.Server.Services
 {
     public class SegmentService
     {

@@ -1,4 +1,4 @@
-﻿namespace ReactApp1.Server.DTOs.Auth
+﻿namespace ChainMates.Server.DTOs.Auth
 {
     public class LoginDto
     {

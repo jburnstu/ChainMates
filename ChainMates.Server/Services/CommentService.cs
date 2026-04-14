@@ -1,13 +1,13 @@
 ﻿using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Mono.TextTemplating;
-using ReactApp1.Server;
-using ReactApp1.Server.DTOs.Comment;
+using ChainMates.Server;
+using ChainMates.Server.DTOs.Comment;
 using System;
 using System.Diagnostics;
 
 
-namespace ReactApp1.Server.Services
+namespace ChainMates.Server.Services
 {
     public class CommentService
     {

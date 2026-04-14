@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using ReactApp1.Server;
+using ChainMates.Server;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using ReactApp1.Server.DTOs.Auth;
+using ChainMates.Server.DTOs.Auth;
 
 [ApiController]
 [Route("chainmates/auth")]

@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using ReactApp1.Server;
+using ChainMates.Server;
 
 #nullable disable
 
-namespace ReactApp1.Server.Migrations
+namespace ChainMates.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260402150932_InitialRecreateWithSnakeCase")]
@@ -25,7 +25,7 @@ namespace ReactApp1.Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ReactApp1.Server.Author", b =>
+            modelBuilder.Entity("ChainMates.Server.Author", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -55,7 +55,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("author", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.JoinableSegmentByAuthor", b =>
+            modelBuilder.Entity("ChainMates.Server.JoinableSegmentByAuthor", b =>
                 {
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer")
@@ -70,7 +70,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToView("joinable_segment_by_author", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.ModeratableSegmentByAuthor", b =>
+            modelBuilder.Entity("ChainMates.Server.ModeratableSegmentByAuthor", b =>
                 {
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer")
@@ -85,7 +85,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToView("moderatable_segment_by_author", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.ModerationAssignment", b =>
+            modelBuilder.Entity("ChainMates.Server.ModerationAssignment", b =>
                 {
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer")
@@ -108,7 +108,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("moderation_assignment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Segment", b =>
+            modelBuilder.Entity("ChainMates.Server.Segment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -156,7 +156,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("segment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.SegmentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentStatus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -176,7 +176,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("segment_status", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.SegmentTrace", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentTrace", b =>
                 {
                     b.Property<int>("EarlierSegmentAuthorId")
                         .HasColumnType("integer")
@@ -207,7 +207,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToView("segment_trace", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Story", b =>
+            modelBuilder.Entity("ChainMates.Server.Story", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -253,16 +253,16 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("story", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.ModerationAssignment", b =>
+            modelBuilder.Entity("ChainMates.Server.ModerationAssignment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Author", "Author")
+                    b.HasOne("ChainMates.Server.Author", "Author")
                         .WithMany("ModerationAssignments")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_moderation_assignment_author_author_id");
 
-                    b.HasOne("ReactApp1.Server.Segment", "Segment")
+                    b.HasOne("ChainMates.Server.Segment", "Segment")
                         .WithMany("ModerationAssignments")
                         .HasForeignKey("SegmentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -274,29 +274,29 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("Segment");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Segment", b =>
+            modelBuilder.Entity("ChainMates.Server.Segment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Author", "Author")
+                    b.HasOne("ChainMates.Server.Author", "Author")
                         .WithMany("Segments")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_segment_author_author_id");
 
-                    b.HasOne("ReactApp1.Server.Segment", "PreviousSegment")
+                    b.HasOne("ChainMates.Server.Segment", "PreviousSegment")
                         .WithMany("FollowingSegments")
                         .HasForeignKey("PreviousSegmentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_segment_segment_previous_segment_id");
 
-                    b.HasOne("ReactApp1.Server.SegmentStatus", "SegmentStatus")
+                    b.HasOne("ChainMates.Server.SegmentStatus", "SegmentStatus")
                         .WithMany("Segments")
                         .HasForeignKey("SegmentStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_segment_segment_status_segment_status_id");
 
-                    b.HasOne("ReactApp1.Server.Story", "Story")
+                    b.HasOne("ChainMates.Server.Story", "Story")
                         .WithMany("Segments")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -312,9 +312,9 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("Story");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Story", b =>
+            modelBuilder.Entity("ChainMates.Server.Story", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Author", "Author")
+                    b.HasOne("ChainMates.Server.Author", "Author")
                         .WithMany("Stories")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -324,7 +324,7 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Author", b =>
+            modelBuilder.Entity("ChainMates.Server.Author", b =>
                 {
                     b.Navigation("ModerationAssignments");
 
@@ -333,19 +333,19 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("Stories");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Segment", b =>
+            modelBuilder.Entity("ChainMates.Server.Segment", b =>
                 {
                     b.Navigation("FollowingSegments");
 
                     b.Navigation("ModerationAssignments");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.SegmentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentStatus", b =>
                 {
                     b.Navigation("Segments");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Story", b =>
+            modelBuilder.Entity("ChainMates.Server.Story", b =>
                 {
                     b.Navigation("Segments");
                 });

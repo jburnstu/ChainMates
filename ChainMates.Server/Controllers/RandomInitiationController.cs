@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ReactApp1.Server.DTOs;
-using ReactApp1.Server.Services;
+using ChainMates.Server.DTOs;
+using ChainMates.Server.Services;
 using System.Diagnostics;
 using System.Net;
 
 
-namespace ReactApp1.Server.Controllers
+namespace ChainMates.Server.Controllers
 {
     [ApiController]
     [Route("chainmates/randomcreation")]

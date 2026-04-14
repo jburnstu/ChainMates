@@ -1,4 +1,4 @@
-﻿namespace ReactApp1.Server.DTOs.Comment
+﻿namespace ChainMates.Server.DTOs.Comment
 {
     public class CommentCreationAndSubmissionDto
     {

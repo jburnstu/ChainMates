@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
-using ReactApp1.Server;
-using ReactApp1.Server.DTOs;
+using ChainMates.Server;
+using ChainMates.Server.DTOs;
 using System.Diagnostics;
 using System.Security.Claims;
 
-namespace ReactApp1.Server.Services
+namespace ChainMates.Server.Services
 {
     public class CurrentUserService
     {

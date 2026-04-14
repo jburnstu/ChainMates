@@ -1,6 +1,6 @@
-@ReactApp1.Server_HostAddress = http://localhost:5173
+@ChainMates.Server_HostAddress = http://localhost:5173
 
-GET {{ReactApp1.Server_HostAddress}}/chainmates/
+GET {{ChainMates.Server_HostAddress}}/chainmates/
 Accept: application/json
 
 ###

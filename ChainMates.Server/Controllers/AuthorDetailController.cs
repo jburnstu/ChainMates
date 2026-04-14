@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ReactApp1.Server.Services;
+using ChainMates.Server.Services;
 
-namespace ReactApp1.Server.Controllers
+namespace ChainMates.Server.Controllers
 {
 
     [ApiController]

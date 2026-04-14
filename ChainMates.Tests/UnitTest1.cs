@@ -1,8 +1,8 @@
-﻿using ReactApp1.Server;
-using ReactApp1.Server.Services;
+﻿using ChainMates.Server;
+using ChainMates.Server.Services;
 
 
-namespace ReactApp1.Tests
+namespace ChainMates.Tests
 {
     public class UnitTest1
     {

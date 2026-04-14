@@ -1,7 +1,7 @@
-﻿using ReactApp1.Server.DTOs.Author;
-using ReactApp1.Server.DTOs.Segment;
+﻿using ChainMates.Server.DTOs.Author;
+using ChainMates.Server.DTOs.Segment;
 
-namespace ReactApp1.Server.DTOs
+namespace ChainMates.Server.DTOs
 {
     public class DashboardIncludingCommentsDto
     {

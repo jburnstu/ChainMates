@@ -1,4 +1,4 @@
-﻿namespace ReactApp1.Server.DTOs.Story
+﻿namespace ChainMates.Server.DTOs.Story
 {
     public class StoryDto
     {

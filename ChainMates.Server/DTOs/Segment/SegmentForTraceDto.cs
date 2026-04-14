@@ -1,6 +1,6 @@
-﻿using ReactApp1.Server.DTOs.Author;
+﻿using ChainMates.Server.DTOs.Author;
 
-namespace ReactApp1.Server.DTOs.Segment
+namespace ChainMates.Server.DTOs.Segment
 {
     public class SegmentForTraceDto
     {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
-using ReactApp1.Server.DTOs.Author;
-using ReactApp1.Server.DTOs;
+using ChainMates.Server.DTOs.Author;
+using ChainMates.Server.DTOs;
 using System.Diagnostics;
 
-namespace ReactApp1.Server.Services
+namespace ChainMates.Server.Services
 {
     public class RandomInitiationService
     {

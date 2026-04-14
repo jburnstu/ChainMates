@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ReactApp1.Server;
-using ReactApp1.Server.DTOs;
-using ReactApp1.Server.DTOs.Author;
-using ReactApp1.Server.DTOs.Segment;
-using ReactApp1.Server.Services;
+using ChainMates.Server;
+using ChainMates.Server.DTOs;
+using ChainMates.Server.DTOs.Author;
+using ChainMates.Server.DTOs.Segment;
+using ChainMates.Server.Services;
 using System.Reflection.Emit;
 using System.Security.Claims;
 using System.Text.Json;

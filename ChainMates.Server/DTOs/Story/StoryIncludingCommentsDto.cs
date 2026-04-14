@@ -1,6 +1,6 @@
-﻿using ReactApp1.Server.DTOs.Comment;
+﻿using ChainMates.Server.DTOs.Comment;
 
-namespace ReactApp1.Server.DTOs.Story
+namespace ChainMates.Server.DTOs.Story
 {
     public class StoryIncludingCommentsDto
     {

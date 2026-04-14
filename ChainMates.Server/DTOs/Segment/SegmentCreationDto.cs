@@ -1,4 +1,4 @@
-﻿namespace ReactApp1.Server.DTOs.Segment
+﻿namespace ChainMates.Server.DTOs.Segment
 {
     public class SegmentCreationDto
     {

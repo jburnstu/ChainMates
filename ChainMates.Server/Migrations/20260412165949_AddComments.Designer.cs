@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using ReactApp1.Server;
+using ChainMates.Server;
 
 #nullable disable
 
-namespace ReactApp1.Server.Migrations
+namespace ChainMates.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260412165949_AddComments")]
@@ -82,7 +82,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("comment_story_comment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Author", b =>
+            modelBuilder.Entity("ChainMates.Server.Author", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -112,7 +112,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("author", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Comment", b =>
+            modelBuilder.Entity("ChainMates.Server.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -153,7 +153,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("comment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.CommentComment", b =>
+            modelBuilder.Entity("ChainMates.Server.CommentComment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -179,7 +179,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("comment_comment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.CommentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.CommentStatus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -199,7 +199,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("comment_status", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.CommentType", b =>
+            modelBuilder.Entity("ChainMates.Server.CommentType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -219,7 +219,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("comment_type", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.JoinableSegmentByAuthor", b =>
+            modelBuilder.Entity("ChainMates.Server.JoinableSegmentByAuthor", b =>
                 {
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer")
@@ -234,7 +234,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToView("joinable_segment_by_author", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.ModeratableSegmentByAuthor", b =>
+            modelBuilder.Entity("ChainMates.Server.ModeratableSegmentByAuthor", b =>
                 {
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer")
@@ -249,7 +249,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToView("moderatable_segment_by_author", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.ModerationAssignment", b =>
+            modelBuilder.Entity("ChainMates.Server.ModerationAssignment", b =>
                 {
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer")
@@ -272,7 +272,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("moderation_assignment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Segment", b =>
+            modelBuilder.Entity("ChainMates.Server.Segment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -320,7 +320,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("segment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.SegmentComment", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentComment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -346,7 +346,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("segment_comment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.SegmentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentStatus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -366,7 +366,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("segment_status", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.SegmentTrace", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentTrace", b =>
                 {
                     b.Property<int>("EarlierSegmentAuthorId")
                         .HasColumnType("integer")
@@ -397,7 +397,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToView("segment_trace", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Story", b =>
+            modelBuilder.Entity("ChainMates.Server.Story", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -443,7 +443,7 @@ namespace ReactApp1.Server.Migrations
                     b.ToTable("story", "chain_mates");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.StoryComment", b =>
+            modelBuilder.Entity("ChainMates.Server.StoryComment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -471,14 +471,14 @@ namespace ReactApp1.Server.Migrations
 
             modelBuilder.Entity("CommentCommentComment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.CommentComment", null)
+                    b.HasOne("ChainMates.Server.CommentComment", null)
                         .WithMany()
                         .HasForeignKey("CommentCommentsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_comment_comment_comment_comment_comment_comment_comments_id");
 
-                    b.HasOne("ReactApp1.Server.Comment", null)
+                    b.HasOne("ChainMates.Server.Comment", null)
                         .WithMany()
                         .HasForeignKey("CommentsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -488,14 +488,14 @@ namespace ReactApp1.Server.Migrations
 
             modelBuilder.Entity("CommentSegmentComment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Comment", null)
+                    b.HasOne("ChainMates.Server.Comment", null)
                         .WithMany()
                         .HasForeignKey("CommentsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_comment_segment_comment_comment_comments_id");
 
-                    b.HasOne("ReactApp1.Server.SegmentComment", null)
+                    b.HasOne("ChainMates.Server.SegmentComment", null)
                         .WithMany()
                         .HasForeignKey("SegmentCommentsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -505,14 +505,14 @@ namespace ReactApp1.Server.Migrations
 
             modelBuilder.Entity("CommentStoryComment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Comment", null)
+                    b.HasOne("ChainMates.Server.Comment", null)
                         .WithMany()
                         .HasForeignKey("CommentsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_comment_story_comment_comment_comments_id");
 
-                    b.HasOne("ReactApp1.Server.StoryComment", null)
+                    b.HasOne("ChainMates.Server.StoryComment", null)
                         .WithMany()
                         .HasForeignKey("StoryCommentsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -520,23 +520,23 @@ namespace ReactApp1.Server.Migrations
                         .HasConstraintName("fk_comment_story_comment_story_comment_story_comments_id");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Comment", b =>
+            modelBuilder.Entity("ChainMates.Server.Comment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Author", "Author")
+                    b.HasOne("ChainMates.Server.Author", "Author")
                         .WithMany("Comments")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_comment_author_author_id");
 
-                    b.HasOne("ReactApp1.Server.CommentStatus", "CommentStatus")
+                    b.HasOne("ChainMates.Server.CommentStatus", "CommentStatus")
                         .WithMany("Comments")
                         .HasForeignKey("CommentStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_comment_comment_status_comment_status_id");
 
-                    b.HasOne("ReactApp1.Server.CommentType", "CommentType")
+                    b.HasOne("ChainMates.Server.CommentType", "CommentType")
                         .WithMany("Comments")
                         .HasForeignKey("CommentTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -550,9 +550,9 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("CommentType");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.CommentComment", b =>
+            modelBuilder.Entity("ChainMates.Server.CommentComment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Comment", "ParentComment")
+                    b.HasOne("ChainMates.Server.Comment", "ParentComment")
                         .WithMany("ChildComments")
                         .HasForeignKey("CommentId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -562,16 +562,16 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("ParentComment");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.ModerationAssignment", b =>
+            modelBuilder.Entity("ChainMates.Server.ModerationAssignment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Author", "Author")
+                    b.HasOne("ChainMates.Server.Author", "Author")
                         .WithMany("ModerationAssignments")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_moderation_assignment_author_author_id");
 
-                    b.HasOne("ReactApp1.Server.Segment", "Segment")
+                    b.HasOne("ChainMates.Server.Segment", "Segment")
                         .WithMany("ModerationAssignments")
                         .HasForeignKey("SegmentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -583,29 +583,29 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("Segment");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Segment", b =>
+            modelBuilder.Entity("ChainMates.Server.Segment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Author", "Author")
+                    b.HasOne("ChainMates.Server.Author", "Author")
                         .WithMany("Segments")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_segment_author_author_id");
 
-                    b.HasOne("ReactApp1.Server.Segment", "PreviousSegment")
+                    b.HasOne("ChainMates.Server.Segment", "PreviousSegment")
                         .WithMany("FollowingSegments")
                         .HasForeignKey("PreviousSegmentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_segment_segment_previous_segment_id");
 
-                    b.HasOne("ReactApp1.Server.SegmentStatus", "SegmentStatus")
+                    b.HasOne("ChainMates.Server.SegmentStatus", "SegmentStatus")
                         .WithMany("Segments")
                         .HasForeignKey("SegmentStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_segment_segment_status_segment_status_id");
 
-                    b.HasOne("ReactApp1.Server.Story", "Story")
+                    b.HasOne("ChainMates.Server.Story", "Story")
                         .WithMany("Segments")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -621,9 +621,9 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("Story");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.SegmentComment", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentComment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Segment", "ParentSegment")
+                    b.HasOne("ChainMates.Server.Segment", "ParentSegment")
                         .WithMany("Comments")
                         .HasForeignKey("SegmentId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -633,9 +633,9 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("ParentSegment");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Story", b =>
+            modelBuilder.Entity("ChainMates.Server.Story", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Author", "Author")
+                    b.HasOne("ChainMates.Server.Author", "Author")
                         .WithMany("Stories")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -645,9 +645,9 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.StoryComment", b =>
+            modelBuilder.Entity("ChainMates.Server.StoryComment", b =>
                 {
-                    b.HasOne("ReactApp1.Server.Story", "ParentStory")
+                    b.HasOne("ChainMates.Server.Story", "ParentStory")
                         .WithMany("Comments")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -657,7 +657,7 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("ParentStory");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Author", b =>
+            modelBuilder.Entity("ChainMates.Server.Author", b =>
                 {
                     b.Navigation("Comments");
 
@@ -668,22 +668,22 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("Stories");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Comment", b =>
+            modelBuilder.Entity("ChainMates.Server.Comment", b =>
                 {
                     b.Navigation("ChildComments");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.CommentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.CommentStatus", b =>
                 {
                     b.Navigation("Comments");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.CommentType", b =>
+            modelBuilder.Entity("ChainMates.Server.CommentType", b =>
                 {
                     b.Navigation("Comments");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Segment", b =>
+            modelBuilder.Entity("ChainMates.Server.Segment", b =>
                 {
                     b.Navigation("Comments");
 
@@ -692,12 +692,12 @@ namespace ReactApp1.Server.Migrations
                     b.Navigation("ModerationAssignments");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.SegmentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentStatus", b =>
                 {
                     b.Navigation("Segments");
                 });
 
-            modelBuilder.Entity("ReactApp1.Server.Story", b =>
+            modelBuilder.Entity("ChainMates.Server.Story", b =>
                 {
                     b.Navigation("Comments");
 

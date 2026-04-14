@@ -3,14 +3,14 @@ using EFCore.NamingConventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
-using ReactApp1.Server;
+using ChainMates.Server;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml.Linq;
 
-namespace ReactApp1.Server
+namespace ChainMates.Server
 {
     public class Author 
     {

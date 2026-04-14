@@ -1,13 +1,13 @@
 ﻿using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ReactApp1.Server.DTOs.Segment;
-using ReactApp1.Server.Services;
+using ChainMates.Server.DTOs.Segment;
+using ChainMates.Server.Services;
 using System.Diagnostics;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace ReactApp1.Server.Controllers
+namespace ChainMates.Server.Controllers
 {
     [Route("chainmates/segments")]
     [ApiController]

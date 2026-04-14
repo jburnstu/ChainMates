@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace ReactApp1.Server.Migrations
+namespace ChainMates.Server.Migrations
 {
     /// <inheritdoc />
     public partial class FixCommentSubTypeTables : Migration

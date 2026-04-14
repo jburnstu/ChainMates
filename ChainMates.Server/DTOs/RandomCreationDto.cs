@@ -1,4 +1,4 @@
-﻿namespace ReactApp1.Server.DTOs
+﻿namespace ChainMates.Server.DTOs
 {
     public class RandomCreationDto
     {

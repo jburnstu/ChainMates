@@ -1,7 +1,7 @@
-﻿using ReactApp1.Server.DTOs.Author;
-using ReactApp1.Server.DTOs.Comment;
+﻿using ChainMates.Server.DTOs.Author;
+using ChainMates.Server.DTOs.Comment;
 
-namespace ReactApp1.Server.DTOs.Segment
+namespace ChainMates.Server.DTOs.Segment
 {
     public class SegmentForTraceIncludingCommentsDto
     {

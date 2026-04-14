@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
-using ReactApp1.Server;
-using ReactApp1.Server.Services;
+using ChainMates.Server;
+using ChainMates.Server.Services;
 using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);

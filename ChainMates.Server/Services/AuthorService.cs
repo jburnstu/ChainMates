@@ -2,10 +2,10 @@
 using System.Text.Json;
 using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
-using ReactApp1.Server;
-using ReactApp1.Server.DTOs.Author;
+using ChainMates.Server;
+using ChainMates.Server.DTOs.Author;
 
-namespace ReactApp1.Server.Services
+namespace ChainMates.Server.Services
 {
     public class AuthorService
     {

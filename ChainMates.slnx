@@ -1,8 +1,8 @@
 <Solution>
-  <Project Path="reactapp1.client/dotnet-chainmates.client.esproj">
+  <Project Path="chainmates.client/chainmates.client.esproj">
     <Build />
     <Deploy />
   </Project>
-  <Project Path="ReactApp1.Server/dotnet-chainmates.Server.csproj" />
-  <Project Path="ReactApp1.Tests/dotnet-chainmates.Tests.csproj" Id="9bd3c7c8-6976-4daf-abd7-a4f9a016107e" />
+  <Project Path="ChainMates.Server/ChainMates.Server.csproj" />
+  <Project Path="ChainMates.Tests/ChainMates.Tests.csproj" />
 </Solution>
