@@ -110,8 +110,8 @@ div.storyContainer {
     display: grid;
     grid-template-areas:
         "storyHeader storyHeader"
-        "storyContent comments"
-        "submissions comments";
+        "storyContent rightSidebar"
+        "submissions rightSidebar";
     grid-template-columns: 3fr 1fr;
     grid-template-rows: min-content auto min-content;
     gap: 3px;
@@ -217,8 +217,8 @@ div.modalButtonContainer {
 }
 
 
-div.comments {
-    grid-area: comments;
+div.rightSidebar {
+    grid-area: rightSidebar;
     display: flex;
     flex-direction: column;
     background-color: var(--col-5);

@@ -5,6 +5,54 @@ import { AuthorContext } from "./context.jsx";
 import { useNavigate, useLocation, redirect } from "react-router";
 import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
 
+export default { AuthorListDisplayButton };
+
+export function AuthorListDisplayButton(props) {
+    const authorID = useContext(AuthorContext);
+
+    const [threeMostRecentAuthors, setThreeMostRecentAuthors] = useState([])
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    // let arrayOfFriendDicts = contactAPI(`author_relation_by_author/${authorID}/`, "get");
+    const [authorArray, setAuthorArray] = useState([])
+
+    const onClick = () => {
+        if (!isOpen) {
+            contactAPI(`author_relation_by_author/${authorID}/`, "get")
+                .then(function (value) {
+                    console.log(value)
+                    setAuthorArray(value.related_authors)
+                })
+                .then(function (innerValue) {
+                    setIsOpen(true);
+                }
+                )
+        }
+        else { setIsOpen(false) }
+    }
+
+    return (
+        <div className="friendSearchContainer">
+            <button onClick={onClick}>AUTHORS</button>
+            {authorArray.map(authorDict =>
+                <FriendProfileButton key={authorDict.id} addAuthorTab={props.addAuthorTab} authorInfo={authorDict} />)}
+        </div>
+    )
+}
+
+function FriendProfileButton(props) {
+
+    const onClick = () => { props.addAuthorTab(props.authorInfo, "author", "add") }
+
+    console.log(props.authorInfo)
+    return (
+        <button onClick={onClick}>
+            {props.authorInfo.display_name}
+        </button>)
+}
+
+
 
 // export function ModalSelectFriendButton(props) {
 //     return (<>
@@ -61,44 +109,23 @@ import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
 
 
 
-function AuthorListDisplayButton(props) {
+//function AuthorListDisplayButton(props) {
 
-    friendsDict = props.friendsDict;
+//    friendsDict = props.friendsDict;
 
-    const [threeMostRecentAuthors, setThreeMostRecentAuthors] = useState([])
+//    const [threeMostRecentAuthors, setThreeMostRecentAuthors] = useState([])
 
-    const [authorArray, setAuthorArray] = useState([])
+//    const [authorArray, setAuthorArray] = useState([])
 
-    const addAuthorTab = (authorID) => { props.etc }
+//    const addAuthorTab = (authorID) => { props.etc }
 
-    return (
-        <div className="friendSearchContainer">
-            {authorArray.map(authorDict =>
-                <FriendProfileButton onClick={addAuthorTab} authorInfo={authorDict} />)}
-        </div>
+//    return (
+//        <div className="friendSearchContainer">
+//            {authorArray.map(authorDict =>
+//                <FriendProfileButton onClick={addAuthorTab} authorInfo={authorDict} />)}
+//        </div>
 
-    )
+//    )
 
-}
+//}
 
-function FriendProfileButton(props) {
-
-
-
-    return (<button onClick={props.onClick}></button>)
-
-}
-
-
-```
-So, regardless of backend, we still need frontend to have a "friends" dict.
-As not coming from the top, can put in the dashboard object *IF* we like
-
-[{authorID::, 
-displayName::,
-
-}]
-
-
-
-```

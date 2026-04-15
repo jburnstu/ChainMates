@@ -3,7 +3,9 @@ import React, { StrictMode, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
 import { SubmissionButton, ModalSelectSegmentFromOptionsButton, ModalNewButton } from './storyButtons.jsx';
 import { AuthorContext } from "./context.jsx";
-import { AuthorProfile, AuthorListDisplayButton } from "./authorProfileComponents.jsx";
+import { AuthorProfile} from "./authorProfileComponents.jsx";
+import { AuthorListDisplayButton } from "./authorsButtons.jsx";
+
 import { Comments } from "./comments.jsx";
 import { getArrayObjByID } from "./utilityFuncs";
 import { Login, Signup } from "./authFuncs";
@@ -48,6 +50,7 @@ export default function App() {
                     />
                 );
                 break;
+        }
     }
 
     const rootPath = "/chainmates/";
@@ -69,9 +72,20 @@ export default function App() {
     }
     else {
         startingURL = `${startingWriteOrReview}/${startingStoryID}`;
-    }
-    // console.log(startingURL);
+        }
 
+    const authorDicts = [{
+        "id": data.authorInfo.id,
+        "displayName": data.authorInfo.displayName,
+        "statsDTO": {
+            "writeCount": 0,
+            "reviewCount": 0,
+            "storyCount":0
+        }
+        }]
+    Object.assign(data, {
+        "authorDicts": authorDicts
+    });
 
     async function changeStoryDicts(storyDict, writeOrReview = "write", addOrRemove = "add") {
 
@@ -164,8 +178,7 @@ function Home(props) {
     useEffect(() => {
         console.log("initital navigate")
         navigate(props.startingURL);
-    }, [navigate,props.startingURL])
-
+    }, [navigate, props.startingURL])
     return (<div className="container"></div>);
 }
 
@@ -212,14 +225,13 @@ function StoryDashboard(props) {
             presavedCurrentContentByStory[dictInArray.id] =
                 dictInArray.segmentHistoryList.slice(-1)[0].content;
         })
-
     }
 
     const [currentContentByStory, setCurrentContentByStory] = useState(presavedCurrentContentByStory);
     const outlet = useOutlet([currentContentByStory, setCurrentContentByStory]);
 
     return (
-        <div className={props.writeOrReview + "StoryDashboardContainer" + " storydashboardContainer"}>
+        <div className={props.writeOrReview + "storyDashboardContainer" + " StorydashboardContainer"}>
             <Sidebar writeOrReview={props.writeOrReview} addNewTab={addNewTab} />
             <nav className="tabs">
                 {arrayOfTabIDs.map((tabID, index) =>
@@ -237,7 +249,7 @@ function PlaceHolder() {
     return (<div className="storyContainer">PLACEHOLDER
         <div className="storyContent"></div>
         <div className="submissions"></div>
-        <div className="comments"></div>
+        <div className="rightSidebar comments"></div>
     </div>
     )
 }
