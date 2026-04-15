@@ -1,6 +1,5 @@
 
 import React, { StrictMode, useState, useEffect } from "react";
-//import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
 import { SubmissionButton, ModalSelectSegmentFromOptionsButton, ModalNewButton } from './storyButtons.jsx';
 import { AuthorContext } from "./context.jsx";
@@ -9,8 +8,6 @@ import { Comments } from "./comments.jsx";
 import { getArrayObjByID } from "./utilityFuncs";
 import { Login, Signup } from "./authFuncs";
 import { contactAPI } from "./utilityFuncs";
-
-
 export default function App() {
 
 
@@ -18,7 +15,7 @@ export default function App() {
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
-        contactAPI("dashboardInfo", "get", true)
+        contactAPI("load", "get", true)
             .then(function (value) {
                 console.log(value);
                 setData(value)
@@ -124,13 +121,13 @@ export default function App() {
                 <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
                         <Route path="" relative element={<Home startingURL={startingURL} />}
                             index />
-                        <Route path="write/" element={<Dashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
+                        <Route path="write/" element={<StoryDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                         >
                             <Route path=":storyID/"
                                 element={<Story writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
-                        <Route path="review/" element={<Dashboard writeOrReview="review" dicts={data.reviewDicts}
+                        <Route path="review/" element={<StoryDashboard writeOrReview="review" dicts={data.reviewDicts}
                             setDicts={changeStoryDicts} />}
                         >
                             <Route path=":storyID/"
@@ -138,7 +135,7 @@ export default function App() {
                             />
                         </Route>
                         <Route path="author/"
-                            element={<Dashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}
+                            element={<StoryDashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}
                             />}
                         >
                             <Route path=":tabID/"
@@ -194,7 +191,7 @@ function UniversalHeader(props) {
 
 
 
-function Dashboard(props) {
+function StoryDashboard(props) {
 
     console.log(props.dicts)
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
@@ -222,7 +219,7 @@ function Dashboard(props) {
     const outlet = useOutlet([currentContentByStory, setCurrentContentByStory]);
 
     return (
-        <div className={props.writeOrReview + "DashboardContainer" + " dashboardContainer"}>
+        <div className={props.writeOrReview + "StoryDashboardContainer" + " storydashboardContainer"}>
             <Sidebar writeOrReview={props.writeOrReview} addNewTab={addNewTab} />
             <nav className="tabs">
                 {arrayOfTabIDs.map((tabID, index) =>
