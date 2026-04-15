@@ -29,6 +29,8 @@ export function AuthorProfile(props) {
         async function fetchData() {
             let segmentTraceDataArray = await getRecentSegmentTraceDTOList();
             setRecentSegmentTraceDTOList(segmentTraceDataArray);
+
+
         }
         if (authorDict?.id) {
             fetchData();
@@ -47,7 +49,7 @@ export function AuthorProfile(props) {
                         <RecentSegmentDisplay key={recentSegmentTraceDTO.id} segmentTraceInfo={recentSegmentTraceDTO} />)
                     }
                 </div>
-                <div className="lowerSection">
+                <div className="circleNotificationsAndAwardsContainer">
                     <CircleNotifications circleNotificationDTOList={circleNotificationDTOList } />
                     <Awards />
                 </div>
@@ -101,14 +103,14 @@ function CircleNotifications(props) {
     let circleNotificationDTOList = [];
 
     return (
-        <>
+        <div className="circleNotificationListContainer">
             <header>Circle Notifications</header>
-            <div className="circleNotificationContainer">
+            <div>
                 {circleNotificationDTOList.map((circleNotificationDTO) =>
                     <CircleNotificationPanel key={circleNotificationDTO.id}
-                        circleNotificationDTO={circleNotificationDTO} />)})
+                        circleNotificationDTO={circleNotificationDTO} />)}
             </div>
-        </>
+        </div>
     );
 }
 
@@ -117,16 +119,21 @@ function CircleNotificationPanel(props) {
     let circleNotificationDTO = props.circleNotificationDTO;
 
     return (
-        <>
+        <div className="circleNotificationContainer">
             <header>{circleNotificationDTO.circleName}</header>
             <textarea readonly>{circleNotificationDTO.displayName + " added a segment to the story " + circleNotificationDTO.title + " ."}</textarea>
-        </>
+        </div>
     )
 
                 }
 function Awards(props) {
     //Leaving this for now!
-    return(<div>Coming Soon!</div>);
+    return (
+        <div className="awardsContainer">
+            <header>Awards (coming soon!)
+            </header>
+        </div>
+    );
 }
 
 function Notifications(props) {
@@ -135,7 +142,7 @@ function Notifications(props) {
 
     return (
         <div className="rightSidebar notifications">
-            <header>Comments</header>
+            <header>Notifications</header>
             <div className="notificationListContainer">
                 {notificationDTOList.map(notificationDTO =>
                     <NotificationPanel key={notificationDTO.id}

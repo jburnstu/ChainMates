@@ -177,6 +177,38 @@ nav {
     margin: 5px;
 }
 
+.recentSegmentsContainer {
+    display: flex;
+    background-color: var(--col-5);
+    padding: 5px;
+    margin: 5px;
+}
+
+.circleNotificationsAndAwardsContainer {
+    display: flex;
+    background-color: var(--col-5);
+    padding: 5px;
+    margin: 5px;
+}
+
+.circleNotificationsAndAwardsContainer>div {
+    background-color: var(--col-1);
+    padding: 5px;
+    margin: 5px;
+}
+
+.circleNotificationsAndAwardsContainer>div>header {
+    background-color: var(--col-2);
+    padding: 5px;
+    margin: 5px;
+}
+
+.circleNotificationContainer {
+    background-color: var(--col-2);
+    padding: 5px;
+    margin: 5px;
+}
+
 
 .modalPortal {
     position: 'fixed';
