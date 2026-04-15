@@ -17,9 +17,9 @@ export function AuthorProfile(props) {
 
 
     async function getRecentSegmentTraceDTOList() {
-        let segmentByAuthorData = await contactAPI(`authors/${authorDict.id}/recentsegments`, "get");
-        console.log(segmentByAuthorData);
-        return segmentByAuthorData;
+        let recentSegmentByAuthorData = await contactAPI(`authors/${authorDict.id}/recentsegments/`, "get", true, {},[]);
+        console.log(recentSegmentByAuthorData);
+        return recentSegmentByAuthorData;
     }
 
     let circleNotificationDTOList;

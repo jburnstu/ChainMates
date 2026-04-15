@@ -101,7 +101,7 @@ namespace ChainMates.Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("({'authorId'})/recentsegments")]
+        [HttpGet("{authorId}/recentsegments")]
         public async Task<IActionResult> GetRecentSegmentsByAuthor(int authorId)
         {
             var data = await _authorService.GetRecentSegmentHistoriesByAuthorId(authorId,numberOfRecentSegments);
