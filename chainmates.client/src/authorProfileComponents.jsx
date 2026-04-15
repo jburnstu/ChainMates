@@ -14,18 +14,9 @@ export function AuthorProfile(props) {
 
     async function getArrayOfRecentSegmentTraces() {
         const numberOfSegments = 3;
-        let segmentByAuthorData = await contactAPI(`completed_segment_by_author/${authorDict.id}/`, "get");
-        let randomSegmentSelection = getRandomItem(segmentByAuthorData.segment, numberOfSegments, true);
+        let segmentByAuthorData = await contactAPI(`authors/${authorDict.id}/recentsegments`, "get");
+        console.log(segmentByAuthorData);
 
-        const segmentTraceDataArray = [];
-        let segmentTraceData;
-        console.log(randomSegmentSelection)
-        await Promise.all(randomSegmentSelection.map(async (segmentID) => {
-            segmentTraceData = await contactAPI(`segment_trace/${segmentID}`, "get");
-            segmentTraceDataArray.push(segmentTraceData);
-        }
-        )
-        )
         return segmentTraceDataArray;
 
     }
@@ -76,8 +67,6 @@ function RecentSegmentDisplay(props) {
         </div>
     )
 }
-
-
 
 export function AuthorListDisplayButton(props) {
     const authorID = useContext(AuthorContext);
