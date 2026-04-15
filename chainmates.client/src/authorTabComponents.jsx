@@ -13,7 +13,7 @@ export function AuthorProfile(props) {
 
     console.log(props.dicts, tabID)
     let authorDict = getArrayObjByID(props.dicts, tabID);
-    console.log(AuthorDict);
+    console.log(authorDict);
 
 
     async function getRecentSegmentTraceDTOList() {
@@ -39,9 +39,9 @@ export function AuthorProfile(props) {
     // const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
 
     return (
-        <div className="authorProfileContainer" id={"authorProfileContainer" + { tabID }}>
+        <div className="authorTabContainer tabContainer" id={"authorTabContainer" + { tabID }}>
             <AuthorHeader statsDTO={authorDict.statsDTO} displayName={ authorDict.displayName} /> 
-             <div className = "authorInfoContainer"> 
+             <div className="authorTabContent tabContent"> 
                 <div className="recentSegmentsContainer">
                     {recentSegmentTraceDTOList.map(recentSegmentTraceDTO =>
                         <RecentSegmentDisplay key={recentSegmentTraceDTO.id} segmentTraceInfo={recentSegmentTraceDTO} />)
@@ -52,9 +52,20 @@ export function AuthorProfile(props) {
                     <Awards />
                 </div>
             </div>
-            <Notifications notificationDTOList={notificationDTOList} className="rightSidebar comments"/>
+            <div className="footer"></div>
+            <Notifications notificationDTOList={notificationDTOList} />
         </div>
     )
+}
+
+function AuthorHeader(props) {
+
+    return (<div className="tabHeader authorTabHeader">
+        <div>{props.displayName}</div>
+        <div>{props.statsDTO.writeCount + " Segments Published"}</div>
+        <div>{props.statsDTO.reivewCount + " Segments Reviewed"}</div>
+        <div>{props.statsDTO.storyCount + " Stories Joined"}</div>
+    </div>)
 }
 
 function RecentSegmentDisplay(props) {
@@ -65,27 +76,29 @@ function RecentSegmentDisplay(props) {
     console.log(props.segmentTraceInfo)
     console.log(finalSegment)
     return (
-        <div>
-            <textarea value={penultimateSegment.content}></textarea>
-            <textarea value={finalSegment.content}></textarea>
+        <div className="recentSegmentDisplayContainer">
+            <SegmentDisplay
+                id={segmentDict.id}
+                isFinalSegment={false}
+                fixedContent={penultimateSegment.content}
+                currentContent={null}
+                changeSelection={null}
+                onChange={null} />
+            <SegmentDisplay
+                id={segmentDict.id}
+                isFinalSegment={false}
+                fixedContent={finalSegment.content}
+                currentContent={null}
+                changeSelection={null}
+                onChange={null} />
+            )
         </div>
     )
 }
 
-function AuthorHeader(props) {
-
-
-    return (<div className="storyHeader">
-        <div>{props.displayName}</div>
-        <div>{props.statsDTO.writeCount + " Segments Published"}</div>
-        <div>{props.statsDTO.reivewCount + " Segments Reviewed"}</div>
-        <div>{props.statsDTO.storyCount + " Stories Joined"}</div>
-    </div>)
-}
-
 function CircleNotifications(props) {
 
-    let circleNotificationDTOList;
+    let circleNotificationDTOList = [];
 
     return (
         <>
@@ -113,15 +126,15 @@ function CircleNotificationPanel(props) {
                 }
 function Awards(props) {
     //Leaving this for now!
-    retun(<div>Coming Soon!</div>);
+    return(<div>Coming Soon!</div>);
 }
 
 function Notifications(props) {
 
-   let notificationDTOList;
+    let notificationDTOList = [];
 
     return (
-        <>
+        <div className="rightSidebar notifications">
             <header>Comments</header>
             <div className="notificationListContainer">
                 {notificationDTOList.map(notificationDTO =>
@@ -129,7 +142,7 @@ function Notifications(props) {
                         notificationDTO={notificationDTO} />
                     )}
             </div>
-        </>
+        </div>
     )
 }
 
