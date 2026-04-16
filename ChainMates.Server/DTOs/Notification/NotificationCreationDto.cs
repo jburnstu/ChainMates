@@ -4,7 +4,7 @@ namespace ChainMates.Server.DTOs.Author
 {
     public class NotificationCreationDto
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
         //public DateTime DateCreated { get; set; }
         public int NotificationTypeId { get; set; }
 
