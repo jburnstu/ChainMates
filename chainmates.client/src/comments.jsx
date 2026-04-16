@@ -19,7 +19,7 @@ export function Comments(props) {
     //     console.log(segmentObj.id))
 
     return (
-        <div className="comments">
+        <div className="rightSidebar comments">
             <StoryCommentPanel />
             {segmentTraceWithInfo.map(segmentObj =>
                 <SegmentInfoPanel key={segmentObj.id} selections={selections} segmentInfo={segmentObj} />

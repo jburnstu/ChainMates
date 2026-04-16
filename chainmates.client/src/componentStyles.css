@@ -64,54 +64,54 @@ nav {
 }
 
 
-div.dashboardContainer {
+.dashboardContainer {
     grid-area: dashboardContainer;
     display: grid;
     grid-template-areas:
-        "sidebar storyTabs"
-        "sidebar storyContainer";
+        "leftSidebar tabsList"
+        "leftSidebar tabContainer";
     grid-template-rows: min-content auto;
     grid-template-columns: min-content auto;
     height: 100%;
 }
 
-div.sidebar {
-    grid-area: sidebar;
+.leftSidebar {
+    grid-area: leftSidebar;
     background-color: var(--col-5);
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-div.sidebar>button {
+.leftSidebar>button {
     flex-grow: 1;
 }
 
-nav.storyTabs {
-    grid-area: storyTabs;
+.tabsList {
+    grid-area: tabsList;
     display: flex;
     justify-content: space-evenly;
     background-color: var(--col-3);
 }
 
-.storyTabLink {
+.tabLink {
     flex-grow: 1;
     width: 100%;
 }
 
-.storyTabButton {
+.tabButton {
     flex-grow: 1;
     width: 100%;
 }
 
 
-div.storyContainer {
-    grid-area: storyContainer;
+.tabContainer {
+    grid-area: tabContainer;
     display: grid;
     grid-template-areas:
-        "storyHeader storyHeader"
-        "storyContent comments"
-        "submissions comments";
+        "tabHeader tabHeader"
+        "tabContent rightSidebar"
+        "footer rightSidebar";
     grid-template-columns: 3fr 1fr;
     grid-template-rows: min-content auto min-content;
     gap: 3px;
@@ -121,24 +121,24 @@ div.storyContainer {
     width: 100%;
 }
 
-div.storyHeader {
+.tabHeader {
     background-color: var(--col-1);
-    grid-area: storyHeader;
+    grid-area: tabHeader;
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
 }
 
-div.storyHeader>div {
+.tabHeader>div {
     background-color: var(--col-1-A);
 }
 
-div.storyHeader>div:first-child {
+.tabHeader>div:first-child {
     flex-grow: 50;
 }
 
-div.storyContent {
-    grid-area: storyContent;
+.tabContent {
+    grid-area: tabContent;
     display: flex;
     flex-direction: column;
     background-color: var(--col-4);
@@ -146,15 +146,15 @@ div.storyContent {
     overflow: scroll;
 }
 
-div.submissions {
-    grid-area: submissions;
+.footer {
+    grid-area: footer;
     display: flex;
     justify-content: space-evenly;
     background-color: var(--col-1);
     height: min-content
 }
 
-div.submissions>div {
+.footer>div {
     flex-grow: 1;
 }
 
@@ -177,8 +177,40 @@ div.submissions>div {
     margin: 5px;
 }
 
+.recentSegmentsContainer {
+    display: flex;
+    background-color: var(--col-5);
+    padding: 5px;
+    margin: 5px;
+}
 
-div.modalPortal {
+.circleNotificationsAndAwardsContainer {
+    display: flex;
+    background-color: var(--col-5);
+    padding: 5px;
+    margin: 5px;
+}
+
+.circleNotificationsAndAwardsContainer>div {
+    background-color: var(--col-1);
+    padding: 5px;
+    margin: 5px;
+}
+
+.circleNotificationsAndAwardsContainer>div>header {
+    background-color: var(--col-2);
+    padding: 5px;
+    margin: 5px;
+}
+
+.circleNotificationContainer {
+    background-color: var(--col-2);
+    padding: 5px;
+    margin: 5px;
+}
+
+
+.modalPortal {
     position: 'fixed';
     top: 0;
     left: 0;
@@ -190,7 +222,7 @@ div.modalPortal {
     justify-content: 'center';
 }
 
-div.modalButtonContainer {
+.modalButtonContainer {
     background: 'white';
     padding: '20px';
     border-radius: '8px'
@@ -211,14 +243,14 @@ div.modalButtonContainer {
 }
 
 
-.displayStoryContainer {
+.displaytabContainer {
     display: flex;
     flex-direction: column;
 }
 
 
-div.comments {
-    grid-area: comments;
+div.rightSidebar {
+    grid-area: rightSidebar;
     display: flex;
     flex-direction: column;
     background-color: var(--col-5);

@@ -1,16 +1,16 @@
 
 import React, { StrictMode, useState, useEffect } from "react";
-//import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
-import { SubmissionButton, ModalSelectSegmentFromOptionsButton, ModalNewButton } from './storyButtons.jsx';
-import { AuthorContext } from "./context.jsx";
-import { AuthorProfile, AuthorListDisplayButton } from "./authorProfileComponents.jsx";
-import { Comments } from "./comments.jsx";
-import { getArrayObjByID } from "./utilityFuncs";
+
+
+import { getArrayObjByID, contactAPI } from "./utilityFuncs";
 import { Login, Signup } from "./authFuncs";
-import { contactAPI } from "./utilityFuncs";
 
+import { StoryTab } from "./storyTabComponents";
+import { ModalSelectSegmentFromOptionsButton, ModalNewButton } from './storyButtons.jsx';
 
+import { AuthorProfile } from "./authorTabComponents.jsx";
+import { AuthorListDisplayButton } from "./authorButtons.jsx";
 export default function App() {
 
 
@@ -18,7 +18,7 @@ export default function App() {
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
-        contactAPI("dashboardInfo", "get", true)
+        contactAPI("load", "get", true)
             .then(function (value) {
                 console.log(value);
                 setData(value)
@@ -51,6 +51,7 @@ export default function App() {
                     />
                 );
                 break;
+        }
     }
 
     const rootPath = "/chainmates/";
@@ -72,9 +73,20 @@ export default function App() {
     }
     else {
         startingURL = `${startingWriteOrReview}/${startingStoryID}`;
-    }
-    // console.log(startingURL);
+        }
 
+    const authorDicts = [{
+        "id": data.authorInfo.id,
+        "displayName": data.authorInfo.displayName,
+        "statsDTO": {
+            "writeCount": 0,
+            "reviewCount": 0,
+            "storyCount":0
+        }
+        }]
+    Object.assign(data, {
+        "authorDicts": authorDicts
+    });
 
     async function changeStoryDicts(storyDict, writeOrReview = "write", addOrRemove = "add") {
 
@@ -124,21 +136,21 @@ export default function App() {
                 <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
                         <Route path="" relative element={<Home startingURL={startingURL} />}
                             index />
-                        <Route path="write/" element={<Dashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
+                        <Route path="write/" element={<StoryDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                         >
-                            <Route path=":storyID/"
-                                element={<Story writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
+                            <Route path=":tabID/"
+                                element={<StoryTab writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
-                        <Route path="review/" element={<Dashboard writeOrReview="review" dicts={data.reviewDicts}
+                        <Route path="review/" element={<StoryDashboard writeOrReview="review" dicts={data.reviewDicts}
                             setDicts={changeStoryDicts} />}
                         >
-                            <Route path=":storyID/"
-                                element={<Story writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
+                            <Route path=":tabID/"
+                                element={<StoryTab writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
                         <Route path="author/"
-                            element={<Dashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}
+                            element={<StoryDashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}
                             />}
                         >
                             <Route path=":tabID/"
@@ -167,8 +179,7 @@ function Home(props) {
     useEffect(() => {
         console.log("initital navigate")
         navigate(props.startingURL);
-    }, [navigate,props.startingURL])
-
+    }, [navigate, props.startingURL])
     return (<div className="container"></div>);
 }
 
@@ -194,7 +205,7 @@ function UniversalHeader(props) {
 
 
 
-function Dashboard(props) {
+function StoryDashboard(props) {
 
     console.log(props.dicts)
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
@@ -215,16 +226,15 @@ function Dashboard(props) {
             presavedCurrentContentByStory[dictInArray.id] =
                 dictInArray.segmentHistoryList.slice(-1)[0].content;
         })
-
     }
 
     const [currentContentByStory, setCurrentContentByStory] = useState(presavedCurrentContentByStory);
     const outlet = useOutlet([currentContentByStory, setCurrentContentByStory]);
 
     return (
-        <div className={props.writeOrReview + "DashboardContainer" + " dashboardContainer"}>
-            <Sidebar writeOrReview={props.writeOrReview} addNewTab={addNewTab} />
-            <nav className="tabs">
+        <div className={props.writeOrReview + "storyDashboardContainer storyDashboardContainer dashboardContainer"}>
+            <LeftSidebar writeOrReview={props.writeOrReview} addNewTab={addNewTab} />
+            <nav className="tabsList">
                 {arrayOfTabIDs.map((tabID, index) =>
                     <Link to={tabID + "/"} key={index + tabID} className="tabLink">
                         <button className="tabButton">{getTabName(tabID, index)}</button>
@@ -237,161 +247,39 @@ function Dashboard(props) {
 }
 
 function PlaceHolder() {
-    return (<div className="storyContainer">PLACEHOLDER
-        <div className="storyContent"></div>
-        <div className="submissions"></div>
-        <div className="comments"></div>
+    return (<div className="tabContainer">PLACEHOLDER
+        <div className="tabContent"></div>
+        <div className="footer submissions"></div>
+        <div className="rightSidebar comments"></div>
     </div>
     )
 }
 
-function Sidebar(props) {
+function LeftSidebar(props) {
+
+    let buttonList;
 
     switch (props.writeOrReview) {
         case "author":
-            return (
-                <div className="sidebar">
-                    <AuthorListDisplayButton addAuthorTab={props.addNewTab} />
-                </div>
-            )
-        case "write":
-            return (
-                <div className="sidebar">
-                    <ModalNewButton addNewStory={props.addNewTab} />
-                    <ModalSelectSegmentFromOptionsButton type="JOIN" addNewStory={props.addNewTab} />
-                </div>
-            )
-        case "review":
-        default:
-            return (
-                <div className="sidebar">
-                    <ModalSelectSegmentFromOptionsButton type="MODERATE" addNewStory={props.addNewTab} />
-                </div>
-            )
-    }
-}
-
-
-function Story(props) {
-
-    let writeOrReview = props.writeOrReview;
-    const { storyID } = useParams();
-    const [wordCount, setWordCount] = useState(0);
-    const [currentContentByStory, setCurrentContentByStory] = useOutletContext();
-
-    console.log(storyID, props.dicts);
-
-
-    let storyDict = getArrayObjByID(props.dicts, storyID);
-    let currentContent = currentContentByStory[storyID];
-
-    let noSelections = {};
-    storyDict.segmentHistoryList.forEach(dictInArray =>
-        noSelections[dictInArray.id] = false)
-    const [selectedSegmentDict, setSelectedSegmentDict] = useState(noSelections);
-
-    function changeSegmentSelection(segmentID) {
-        setSelectedSegmentDict({ ...selectedSegmentDict, [segmentID]: !selectedSegmentDict[segmentID] })
-    }
-
-    function handleChange(e) {
-        setCurrentContentByStory({ ...currentContentByStory, [storyID]: e.target.value });
-        setWordCount(getWordCount(currentContent));
-    }
-
-    function getWordCount(myText) {
-        // const spaceMatchPattern = /[\w\d][\s\W*\d*]+[\w\d]/;
-        const spaceMatchPattern = /\S+/g;
-        let numberOfSpaces = myText.match(spaceMatchPattern);
-        return (numberOfSpaces ? numberOfSpaces : []).length;
-    }
-
-    const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
-
-    //storyDict.segmentHistoryList.foreach((segmentDict) => {
-    //    console.log(segmentDict);
-    //                    });
-
-    return (
-        <div className="storyContainer" id={"storyContainer" + { storyID }}>
-            <StoryHeader storyDict={storyDict} wordCount={wordCount} />
-            <div className="storyContent">
-                {storyDict.segmentHistoryList.map(segmentDict =>
-                    <SegmentDisplay key={segmentDict.id}
-                        id={segmentDict.id}
-                        isFinalSegment={segmentDict.id == storyID}
-                        fixedContent={segmentDict.content}
-                        currentContent={currentContent}
-                        changeSelection={changeSegmentSelection}
-                        onChange={handleChange} />
-                )
-                }
-            </div>
-            <SubmissionButtons writeOrReview={writeOrReview} currentContent={currentContent} segmentID={storyID} removeCurrentStory={removeCurrentStory} />
-            <Comments selections={selectedSegmentDict} storyDict={storyDict} />
-        </div>
-    )
-}
-
-function StoryHeader(props) {
-
-    let storyData = props.storyDict["storyData"];
-    let length = props.storyDict.segmentHistoryList.length;
-
-    return (<div className="storyHeader">
-        <div>{storyData.title ? storyData.title : "Untitled"}</div>
-        <div>{"Section : " + length + (storyData.maxNumberOfSegments ? " / " + storyData.maxSnumberOfSegments : "")}</div>
-        <div>{"Word Count :" + props.wordCount + (storyData.maxSegmentLength ? " / " + storyData.maxSegmentLength : "")}</div>
-    </div>)
-}
-
-function SegmentDisplay(props) {
-
-    console.log(props.id)
-
-    let readOnly = true;
-    let onChange = null;
-    let value = props.fixedContent;
-
-    if (props.isFinalSegment) {
-        readOnly = false;
-        onChange = props.onChange;
-        value = props.currentContent;
-    }
-
-    const onClick = () => {
-        props.changeSelection(props.id)
-    }
-
-
-    return (
-        <textarea className={`segmentDisplay ${readOnly ? undefined : 'currentSegmentDisplay'}`} readOnly={readOnly} value={value}
-            onChange={onChange} onClick={onClick} ></ textarea>)
-
-}
-
-
-function SubmissionButtons(props) {
-
-    let arrayOfButtonTypes;
-    switch (props.writeOrReview) {
-        case "review":
-            arrayOfButtonTypes = ["APPROVE"];
+            buttonList = <AuthorListDisplayButton addAuthorTab={props.addNewTab} />;
             break;
         case "write":
-        default:
-            arrayOfButtonTypes = ["SAVE", "SUBMIT", "ABANDON"];
-    }
+            buttonList = <>
+                            <ModalNewButton addNewStory={props.addNewTab} />
+                            <ModalSelectSegmentFromOptionsButton type="JOIN" addNewStory={props.addNewTab} />
+                        </>
+            break;
 
+        case "review":
+        default:
+            buttonList = <ModalSelectSegmentFromOptionsButton type="MODERATE" addNewStory={props.addNewTab} />
+            break;
+
+    }
     return (
-        <div className="submissions">
-            {arrayOfButtonTypes.map(buttonType =>
-                <SubmissionButton
-                    key={buttonType}
-                    submissionType={buttonType}
-                    currentContent={props.currentContent}
-                    segmentID={props.segmentID}
-                    removeCurrentStory={props.removeCurrentStory} />)}
+        <div className="leftSidebar">
+            {buttonList}
         </div>
     )
 }
+

@@ -12,8 +12,8 @@ using System.Text.Json;
 using System.Xml.Linq;
 
 [ApiController]
-[Route("chainmates/dashboardInfo")]
-public class DashboardInfoController : ControllerBase
+[Route("chainmates/load")]
+public class InitialLoadController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly CurrentUserService _currentUserService;
@@ -27,7 +27,7 @@ public class DashboardInfoController : ControllerBase
     protected RelationInfoDto relationInfoDto;
     public DashboardDto dashboardInfo;
 
-    public DashboardInfoController(AppDbContext context, CurrentUserService currentUserService)
+    public InitialLoadController(AppDbContext context, CurrentUserService currentUserService)
     {
          _context = context;
         _currentUserService = currentUserService;
@@ -100,39 +100,3 @@ public class DashboardInfoController : ControllerBase
 
     }
 }
-
-// writeDicts:
-//[{"final_segment_id"::,
-//    "segment_trace":[{
-//                    "id"::, 
-//                    "content"::, 
-//                    "segment_info":{
-//                                    "author":{
-//                                            "id"::,
-//                                            "name":display_name}
-//                                            },
-//                                        "moderator":{
-//                                                "id"::,
-//                                                "name":display_name,
-//                                                "moderation_notes":notes
-//                                                 },
-//"comments":[{
-//            "commentID"::,
-//            "author":{
-//                        "id"::,
-//                        "name":display_name}
-//                        },
-//            "content"::,
-//            "child_comments":[{
-//                                "commentID"::,
-//                                "author":{
-//                                        "id"::,
-//                                        "name":display_name}
-//                                        },
-//                                "content"::,
-//                                }]
-//        }]
-//      "story_data":{
-//                  "variousData"::,
-//                   "comments":},
-//  ]

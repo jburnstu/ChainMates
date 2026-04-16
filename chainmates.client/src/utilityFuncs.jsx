@@ -6,7 +6,7 @@ export default { getRandomItem, contactAPI, getArrayObjByID }
 
 
 
-export async function contactAPI(urlTarget, method, authorized = false, bodyDict = {}) {
+export async function contactAPI(urlTarget, method, authorized = false, bodyDict = {}, onFailReturn = null) {
 
     const urlStub = "/chainmates/"
     let credentials = authorized ? "include" : "same-origin";
@@ -37,7 +37,7 @@ export async function contactAPI(urlTarget, method, authorized = false, bodyDict
 
     if ((method == "get" && response.status != 200) || !response.ok) {
         console.log("HTTP Error ", response.status, "at url ", `${urlStub}${urlTarget}`);
-        return {};
+        return onFailReturn ?? {};
     }
     else {
         console.log("SUCCESS at url ", `${urlStub}${urlTarget}`);
