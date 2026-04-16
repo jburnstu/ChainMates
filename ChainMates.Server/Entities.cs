@@ -29,8 +29,8 @@ namespace ChainMates.Server
         public List<AuthorRelation> SecondaryRelations { get; set; }
         public List<CircleAssignment> CircleAssignments { get; set; } = new();
 
-        public List<Notification> RecievedNotifications { get; set; } = new();
-        public List<Notification> InstigatedNotifications { get; set; } = new();
+        public List<Notification> ReceivedNotifications { get; set; } = new();
+        //public List<Notification> InstigatedNotifications { get; set; } = new();
     }
     public class Story
     {
@@ -201,13 +201,13 @@ namespace ChainMates.Server
         public int Id { get; set; }
         public int NotificationTypeId { get; set; }
         public int RecipientAuthorId { get; set; }
-        public int InstigatorAuthorId { get; set; }
-        public JsonDocument data { get; set; }
+        //public int InstigatorAuthorId { get; set; }
+        public JsonDocument Info { get; set; }
         public DateTime DateCreated { get; set; }
 
         public NotificationType NotificationType { get; set; }
         public Author RecipientAuthor { get; set; }
-        public Author InstigatorAuthor { get; set; }
+        //public Author InstigatorAuthor { get; set; }
 
     }
 
@@ -479,13 +479,13 @@ namespace ChainMates.Server
 
                                 nestedBuilder
                                     .HasOne(n => n.RecipientAuthor)
-                                    .WithMany(ra => ra.RecievedNotifications)
+                                    .WithMany(ra => ra.ReceivedNotifications)
                                     .HasForeignKey(n => n.RecipientAuthorId);
 
-                                nestedBuilder
-                                    .HasOne(n => n.InstigatorAuthor)
-                                    .WithMany(ia => ia.InstigatedNotifications)
-                                    .HasForeignKey(n => n.InstigatorAuthorId);
+                                //nestedBuilder
+                                //    .HasOne(n => n.InstigatorAuthor)
+                                //    .WithMany(ia => ia.InstigatedNotifications)
+                                //    .HasForeignKey(n => n.InstigatorAuthorId);
                             });
                 
 
