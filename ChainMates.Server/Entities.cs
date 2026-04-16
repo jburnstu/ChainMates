@@ -9,6 +9,7 @@ using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml.Linq;
+using System.Text.Json;
 
 namespace ChainMates.Server
 {
@@ -18,6 +19,7 @@ namespace ChainMates.Server
         public string DisplayName { get; set; }
         public string EmailAddress { get; set; }
         public string Password { get; set; }
+        public DateTime DateCreated { get; set; }
         public List<Story> Stories { get; set; } = new();
         public List<Segment> Segments { get; set; } = new();
         public List<ModerationAssignment> ModerationAssignments { get; set; } = new();
@@ -26,6 +28,9 @@ namespace ChainMates.Server
         public List<AuthorRelation> PrimaryRelations { get; set; }
         public List<AuthorRelation> SecondaryRelations { get; set; }
         public List<CircleAssignment> CircleAssignments { get; set; } = new();
+
+        public List<Notification> RecievedNotifications { get; set; } = new();
+        public List<Notification> InstigatedNotifications { get; set; } = new();
     }
     public class Story
     {
@@ -38,6 +43,7 @@ namespace ChainMates.Server
         public int? MinSegmentLength { get; set; } = null;
         public int? MaxBranches { get; set; } = null;
         public bool? IsItMature { get; set; } = false;
+        public DateTime DateCreated { get; set; }
 
         public Author Author { get; set; }
         public Circle? Circle { get; set; }
@@ -53,6 +59,7 @@ namespace ChainMates.Server
         public int AuthorId { get; set; }
         public int StoryId { get; set; }
         public int? PreviousSegmentId { get; set; } = null;
+        public DateTime DateCreated { get; set; }
         public SegmentStatus SegmentStatus { get; set; }
         public Author Author { get; set; }
         public Story Story { get; set; }
@@ -72,6 +79,7 @@ namespace ChainMates.Server
         public int AuthorId { get; set; }
         public int SegmentId { get; set; }
         public bool IsClosed { get; set; } = false;
+        public DateTime DateCreated { get; set; }
         public Author Author { get; set; }
         public Segment Segment { get; set; }
     }
@@ -82,6 +90,7 @@ namespace ChainMates.Server
         public string Content { get; set; }
         public int CommentTypeId { get; set; }
         public int CommentStatusId { get; set; }
+        public DateTime DateCreated { get; set; }
         public Author Author { get; set; }
         public CommentType CommentType { get; set; }
         public CommentStatus CommentStatus { get; set; }
@@ -158,7 +167,7 @@ namespace ChainMates.Server
         public int AuthorId { get; set; }
         public int RelatedAuthorId { get; set; }
         public int AuthorRelationTypeId { get; set; }
-
+        public DateTime DateCreated { get; set; }
         public Author Author { get; set; }
         public Author RelatedAuthor { get; set; }
         public AuthorRelationType AuthorRelationType { get; set; }
@@ -167,13 +176,13 @@ namespace ChainMates.Server
     public class AuthorRelationType     {
         public int Id { get; set; }
         public string Description { get; set; }
-
         public List<AuthorRelation> AuthorRelations { get; set; }
     }
 
     public class Circle {
         public int Id { get; set; }
         public string Name { get; set; }
+        public DateTime DateCreated { get; set; }
         public List<CircleAssignment> CircleAssignments { get; set; }
 
         public List<Story> Stories { get; set; }
@@ -182,12 +191,34 @@ namespace ChainMates.Server
     public class CircleAssignment {
         public int CircleId { get; set; }
         public int AuthorId { get; set; }
+        public DateTime DateCreated { get; set; }
         public Circle Circle { get; set; }
         public Author Author { get; set; }
     }
 
+    public class Notification
+    {
+        public int Id { get; set; }
+        public int NotificationTypeId { get; set; }
+        public int RecipientAuthorId { get; set; }
+        public int InstigatorAuthorId { get; set; }
+        public JsonDocument data { get; set; }
+        public DateTime DateCreated { get; set; }
 
+        public NotificationType NotificationType { get; set; }
+        public Author RecipientAuthor { get; set; }
+        public Author InstigatorAuthor { get; set; }
 
+    }
+
+    public class NotificationType
+        {
+            public int Id { get; set; }
+            public int Description { get; set; }
+            public List<Notification> Notifications { get; set; } = new();
+
+        
+        }
     public class AppDbContext : DbContext
     {
         public DbSet<Author> Author { get; set; }
@@ -216,6 +247,10 @@ namespace ChainMates.Server
 
         public DbSet<Circle> Circle { get; set; }
         public DbSet<CircleAssignment> CircleAssignment { get; set; }
+
+
+        public DbSet<Notification> Notification { get; set; }
+        public DbSet<NotificationType> NotificationType { get; set; } 
 
         //public DbSet<SegmentCommentBySegment> SegmentCommentBySegment { get; set; }
         //public DbSet<SegmentCommentByComment> SegmentCommentByComment { get; set; }
@@ -431,8 +466,28 @@ namespace ChainMates.Server
                                 .HasOne(cm => cm.Author)
                                 .WithMany(a => a.CircleAssignments)
                                 .HasForeignKey(cm => cm.CircleId);
-
                         });
+
+                    modelBuilder.Entity<Notification>(
+                            nestedBuilder =>
+                            {
+
+                                nestedBuilder
+                                    .HasOne(n => n.NotificationType)
+                                    .WithMany(nt => nt.Notifications)
+                                    .HasForeignKey(n => n.NotificationTypeId);
+
+                                nestedBuilder
+                                    .HasOne(n => n.RecipientAuthor)
+                                    .WithMany(ra => ra.RecievedNotifications)
+                                    .HasForeignKey(n => n.RecipientAuthorId);
+
+                                nestedBuilder
+                                    .HasOne(n => n.InstigatorAuthor)
+                                    .WithMany(ia => ia.InstigatedNotifications)
+                                    .HasForeignKey(n => n.InstigatorAuthorId);
+                            });
+                
 
                     modelBuilder.Entity<SegmentTrace>()
                         .HasNoKey()
