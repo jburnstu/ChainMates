@@ -4,6 +4,7 @@ using System.Text.Json;
 using ChainMates.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChainMates.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260416124901_AddDatetimesAndNotificationTable")]
+    partial class AddDatetimesAndNotificationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -363,10 +366,9 @@ namespace ChainMates.Server.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_created");
 
-                    b.Property<JsonDocument>("Info")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("info");
+                    b.Property<int>("InstigatorAuthorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("instigator_author_id");
 
                     b.Property<int>("NotificationTypeId")
                         .HasColumnType("integer")
@@ -376,8 +378,16 @@ namespace ChainMates.Server.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("recipient_author_id");
 
+                    b.Property<JsonDocument>("data")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("data");
+
                     b.HasKey("Id")
                         .HasName("pk_notification");
+
+                    b.HasIndex("InstigatorAuthorId")
+                        .HasDatabaseName("ix_notification_instigator_author_id");
 
                     b.HasIndex("NotificationTypeId")
                         .HasDatabaseName("ix_notification_notification_type_id");
@@ -754,6 +764,13 @@ namespace ChainMates.Server.Migrations
 
             modelBuilder.Entity("ChainMates.Server.Notification", b =>
                 {
+                    b.HasOne("ChainMates.Server.Author", "InstigatorAuthor")
+                        .WithMany("InstigatedNotifications")
+                        .HasForeignKey("InstigatorAuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notification_author_instigator_author_id");
+
                     b.HasOne("ChainMates.Server.NotificationType", "NotificationType")
                         .WithMany("Notifications")
                         .HasForeignKey("NotificationTypeId")
@@ -762,11 +779,13 @@ namespace ChainMates.Server.Migrations
                         .HasConstraintName("fk_notification_notification_type_notification_type_id");
 
                     b.HasOne("ChainMates.Server.Author", "RecipientAuthor")
-                        .WithMany("ReceivedNotifications")
+                        .WithMany("RecievedNotifications")
                         .HasForeignKey("RecipientAuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_notification_author_recipient_author_id");
+
+                    b.Navigation("InstigatorAuthor");
 
                     b.Navigation("NotificationType");
 
@@ -881,11 +900,13 @@ namespace ChainMates.Server.Migrations
 
                     b.Navigation("Comments");
 
+                    b.Navigation("InstigatedNotifications");
+
                     b.Navigation("ModerationAssignments");
 
                     b.Navigation("PrimaryRelations");
 
-                    b.Navigation("ReceivedNotifications");
+                    b.Navigation("RecievedNotifications");
 
                     b.Navigation("SecondaryRelations");
 
