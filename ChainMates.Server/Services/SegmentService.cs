@@ -39,12 +39,6 @@ namespace ChainMates.Server.Services
 
         }
 
-        public async Task<List<Segment>> GetSegmentsByAuthor(int authorId)
-        {
-            return await _context.Segment
-                .Where(s => s.AuthorId == authorId)
-                .ToListAsync();
-        }
 
         public async Task<List<Segment>> GetSegmentsByAuthorAndStatus(int authorId, int segmentStatusId)
         {
@@ -126,7 +120,6 @@ namespace ChainMates.Server.Services
 
         }
 
-
         public async Task<Segment> CreateSegment(SegmentCreationDto dto, int authorId, bool save)
         {
             Debug.WriteLine("CreateSegment");
@@ -171,8 +164,6 @@ namespace ChainMates.Server.Services
             return moderationAssignment;
 
         }
-
-
         public async Task<Segment> CreateNewSegmentByAuthor(int authorId)
         {
             Debug.WriteLine("CreateNewSegmentByAuthor");
@@ -302,7 +293,6 @@ namespace ChainMates.Server.Services
 
         public async Task<List<SegmentTrace>> GetSegmentTraces()
         {
-
             return await _context.SegmentTrace.ToListAsync();
         }
 

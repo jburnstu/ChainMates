@@ -1,5 +1,6 @@
 ﻿using ChainMates.Server;
 using ChainMates.Server.DTOs.Author;
+using ChainMates.Server.DTOs.Segment;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
@@ -54,25 +55,33 @@ namespace ChainMates.Server.Services
         }
 
 
-        public async Task<List<int>> GetFollowedAuthors(int authorId)
+        public async Task<List<AuthorDto>> GetFollowedAuthors(int authorId)
         {
-            var followedAuthors = await _context.AuthorRelation
-                .Where(ar => ar.AuthorId == authorId)
-                .Where(ar => ar.AuthorRelationTypeId == 1)
-                .Select(ar =>ar.RelatedAuthorId)
-                .ToListAsync();
-
-            return followedAuthors;
+            return await (from ar in _context.AuthorRelation
+                          join a in _context.Author
+                          on ar.RelatedAuthorId equals a.Id
+                          where ar.AuthorRelationTypeId == 1
+                          where ar.AuthorId == authorId
+                          select new AuthorDto
+                          {
+                              Id = a.Id,
+                              DisplayName = a.DisplayName
+                          }
+                          ).ToListAsync();
         }
-        public async Task<List<int>> GetFollowingAuthors(int authorId)
+        public async Task<List<AuthorDto>> GetFollowingAuthors(int authorId)
         {
-            var followedAuthors = await _context.AuthorRelation
-                .Where(ar => ar.RelatedAuthorId == authorId)
-                .Where(ar => ar.AuthorRelationTypeId == 1)
-                .Select(ar => ar.AuthorId)
-                .ToListAsync();
-
-            return followedAuthors;
+            return await (from ar in _context.AuthorRelation
+                          join a in _context.Author
+                          on ar.AuthorId equals a.Id
+                          where ar.AuthorRelationTypeId == 1
+                          where ar.RelatedAuthorId == authorId
+                          select new AuthorDto
+                          {
+                              Id = a.Id,
+                              DisplayName = a.DisplayName
+                          }
+                          ).ToListAsync();
         }
         public async Task<AuthorRelation> FollowAuthor(int authorId, int authorToFollowId)
         {
@@ -94,12 +103,16 @@ namespace ChainMates.Server.Services
             return await _context.Circle.ToListAsync();
         }
         
-        public async Task<List<int>> GetCircleIdsByAuthorId(int authorId)
+        public async Task<List<CircleDto>> GetCirclesByAuthorId(int authorId)
         {
-            return await _context.CircleAssignment
-                .Where(ca => ca.AuthorId == authorId)
-                .Select(ca => ca.CircleId)
-                .ToListAsync();
+            return await (from ca in _context.CircleAssignment
+                          join c in _context.Circle on ca.CircleId equals c.Id
+                          where ca.AuthorId == authorId
+                          select new CircleDto
+                          {
+                              Id = c.Id,
+                              Name = c.Name
+                          }).ToListAsync();
         }
 
         public async Task<List<int>> GetAuthorIdsByCircleId(int circleId)
@@ -140,6 +153,25 @@ namespace ChainMates.Server.Services
             _context.CircleAssignment.Add(circleAssignment);
             await _context.SaveChangesAsync();
             return circleAssignment;
+        }
+
+        public async Task<List<SegmentHistoryIncludingCommentsDto>> GetRecentSegmentHistoriesByAuthorId(int authorId, int numberOfSegments)
+        {
+            var segmentService = new SegmentService(_context);
+
+            var segmentIdList = (from s in _context.Segment
+                                     where s.SegmentStatusId == 4
+                                     where s.AuthorId == authorId
+                                     orderby s.Id descending
+                                     select s.Id)
+                              .Take(numberOfSegments);
+            List<SegmentHistoryIncludingCommentsDto> dtoList = new List<SegmentHistoryIncludingCommentsDto>();
+            foreach (var segmentId in segmentIdList)
+            {
+                var segmentTrace = await segmentService.GetSegmentTraceBySegment(segmentId);
+                dtoList.Add(segmentTrace);
+            }
+            return dtoList;
         }
     }
 }
