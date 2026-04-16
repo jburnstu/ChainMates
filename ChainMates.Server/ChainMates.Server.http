@@ -1,0 +1,6 @@
+@ChainMates.Server_HostAddress = http://localhost:5173
+
+GET {{ChainMates.Server_HostAddress}}/chainmates/
+Accept: application/json
+
+###

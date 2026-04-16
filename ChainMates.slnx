@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="chainmates.client/chainmates.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="ChainMates.Server/ChainMates.Server.csproj" />
+  <Project Path="ChainMates.Tests/ChainMates.Tests.csproj" />
+</Solution>

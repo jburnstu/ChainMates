@@ -1,0 +1,10 @@
+﻿namespace ChainMates.Server.DTOs.Auth
+{
+    public class RegisterDto
+    {
+        public string EmailAddress { get; set; }
+        public string Password { get; set; }
+
+        public string DisplayName { get; set; }
+    }
+}
