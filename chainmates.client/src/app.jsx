@@ -2,7 +2,6 @@
 import React, { StrictMode, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
 
-
 import { getArrayObjByID, contactAPI } from "./utilityFuncs";
 import { Login, Signup } from "./authFuncs";
 
@@ -11,8 +10,9 @@ import { ModalSelectSegmentFromOptionsButton, ModalNewButton } from './storyButt
 
 import { AuthorProfile } from "./authorTabComponents.jsx";
 import { AuthorListDisplayButton } from "./authorButtons.jsx";
-export default function App() {
 
+
+export default function App() {
 
     const [data, setData] = useState(null);
     const [authMode, setAuthMode] = useState("login"); 
@@ -75,18 +75,6 @@ export default function App() {
         startingURL = `${startingWriteOrReview}/${startingStoryID}`;
         }
 
-    const authorDicts = [{
-        "id": data.authorInfo.id,
-        "displayName": data.authorInfo.displayName,
-        "statsDTO": {
-            "writeCount": 0,
-            "reviewCount": 0,
-            "storyCount":0
-        }
-        }]
-    Object.assign(data, {
-        "authorDicts": authorDicts
-    });
 
     async function changeStoryDicts(storyDict, writeOrReview = "write", addOrRemove = "add") {
 
@@ -98,9 +86,9 @@ export default function App() {
             case "review":
                 dataKey = "reviewDicts";
                 break;
-            case "author":
-                dataKey = "relationInfo";
-                break;
+            //case "author":
+            //    dataKey = "relationInfo";
+            //    break;
         }
 
         let dictArrayToChange = data[dataKey];
@@ -149,12 +137,11 @@ export default function App() {
                                 element={<StoryTab writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
-                        <Route path="author/"
-                            element={<StoryDashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}
-                            />}
-                        >
-                            <Route path=":tabID/"
-                                element={<AuthorProfile writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts} />} />
+                        <Route path="authors/" element={<AuthorBrowser />}>
+                        <Route path=":authorID/" element={<AuthorProfile self={false} />} />
+                        </Route>
+                        <Route path="stories/" element={<StoryBrowser/>}>
+                            <Route path=":storyID/" element={<StoryProfile />} />
                         </Route>
                     </Route>
                     <Route path="*" element={<NoMatch />} />
@@ -181,6 +168,12 @@ function Home(props) {
         navigate(props.startingURL);
     }, [navigate, props.startingURL])
     return (<div className="container"></div>);
+
+
+    return (
+        <AuthorProfile  self={true} />)
+
+
 }
 
 
@@ -195,10 +188,11 @@ function UniversalHeader(props) {
                     <Link to="" ><button type="button">HOME</button></Link>|{" "}
                     <Link to="write" ><button type="button">WRITE</button></Link>|{" "}
                     <Link to="review"><button type="button">READ</button></Link>
-                    <Link to="author"><button type="button">AUTHORS</button></Link>
+                    <Link to="authors"><button type="button">AUTHORS</button></Link>
+                    <Link to="stories"><button type="button">STORIES</button></Link>
                 </nav>
             </header >
-            <Outlet></Outlet>
+            <Outlet />
         </>
     )
 }
@@ -210,30 +204,23 @@ function StoryDashboard(props) {
     console.log(props.dicts)
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
     const addNewTab = (tabID) => props.setDicts(tabID, props.writeOrReview, "add");
-    let getTabName;
+
+    const getTabName = (id, index) =>
+        getArrayObjByID(props.dicts, id).storyData.title ?? `${index}.`;
+
+
     let presavedCurrentContentByStory = {};
-
-    if (props.writeOrReview == "author") {
-        console.log(props.dicts)
-        getTabName = (id, index) =>
-            getArrayObjByID(props.dicts, id).displayName ?? `${index}.`
-    }
-    else {
-        getTabName = (id, index) =>
-            getArrayObjByID(props.dicts, id).storyData.title ?? `${index}.`;
-
-        props.dicts.forEach(dictInArray => {
-            presavedCurrentContentByStory[dictInArray.id] =
-                dictInArray.segmentHistoryList.slice(-1)[0].content;
-        })
-    }
+    props.dicts.forEach(dictInArray => {
+        presavedCurrentContentByStory[dictInArray.id] =
+            dictInArray.segmentHistoryList.slice(-1)[0].content;
+    })
 
     const [currentContentByStory, setCurrentContentByStory] = useState(presavedCurrentContentByStory);
     const outlet = useOutlet([currentContentByStory, setCurrentContentByStory]);
 
     return (
         <div className={props.writeOrReview + "storyDashboardContainer storyDashboardContainer dashboardContainer"}>
-            <LeftSidebar writeOrReview={props.writeOrReview} addNewTab={addNewTab} />
+            <LeftSidebar type={props.writeOrReview} addNewTab={addNewTab} />
             <nav className="tabsList">
                 {arrayOfTabIDs.map((tabID, index) =>
                     <Link to={tabID + "/"} key={index + tabID} className="tabLink">
@@ -255,26 +242,36 @@ function PlaceHolder() {
     )
 }
 
+
+function BrowserPlaceHolder() {
+    return (<div className="tabContainer">PLACEHOLDER
+        <div className="tabContent"></div>
+        <div className="footer submissions"></div>
+        <div className="rightSidebar comments"></div>
+    </div>
+    )
+}
+
 function LeftSidebar(props) {
 
     let buttonList;
-
-    switch (props.writeOrReview) {
-        case "author":
-            buttonList = <AuthorListDisplayButton addAuthorTab={props.addNewTab} />;
-            break;
+    switch (props.type) {
         case "write":
             buttonList = <>
                             <ModalNewButton addNewStory={props.addNewTab} />
                             <ModalSelectSegmentFromOptionsButton type="JOIN" addNewStory={props.addNewTab} />
                         </>
             break;
-
         case "review":
-        default:
             buttonList = <ModalSelectSegmentFromOptionsButton type="MODERATE" addNewStory={props.addNewTab} />
             break;
-
+        case "authors":
+            buttonList = <AuthorSearchButton />
+            break;
+        case "stories":
+            buttonList = <StorySearchButton />
+            break;
+        
     }
     return (
         <div className="leftSidebar">
@@ -283,3 +280,69 @@ function LeftSidebar(props) {
     )
 }
 
+
+function StoryBrowser(props) {
+
+    return (
+        <div className={props.writeOrReview + "storyDashboardContainer storyDashboardContainer dashboardContainer"}>
+            <LeftSidebar type="stories" />
+        {outlet || <BrowserPlaceHolder />}
+        </div >
+    )
+}
+
+
+function StoryProfile(props) {
+
+    const { storyID } = useParams();
+
+    useEffect(() => {
+        let storyData = await contactAPI(`stories/${storyID}`, "get", false);
+
+        //let allSegmentsData = await contactAPI(`stories/${storyID}/segments`, "get", false);
+    });
+
+    return (
+        <>
+            <div>{storyData.Title}</div>
+            <div>{storyData.Author.DisplayName}</div>
+        </>
+    )
+
+    {/*<SubmissionButtons writeOrReview={writeOrReview} currentContent={currentContent} segmentID={tabID} removeCurrentStory={removeCurrentStory} />*/ }
+    {/*<Comments selections={selectedSegmentDict} storyDict={storyDict} />*/ }
+}
+
+function AuthorBrowser(props) {
+
+    return (
+        <div >
+            <LeftSidebar type="authors"/>
+            {outlet || <BrowserPlaceHolder />}
+        </div >
+    )
+}
+
+
+{/*<Route path="author/"*/ }
+{/*    element={<StoryDashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}*/ }
+{/*    />}*/ }
+{/*>*/ }
+{/*    <Route path=":tabID/"*/ }
+{/*        element={<AuthorProfile writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts} />} />*/ }
+{/*</Route>*/ }
+
+
+
+//const authorDicts = [{
+//    "id": data.authorInfo.id,
+//    "displayName": data.authorInfo.displayName,
+//    "statsDTO": {
+//        "writeCount": 0,
+//        "reviewCount": 0,
+//        "storyCount":0
+//    }
+//    }]
+//Object.assign(data, {
+//    "authorDicts": authorDicts
+//});

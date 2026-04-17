@@ -1,9 +1,11 @@
-﻿namespace ChainMates.Server.DTOs.Story
+﻿using ChainMates.Server.DTOs.Author;
+
+namespace ChainMates.Server.DTOs.Story
 {
     public class StoryInfoDto
     {
         public int Id { get; set; }
-        public int AuthorId {  get; set; }
+        public AuthorDto Author {  get; set; }
         public string? Title { get; set; }
 
     }

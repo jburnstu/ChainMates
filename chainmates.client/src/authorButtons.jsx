@@ -5,54 +5,128 @@ import { AuthorContext } from "./context.jsx";
 import { useNavigate, useLocation, redirect } from "react-router";
 import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
 
-export default { AuthorListDisplayButton };
+export default { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink };
 
-export function AuthorListDisplayButton(props) {
-    const authorID = useContext(AuthorContext);
-
-    const [threeMostRecentAuthors, setThreeMostRecentAuthors] = useState([])
+export function AuthorSearchButton() {
 
     const [isOpen, setIsOpen] = useState(false);
-
-    // let arrayOfFriendDicts = contactAPI(`author_relation_by_author/${authorID}/`, "get");
     const [authorArray, setAuthorArray] = useState([])
 
     const onClick = () => {
         if (!isOpen) {
-            contactAPI(`author_relation_by_author/${authorID}/`, "get")
+            contactAPI(`authors`, "get", false)
                 .then(function (value) {
                     console.log(value)
-                    setAuthorArray(value.related_authors)
+                    setAuthorArray(value)
                 })
                 .then(function (innerValue) {
                     setIsOpen(true);
-                }
-                )
+                })
         }
         else { setIsOpen(false) }
     }
 
     return (
-        <div className="friendSearchContainer">
+        <div className="authorSearchButton">
             <button onClick={onClick}>AUTHORS</button>
-            {authorArray.map(authorDict =>
-                <FriendProfileButton key={authorDict.id} addAuthorTab={props.addAuthorTab} authorInfo={authorDict} />)}
+            {isOpen 
+               ? <div className="searchContainer">
+                    {authorArray.map(authorDict =>
+                        <div className="searchResultContainer">
+                            <AuthorNameLink key={authorDict.id} authorInfo={authorDict} />)
+                        </div>
+                    )}
+                </div>
+               : null}
         </div>
     )
 }
 
-function FriendProfileButton(props) {
-
-    const onClick = () => { props.addAuthorTab(props.authorInfo, "author", "add") }
-
-    console.log(props.authorInfo)
+export function AuthorNameLink({ authorInfo }) {
     return (
-        <button onClick={onClick}>
-            {props.authorInfo.display_name}
-        </button>)
+        <Link to={`authors/${authorInfo.Id}`}>{authorInfo.DisplayName}</Link>
+    )
 }
 
 
+
+
+export function StorySearchButton() {
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [storyArray, setStoryArray] = useState([])
+
+    const onClick = () => {
+        if (!isOpen) {
+            contactAPI(`stories`, "get", false)
+                .then(function (value) {
+                    console.log(value)
+                    setStoryArray(value)
+                })
+                .then(function (innerValue) {
+                    setIsOpen(true);
+                })
+        }
+        else { setIsOpen(false) }
+    }
+
+    return (
+        <div className="storySearchButton">
+            <button onClick={onClick}>STORIES</button>
+            {isOpen
+                ? <div className="searchContainer">
+                    {storyArray.map(storyDict =>
+                        <div className="searchResultContainer">
+                            <StoryNameLink key={storyDict.Id} storyInfo={storyDict} />)
+                            <AuthorNameLink key={storyDict.Id} authorInfo={storyDict.Author} />
+                        </div>
+                    )}
+                </div>
+                : null}
+        </div>
+    )
+}
+
+export function StoryNameLink({ storyInfo }) {
+    return (
+        <Link to={`authors/${storyInfo.Id}`}>{storyInfo.Title}</Link>
+    )
+}
+
+
+
+//export function AuthorListDisplayButton(props) {
+//    const authorID = useContext(AuthorContext);
+
+//    const [threeMostRecentAuthors, setThreeMostRecentAuthors] = useState([])
+
+//    const [isOpen, setIsOpen] = useState(false);
+
+//    const [authorArray, setAuthorArray] = useState([])
+
+//    const onClick = () => {
+//        if (!isOpen) {
+//            contactAPI(`author_relation_by_author/${authorID}/`, "get")
+//                .then(function (value) {
+//                    console.log(value)
+//                    setAuthorArray(value.related_authors)
+//                })
+//                .then(function (innerValue) {
+//                    setIsOpen(true);
+//                }
+//                )
+//        }
+//        else { setIsOpen(false) }
+//    }
+
+//    return (
+//        <div className="friendSearchContainer">
+//            <button onClick={onClick}>AUTHORS</button>
+//            {authorArray.map(authorDict =>
+//                <FriendProfileButton key={authorDict.id} addAuthorTab={props.addAuthorTab} authorInfo={authorDict} />)}
+//        </div>
+//    )
+//}
 
 // export function ModalSelectFriendButton(props) {
 //     return (<>

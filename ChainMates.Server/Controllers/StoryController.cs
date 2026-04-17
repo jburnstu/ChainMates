@@ -27,20 +27,20 @@ namespace ChainMates.Server.Controllers
 
         // GET: api/stories
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetStories()
         {
             var data = _service.GetStories();
             return Ok(data);
         }
 
         //// GET api/stories/5
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> Get(int id)
-        //{
-        //    var data = await _storyService.GetStoryById(id);
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetStoryById(int id)
+        {
+            var data = await _service.GetStoryById(id);
 
-        //    return Ok(data);
-        //}
+            return Ok(data);
+        }
 
         // POST api/<StoryController>
         [HttpPost]
@@ -58,16 +58,5 @@ namespace ChainMates.Server.Controllers
 
         }
 
-        //// PUT api/<StoryController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<StoryController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

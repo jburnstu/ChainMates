@@ -106,11 +106,17 @@ namespace ChainMates.Server.Services
                                where s .Id == segmentId
                                join st in _context.Story
                                on s.StoryId equals st.Id
+                               join a in _context.Author
+                               on st.AuthorId equals a.Id
                                select new StoryInfoDto
                                {
                                    Id = st.Id,
                                    Title = st.Title,
-                                   AuthorId = st.AuthorId
+                                   Author = new AuthorDto
+                                   {
+                                       Id = a.Id,
+                                       DisplayName = a.DisplayName
+                                   }
                                }).FirstOrDefaultAsync();
 
             await CreateNotifications(new NotificationCreationDto

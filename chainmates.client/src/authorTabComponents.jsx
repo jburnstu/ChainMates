@@ -6,13 +6,11 @@ export default { AuthorProfile };
 
 export function AuthorProfile(props) {
 
-    let writeOrReview = props.writeOrReview;
     const { tabID } = useParams();
     const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
 
 
-    console.log(props.dicts, tabID)
-    let authorDict = getArrayObjByID(props.dicts, tabID);
+    let authorDict = props.authorDict;
     console.log(authorDict);
 
 
@@ -37,9 +35,6 @@ export function AuthorProfile(props) {
         }
     }, [authorDict?.id]);
 
-    console.log(recentSegmentTraceDTOList)
-    // const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
-
     return (
         <div className="authorTabContainer tabContainer" id={"authorTabContainer" + { tabID }}>
             <AuthorHeader statsDTO={authorDict.statsDTO} displayName={ authorDict.displayName} /> 
@@ -55,7 +50,7 @@ export function AuthorProfile(props) {
                 </div>
             </div>
             <div className="footer"></div>
-            <Notifications notificationDTOList={notificationDTOList} />
+            {props.self ? <Notifications notificationDTOList={notificationDTOList} /> : null}
         </div>
     )
 }

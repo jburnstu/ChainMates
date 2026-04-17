@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using ChainMates.Server;
 using ChainMates.Server.DTOs.Story;
 using System.Diagnostics;
+using ChainMates.Server.DTOs.Author;
 
 namespace ChainMates.Server.Services
 {
@@ -17,7 +18,26 @@ namespace ChainMates.Server.Services
 
         public async Task<List<Story>> GetStories()
         {
-            return await _context.Story.ToListAsync();
+            return await _context.Story
+                .ToListAsync();
+        }
+
+        public async Task<StoryInfoDto?> GetStoryById(int storyId)
+        {
+            return await (from s in _context.Story
+                          where s.Id == storyId
+                          join a in _context.Author
+                          on s.AuthorId equals a.Id
+                          select new StoryInfoDto
+                          {
+                              Id = s.Id,
+                              Author = new AuthorDto
+                              {
+                                  Id = a.Id,
+                                  DisplayName = a.DisplayName
+                              },
+                              Title = s.Title
+                          }).FirstOrDefaultAsync();
         }
 
         public async Task<Story> CreateStory(StoryDto dto, int authorId)
