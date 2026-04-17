@@ -29,7 +29,7 @@ namespace ChainMates.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStories()
         {
-            var data = _service.GetStories();
+            var data = await _service.GetStories();
             return Ok(data);
         }
 

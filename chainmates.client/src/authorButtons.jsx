@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { createPortal } from 'react-dom';
 import { AuthorContext } from "./context.jsx";
-import { useNavigate, useLocation, redirect } from "react-router";
+import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
 import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
 
 export default { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink };
@@ -32,8 +32,8 @@ export function AuthorSearchButton() {
             {isOpen 
                ? <div className="searchContainer">
                     {authorArray.map(authorDict =>
-                        <div className="searchResultContainer">
-                            <AuthorNameLink key={authorDict.id} authorInfo={authorDict} />)
+                        <div className="searchResultContainer" key={authorDict.id}>
+                            <AuthorNameLink authorInfo={authorDict} />
                         </div>
                     )}
                 </div>
@@ -43,8 +43,9 @@ export function AuthorSearchButton() {
 }
 
 export function AuthorNameLink({ authorInfo }) {
+    console.log(authorInfo)
     return (
-        <Link to={`authors/${authorInfo.Id}`}>{authorInfo.DisplayName}</Link>
+        <Link to={`/authors/${authorInfo.id}`}>{authorInfo.displayName}</Link>
     )
 }
 
@@ -76,9 +77,9 @@ export function StorySearchButton() {
             {isOpen
                 ? <div className="searchContainer">
                     {storyArray.map(storyDict =>
-                        <div className="searchResultContainer">
-                            <StoryNameLink key={storyDict.Id} storyInfo={storyDict} />)
-                            <AuthorNameLink key={storyDict.Id} authorInfo={storyDict.Author} />
+                        <div className="searchResultContainer" key={storyDict.id}>
+                            <StoryNameLink storyInfo={storyDict} />)
+                            <AuthorNameLink authorInfo={storyDict.author} />
                         </div>
                     )}
                 </div>
@@ -89,7 +90,7 @@ export function StorySearchButton() {
 
 export function StoryNameLink({ storyInfo }) {
     return (
-        <Link to={`authors/${storyInfo.Id}`}>{storyInfo.Title}</Link>
+        <Link to={`${storyInfo.id}`}>{storyInfo.title}</Link>
     )
 }
 

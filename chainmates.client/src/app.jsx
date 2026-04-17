@@ -294,27 +294,37 @@ function StoryBrowser(props) {
 }
 
 
-function StoryProfile(props) {
+function StoryProfile() {
 
     const { storyID } = useParams();
-    const [storyDict, setStoryDict] = useState();
+    const [storyDict, setStoryDict] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             await contactAPI(`stories/${storyID}`, "get", false)
                 .then(function (value) {
                     setStoryDict(value);
+                    console.log(value);
                 })
         }
+        
         if (storyID) {
             fetchData();
         }
     },[storyID]);
 
+    if (!storyDict) {
+        if (storyDict != null) {
+            console.log("DIDN@T WORK");
+        }
+       
+        return null;
+    }
+
     return (
         <>
-            <div>{storyData.Title}</div>
-            <div>{storyData.Author.DisplayName}</div>
+            <div>{storyDict.title}</div>
+            <div>{storyDict.author.displayName}</div>
         </>
     )
 

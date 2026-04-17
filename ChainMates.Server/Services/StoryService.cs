@@ -16,10 +16,21 @@ namespace ChainMates.Server.Services
             _context = context;
         }
 
-        public async Task<List<Story>> GetStories()
+        public async Task<List<StoryInfoDto>> GetStories()
         {
-            return await _context.Story
-                .ToListAsync();
+            return await (from s in _context.Story
+                          join a in _context.Author
+                          on s.AuthorId equals a.Id
+                          select new StoryInfoDto
+                          {
+                              Id = s.Id,
+                              Author = new AuthorDto
+                              {
+                                  Id = a.Id,
+                                  DisplayName = a.DisplayName
+                              },
+                              Title = s.Title
+                          }).ToListAsync();
         }
 
         public async Task<StoryInfoDto?> GetStoryById(int storyId)
