@@ -270,6 +270,27 @@ namespace ChainMates.Server.Services
             return segment;
         }
 
+        public async Task<Segment> ApproveModeration(ModerationAssignmentDto dto, int authorId)
+        {
+
+            var segment = await (from s in _context.Segment
+                                 where s.Id == dto.SegmentId
+                                 select s).FirstOrDefaultAsync();
+            segment.SegmentStatusId = 4;
+            if (segment.PreviousSegmentId is not null)
+            {
+                segment.PreviousSegment.SegmentStatusId = 4;
+            }
+            var moderationAssignment = await (from ma in _context.ModerationAssignment
+                                              where ma.AuthorId == authorId
+                                              where ma.SegmentId == dto.SegmentId
+                                              select ma)
+                                          .FirstOrDefaultAsync();
+            moderationAssignment.IsClosed = true;
+            await _context.SaveChangesAsync();
+            return segment;
+        }
+
         public async Task<Segment?> CreateSubmitAndApproveSegment(int authorId, string content)
         {
             try

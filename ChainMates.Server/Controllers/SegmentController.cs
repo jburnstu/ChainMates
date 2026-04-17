@@ -17,16 +17,16 @@ namespace ChainMates.Server.Controllers
         private readonly AppDbContext _context;
         private readonly SegmentService _service;
         private readonly CurrentUserService _currentUserService;
+        private readonly NotificationService _notificationService;
 
-        public SegmentController(AppDbContext context, CurrentUserService currentUserService)
+        public SegmentController(AppDbContext context, CurrentUserService currentUserService, NotificationService notificationService)
         {
             Debug.WriteLine("in service constructor");
             _context = context;
             _service = new SegmentService(context);
             _currentUserService = currentUserService;
+            _notificationService = notificationService;
         }
-
-
 
         // GET: api/segments
         [HttpGet]
@@ -127,6 +127,23 @@ namespace ChainMates.Server.Controllers
 
         }
 
+        // POST api/moderationassignments/
+        [Authorize]
+        [HttpPost("moderationassignments/{id}")]
+
+        public async Task<IActionResult> PatchModeration([FromBody] ModerationAssignmentDto dto)
+        {
+            int authorId = _currentUserService.UserId ?? 0;
+
+            if (authorId == 0)
+            {
+                return Unauthorized();
+            }
+            await _service.ApproveModeration(dto, authorId);
+            await _notificationService.NotifySegemntApproved(dto.SegmentId, authorId);
+            return Ok(dto);
+
+        }
 
 
         //GET api/segments/traces/5

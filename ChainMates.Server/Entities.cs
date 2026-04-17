@@ -202,7 +202,7 @@ namespace ChainMates.Server
         public int NotificationTypeId { get; set; }
         public int RecipientAuthorId { get; set; }
         //public int InstigatorAuthorId { get; set; }
-        public JsonDocument Info { get; set; }
+        public string Info { get; set; }
         public DateTime DateCreated { get; set; }
 
         public NotificationType NotificationType { get; set; }
@@ -214,7 +214,7 @@ namespace ChainMates.Server
     public class NotificationType
         {
             public int Id { get; set; }
-            public int Description { get; set; }
+            public string Description { get; set; }
             public List<Notification> Notifications { get; set; } = new();
 
         

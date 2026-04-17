@@ -16,13 +16,15 @@ namespace ChainMates.Server.Controllers
         private readonly AppDbContext _context;
         private readonly CommentService _service;
         private readonly CurrentUserService _currentUserService;
+        private readonly NotificationService _notificationService;
 
-        public CommentController(AppDbContext context, CurrentUserService currentUserService)
+        public CommentController(AppDbContext context, CurrentUserService currentUserService, NotificationService notificationService)
         {
             Debug.WriteLine("in service constructor");
             _context = context;
             _service = new CommentService(context);
             _currentUserService = currentUserService;
+            _notificationService = notificationService;
         }
 
 
@@ -41,6 +43,8 @@ namespace ChainMates.Server.Controllers
             Debug.WriteLine("InCommentController");
             Debug.WriteLine(dto.ParentId);
             var data = await _service.CreateAndSubmitComment(dto, authorId);
+            await _notificationService.NotifyCommentPosted(dto.CommentTypeId, dto.ParentId, authorId);
+
             return Ok(data);
 
         }
