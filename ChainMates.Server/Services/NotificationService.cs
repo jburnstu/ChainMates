@@ -85,10 +85,33 @@ namespace ChainMates.Server.Services
             var finalAuthorFollowerIds = await (from ar in _context.AuthorRelation
                                                 where ar.RelatedAuthorId == finalAuthorId
                                                 select ar.AuthorId).ToListAsync();
-            var storyId = await (from s in _context.Segment
-                                 where s.Id == segmentId
-                                 select s.StoryId).FirstOrDefaultAsync();
 
+            var instigator = await (from a in _context.Author
+                                    where a.Id == moderatorAuthorId
+                                    select new AuthorDto
+                                    {
+                                        Id = a.Id,
+                                        DisplayName = a.DisplayName
+                                    }).FirstOrDefaultAsync();
+
+            var followedAuthor = await (from a in _context.Author
+                                    where a.Id == finalAuthorId
+                                        select new AuthorDto
+                                    {
+                                        Id = a.Id,
+                                        DisplayName = a.DisplayName
+                                    }).FirstOrDefaultAsync();
+
+            var story = await (from s in _context.Segment
+                               where s .Id == segmentId
+                               join st in _context.Story
+                               on s.StoryId equals st.Id
+                               select new StoryInfoDto
+                               {
+                                   Id = st.Id,
+                                   Title = st.Title,
+                                   AuthorId = st.AuthorId
+                               }).FirstOrDefaultAsync();
 
             await CreateNotifications(new NotificationCreationDto
             {
@@ -96,7 +119,7 @@ namespace ChainMates.Server.Services
                 Info = new AuthorApprovedYourSegmentDto
                 {
                     SegmentId = segmentId,
-                    ModeratorAuthorId = moderatorAuthorId
+                    Instigator = instigator
                 }
             }, [finalAuthorId]);
 
@@ -106,7 +129,8 @@ namespace ChainMates.Server.Services
                 Info = new AuthorYouFollowPublishedSegmentDto
                 {
                     SegmentId = segmentId,
-                    ModeratorAuthorId = moderatorAuthorId
+                    Instigator = instigator,
+                    FollowedAuthor = followedAuthor
                 }
             }, finalAuthorFollowerIds);
 
@@ -115,7 +139,8 @@ namespace ChainMates.Server.Services
                 NotificationTypeId = 4,
                 Info = new StoryYouJoinedWasExtendedDto
                 {
-                    StoryId = storyId,
+                    SegmentId = segmentId,
+                    Story = story
                 }
             }, previousAuthorIds.Skip(1).ToList());
 
@@ -125,46 +150,43 @@ namespace ChainMates.Server.Services
         public async Task<string> NotifyCommentPosted(int commentTypeId, int parentId, int authorId)
         {
             int recipientId;
-            NotificationInfoDto dto;
             switch (commentTypeId)
             {
                 case 1:
                     recipientId = await (from s in _context.Story
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
-                    dto = new AuthorCommentedOnYourStoryDto
-                    {
-                        StoryId = parentId,
-                        AuthorId = authorId
-                    };
                     break;
                 case 2:
                     recipientId = await (from s in _context.Segment
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
-                    dto = new AuthorCommentedOnYourSegmentDto
-                    {
-                        SegmentId = parentId,
-                        AuthorId = authorId
-                    };
                     break;
                 case 3:
                 default:
                     recipientId = await (from s in _context.Comment
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
-                    dto = new AuthorCommentedOnYourCommentDto
-                    {
-                        CommentId = parentId,
-                        AuthorId = authorId
-                    };
                     break;
             }
+
+            var instigator = await (from a in _context.Author
+                                    where a.id == authorId
+                                    select new AuthorDto
+                                    {
+                                        Id = a.id,
+                                        DisplayName = a.DisplayName
+                                    }).FirstOrDefaulyAsync();
 
             await CreateNotifications(new NotificationCreationDto
             {
                 NotificationTypeId = 4,
-                Info = dto
+                Info = new AuthorAddedACommentDto
+                {
+                    CommentTypeId = commentTypeId,
+                    ParentId = parentId,
+                    Instigator = instigator
+                }
             }, [recipientId]);
 
             return "Done"; //fix later?

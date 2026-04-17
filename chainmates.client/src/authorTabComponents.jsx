@@ -102,6 +102,10 @@ function CircleNotifications(props) {
 
     let circleNotificationDTOList = [];
 
+    //useEffect(() => {
+    //    circleNotificationDTOList = await contactAPI("notifications/","get",true)
+    //})
+
     return (
         <div className="circleNotificationListContainer">
             <header>Circle Notifications</header>
@@ -140,6 +144,13 @@ function Notifications(props) {
 
     let notificationDTOList = [];
 
+    useEffect(() => {
+        notificationDTOListData = await("notifications/", "get", true);
+        console.log(notificationDTOListData);
+
+
+    })
+
     return (
         <div className="rightSidebar notifications">
             <header>Notifications</header>
@@ -157,27 +168,36 @@ function Notifications(props) {
 function NotificationPanel(props) {
 
     let dto = props.notificationDTO;
+    console.log(dto);
+    let typeID = dto.notificationTypeId;
+
     let content;
-    switch (dto.type) {
-        case "MODERATION":
-            content = dto.DisplayName + " finished moderating your segment!";
-            break;
-        case "ADDITION":
-            content = dto.DisplayName + " published a follow-up on your segment!";
-            break;
-        case "NEWFOLLOW":
+    switch (typeID) {
+        case "authorFollowedYou":
             content = dto.DisplayName + " started following you.";
+            // Nothing else
             break;
-        case "PUBLISHBYFOLLOW":
+        case "authorApprovedYourSegment":
+            content = "Your segment was published!";
+            // view segment
+            break;
+        case "authorApprovedSegmentYouFollow":
             content = dto.DisplayName + "'s segment was published!";
+            // view segment
             break;
-        case "COMMENT":
-            content = dto.DisplayName + " commented on your " +dto.targetType + " .";
+        case "authorApprovedSegmentInYourChain":
+            content = dto.DisplayName + " published a follow-up on your segment!";
+            // Want link to finished segment
             break;
-        case "LIKE":
+        case "authorAddedComment":
+            content = dto.DisplayName + " commented on your " + dto.ParentType + " .";
+            //  View comment
+            break;
+        case "LIKE": //doesn't exist yet
             content = dto.DisplayName + " liked your " + dto.targetType + " .";
             break;
-
+        default:
+            content = "Something happened!";
     }
 
     return (
