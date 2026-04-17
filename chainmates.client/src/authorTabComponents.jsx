@@ -6,12 +6,22 @@ export default { AuthorProfile };
 
 export function AuthorProfile(props) {
 
-    const { tabID } = useParams();
+    const { authorID } = useParams();
     const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
 
+    const [authorDict, setAuthorDict] = useState(null);
 
-    let authorDict = props.authorDict;
-    console.log(authorDict);
+    useEffect(() => {
+        const fetchData = async () => {
+            await contactAPI(`authors/${authorID}`, "get", false)
+                .then(function (value) {
+                    setAuthorDict(value);
+                })
+        }
+        if (authorID) {
+            fetchData();
+        }
+    }, [authorID]);
 
 
     async function getRecentSegmentTraceDTOList() {
@@ -24,20 +34,20 @@ export function AuthorProfile(props) {
     let notificationDTOList;
 
     useEffect(() => {
-        async function fetchData() {
+        const fetchData = async () => {
             let segmentTraceDataArray = await getRecentSegmentTraceDTOList();
             setRecentSegmentTraceDTOList(segmentTraceDataArray);
-
-
         }
         if (authorDict?.id) {
             fetchData();
         }
     }, [authorDict?.id]);
 
+    console.log(authorDict);
+
     return (
-        <div className="authorTabContainer tabContainer" id={"authorTabContainer" + { tabID }}>
-            <AuthorHeader statsDTO={authorDict.statsDTO} displayName={ authorDict.displayName} /> 
+        <div className="authorTabContainer tabContainer" id={"authorTabContainer" + { authorID }}>
+            <AuthorHeader authorDict={authorDict} /> 
              <div className="authorTabContent tabContent"> 
                 <div className="recentSegmentsContainer">
                     {recentSegmentTraceDTOList.map(recentSegmentTraceDTO =>
@@ -57,11 +67,12 @@ export function AuthorProfile(props) {
 
 function AuthorHeader(props) {
 
+    console.log(props.authorDict);
     return (<div className="tabHeader authorTabHeader">
-        <div>{props.displayName}</div>
-        <div>{props.statsDTO.writeCount + " Segments Published"}</div>
-        <div>{props.statsDTO.reivewCount + " Segments Reviewed"}</div>
-        <div>{props.statsDTO.storyCount + " Stories Joined"}</div>
+        {/*<div>{props.authorDict.displayName}</div>*/}
+        {/*<div>{props.statsDTO.writeCount + " Segments Published"}</div>*/}
+        {/*<div>{props.statsDTO.reivewCount + " Segments Reviewed"}</div>*/}
+        {/*<div>{props.statsDTO.storyCount + " Stories Joined"}</div>*/}
     </div>)
 }
 
@@ -137,14 +148,17 @@ function Awards(props) {
 
 function Notifications(props) {
 
-    let notificationDTOList = [];
+    const [notificationDTOList, setNotificationDTOList] = useState([]);
 
     useEffect(() => {
-        notificationDTOListData = await("notifications/", "get", true);
-        console.log(notificationDTOListData);
-
-
-    })
+        const fetchData = async () => {
+            contactAPI("notifications/", "get", true)
+                .then(function (value) {
+                    setNotificationDTOList(value);
+                })
+        }
+        fetchData();
+    },[])
 
     return (
         <div className="rightSidebar notifications">

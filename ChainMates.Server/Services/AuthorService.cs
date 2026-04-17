@@ -23,10 +23,15 @@ namespace ChainMates.Server.Services
             return await _context.Author.ToListAsync();
         }
 
-        public async Task<Author> GetAuthorById(int authorId)
+        public async Task<AuthorDto?> GetAuthorById(int authorId)
         {
-            return await _context.Author
-                .SingleAsync(a => a.Id == authorId);
+            return await (from a in _context.Author
+                          where a.Id == authorId
+                          select new AuthorDto
+                          {
+                              Id = a.Id,
+                              DisplayName = a.DisplayName
+                          }).FirstOrDefaultAsync();
         }
 
         public async Task<AuthorDto?> GetAuthorDtoById(int authorID)

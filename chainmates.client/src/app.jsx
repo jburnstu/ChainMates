@@ -9,7 +9,7 @@ import { StoryTab } from "./storyTabComponents";
 import { ModalSelectSegmentFromOptionsButton, ModalNewButton } from './storyButtons.jsx';
 
 import { AuthorProfile } from "./authorTabComponents.jsx";
-import { AuthorListDisplayButton } from "./authorButtons.jsx";
+import { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink } from "./authorButtons.jsx";
 
 
 export default function App() {
@@ -86,9 +86,6 @@ export default function App() {
             case "review":
                 dataKey = "reviewDicts";
                 break;
-            //case "author":
-            //    dataKey = "relationInfo";
-            //    break;
         }
 
         let dictArrayToChange = data[dataKey];
@@ -167,13 +164,14 @@ function Home(props) {
         console.log("initital navigate")
         navigate(props.startingURL);
     }, [navigate, props.startingURL])
-    return (<div className="container"></div>);
-
 
     return (
-        <AuthorProfile  self={true} />)
-
-
+         <div className="storyDashboardContainer dashboardContainer">
+            <LeftSidebar type={null} />
+            <nav className="tabsList" />
+            <AuthorProfile self={true} />
+        </div >
+    )
 }
 
 
@@ -234,7 +232,8 @@ function StoryDashboard(props) {
 }
 
 function PlaceHolder() {
-    return (<div className="tabContainer">PLACEHOLDER
+    return (
+        <div className="tabContainer">PLACEHOLDER
         <div className="tabContent"></div>
         <div className="footer submissions"></div>
         <div className="rightSidebar comments"></div>
@@ -244,7 +243,8 @@ function PlaceHolder() {
 
 
 function BrowserPlaceHolder() {
-    return (<div className="tabContainer">PLACEHOLDER
+    return (
+    <div className="tabContainer">PLACEHOLDER
         <div className="tabContent"></div>
         <div className="footer submissions"></div>
         <div className="rightSidebar comments"></div>
@@ -254,7 +254,7 @@ function BrowserPlaceHolder() {
 
 function LeftSidebar(props) {
 
-    let buttonList;
+    let buttonList = <></>;
     switch (props.type) {
         case "write":
             buttonList = <>
@@ -271,7 +271,8 @@ function LeftSidebar(props) {
         case "stories":
             buttonList = <StorySearchButton />
             break;
-        
+        default:
+            break;
     }
     return (
         <div className="leftSidebar">
@@ -282,6 +283,7 @@ function LeftSidebar(props) {
 
 
 function StoryBrowser(props) {
+    const outlet = useOutlet();
 
     return (
         <div className={props.writeOrReview + "storyDashboardContainer storyDashboardContainer dashboardContainer"}>
@@ -295,12 +297,19 @@ function StoryBrowser(props) {
 function StoryProfile(props) {
 
     const { storyID } = useParams();
+    const [storyDict, setStoryDict] = useState();
 
     useEffect(() => {
-        let storyData = await contactAPI(`stories/${storyID}`, "get", false);
-
-        //let allSegmentsData = await contactAPI(`stories/${storyID}/segments`, "get", false);
-    });
+        const fetchData = async () => {
+            await contactAPI(`stories/${storyID}`, "get", false)
+                .then(function (value) {
+                    setStoryDict(value);
+                })
+        }
+        if (storyID) {
+            fetchData();
+        }
+    },[storyID]);
 
     return (
         <>
@@ -314,6 +323,7 @@ function StoryProfile(props) {
 }
 
 function AuthorBrowser(props) {
+    const outlet = useOutlet();
 
     return (
         <div >

@@ -177,12 +177,12 @@ namespace ChainMates.Server.Services
             }
 
             var instigator = await (from a in _context.Author
-                                    where a.id == authorId
+                                    where a.Id == authorId
                                     select new AuthorDto
                                     {
-                                        Id = a.id,
+                                        Id = a.Id,
                                         DisplayName = a.DisplayName
-                                    }).FirstOrDefaulyAsync();
+                                    }).FirstOrDefaultAsync();
 
             await CreateNotifications(new NotificationCreationDto
             {

@@ -12,7 +12,7 @@ export function AuthorSearchButton() {
     const [isOpen, setIsOpen] = useState(false);
     const [authorArray, setAuthorArray] = useState([])
 
-    const onClick = () => {
+    async function onClick() {
         if (!isOpen) {
             contactAPI(`authors`, "get", false)
                 .then(function (value) {
@@ -56,7 +56,7 @@ export function StorySearchButton() {
     const [isOpen, setIsOpen] = useState(false);
     const [storyArray, setStoryArray] = useState([])
 
-    const onClick = () => {
+    async function onClick() {
         if (!isOpen) {
             contactAPI(`stories`, "get", false)
                 .then(function (value) {
