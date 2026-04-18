@@ -22,6 +22,10 @@ button {
     font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
+header {
+    color: var(--col-4);
+    background-color: var(--col-3-A);
+}
 
 html, body {
     height: 100%;

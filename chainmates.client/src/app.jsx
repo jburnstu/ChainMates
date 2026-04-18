@@ -5,11 +5,11 @@ import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutl
 import { getArrayObjByID, contactAPI } from "./utilityFuncs";
 import { Login, Signup } from "./authFuncs";
 
-import { StoryTab } from "./storyTabComponents";
-import { ModalSelectSegmentFromOptionsButton, ModalNewButton } from './storyButtons.jsx';
+import { WorkshopTab } from "./workshopTabComponents";
+import { ModalSelectSegmentFromOptionsButton, ModalNewButton } from './workshopButtons.jsx';
 
-import { AuthorProfile } from "./authorTabComponents.jsx";
-import { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink } from "./authorButtons.jsx";
+import { AuthorSearchPage } from "./authorSearchPageComponents.jsx";
+import { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink } from "./searchButtons.jsx";
 
 
 export default function App() {
@@ -60,7 +60,7 @@ export default function App() {
 
     let startingURL;
     if (startingWriteOrReview == null) {
-        startingURL = "";
+        startingURL = "home";
     }
     else if (
         (startingWriteOrReview == "write" &&
@@ -118,27 +118,29 @@ export default function App() {
     return (
             <BrowserRouter>
                 <Routes>
-                <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
-                    <Route path="" relative element={<Home startingURL={startingURL} authorDict={data.authorInfo } />}
-                            index />
-                        <Route path="write/" element={<StoryDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
+                    <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
+                        <Route path="" relative element={<RedirectToStartingURL startingURL={startingURL} />}
+                            index/>
+                        <Route path="home/" relative element={<HomeDashboard authorDict={data.authorInfo} />}
+                        />
+                        <Route path="write/" element={<WorkshopDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                         >
                             <Route path=":tabID/"
-                                element={<StoryTab writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
+                                element={<WorkshopTab writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
-                        <Route path="review/" element={<StoryDashboard writeOrReview="review" dicts={data.reviewDicts}
+                        <Route path="review/" element={<WorkshopDashboard writeOrReview="review" dicts={data.reviewDicts}
                             setDicts={changeStoryDicts} />}
                         >
                             <Route path=":tabID/"
-                                element={<StoryTab writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
+                                element={<WorkshopTab writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
-                        <Route path="authors/" element={<AuthorBrowser />}>
-                        <Route path=":authorID/" element={<AuthorProfile self={false} />} />
+                        <Route path="authors/" element={<SearchDashboard type="authors" />}>
+                            <Route path=":authorID/" element={<AuthorSearchPage self={false} />} />
                         </Route>
-                        <Route path="stories/" element={<StoryBrowser/>}>
-                            <Route path=":storyID/" element={<StoryProfile />} />
+                        <Route path="stories/" element={<SearchDashboard type="stories" />}>
+                            <Route path=":storyID/" element={<StorySearchPage />} />
                         </Route>
                     </Route>
                     <Route path="*" element={<NoMatch />} />
@@ -146,34 +148,6 @@ export default function App() {
             </BrowserRouter>
     );
 }
-
-function NoMatch() {
-    return (
-        <div style={{ padding: 20 }}>
-            <h2>404: Page Not Found</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
-        </div>
-    );
-}
-
-function Home(props) {
-
-    let navigate = useNavigate();
-
-    useEffect(() => {
-        console.log("initital navigate")
-        navigate(props.startingURL);
-    }, [navigate, props.startingURL])
-
-    return (
-         <div className="storyDashboardContainer dashboardContainer">
-            <LeftSidebar type={null} />
-            <nav className="tabsList" />
-            <AuthorProfile self={true} authorDict={props.authorDict} />
-        </div >
-    )
-}
-
 
 function UniversalHeader(props) {
 
@@ -183,7 +157,7 @@ function UniversalHeader(props) {
                 <h1>CHAIN MATES</h1>
                 <h1>Hi, {props.displayName}!</h1>
                 <nav>
-                    <Link to="" ><button type="button">HOME</button></Link>|{" "}
+                    <Link to="home" ><button type="button">HOME</button></Link>|{" "}
                     <Link to="write" ><button type="button">WRITE</button></Link>|{" "}
                     <Link to="review"><button type="button">READ</button></Link>
                     <Link to="authors"><button type="button">AUTHORS</button></Link>
@@ -194,18 +168,34 @@ function UniversalHeader(props) {
         </>
     )
 }
+function RedirectToStartingURL(props) {
+
+    let navigate = useNavigate();
+
+    useEffect(() => {
+        console.log("initital navigate")
+        navigate(props.startingURL);
+    }, [navigate, props.startingURL])
+
+}
+
+function HomeDashboard(props) {
+    return (
+         <div className="storyDashboardContainer dashboardContainer">
+            <LeftSidebar type={null} />
+            <nav className="tabsList" />
+            <AuthorSearchPage self={true} authorDict={props.authorDict} />
+        </div >
+    )
+}
 
 
-
-function StoryDashboard(props) {
-
-    console.log(props.dicts)
+function WorkshopDashboard(props) {
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
     const addNewTab = (tabID) => props.setDicts(tabID, props.writeOrReview, "add");
 
     const getTabName = (id, index) =>
         getArrayObjByID(props.dicts, id).storyData.title ?? `${index}.`;
-
 
     let presavedCurrentContentByStory = {};
     props.dicts.forEach(dictInArray => {
@@ -226,12 +216,12 @@ function StoryDashboard(props) {
                     </Link>
                 )}
             </nav>
-            {outlet || <PlaceHolder />}
+            {outlet || <WorkshopTabPlaceHolder />}
         </div >
     )
 }
 
-function PlaceHolder() {
+function WorkshopTabPlaceHolder() {
     return (
         <div className="tabContainer">PLACEHOLDER
         <div className="tabContent"></div>
@@ -241,8 +231,17 @@ function PlaceHolder() {
     )
 }
 
+function SearchDashboard(props) {
+    const outlet = useOutlet();
+    return (
+        <div className={props.type + "storyDashboardContainer searchDashboardContainer dashboardContainer"}>
+            <LeftSidebar type={props.type} />
+            {outlet || <BrowserPagePlaceHolder />}
+        </div >
+    )
+}
 
-function BrowserPlaceHolder() {
+function BrowserPagePlaceHolder() {
     return (
     <div className="tabContainer">PLACEHOLDER
         <div className="tabContent"></div>
@@ -250,6 +249,15 @@ function BrowserPlaceHolder() {
         <div className="rightSidebar comments"></div>
     </div>
     )
+}
+
+function NoMatch() {
+    return (
+        <div style={{ padding: 20 }}>
+            <h2>404: Page Not Found</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
+        </div>
+    );
 }
 
 function LeftSidebar(props) {
@@ -280,89 +288,3 @@ function LeftSidebar(props) {
         </div>
     )
 }
-
-
-function StoryBrowser(props) {
-    const outlet = useOutlet();
-
-    return (
-        <div className={props.writeOrReview + "storyDashboardContainer storyDashboardContainer dashboardContainer"}>
-            <LeftSidebar type="stories" />
-        {outlet || <BrowserPlaceHolder />}
-        </div >
-    )
-}
-
-
-function StoryProfile() {
-
-    const { storyID } = useParams();
-    const [storyDict, setStoryDict] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            await contactAPI(`stories/${storyID}`, "get", false)
-                .then(function (value) {
-                    setStoryDict(value);
-                    console.log(value);
-                })
-        }
-        
-        if (storyID) {
-            fetchData();
-        }
-    },[storyID]);
-
-    if (!storyDict) {
-        if (storyDict != null) {
-            console.log("DIDN@T WORK");
-        }
-       
-        return null;
-    }
-
-    return (
-        <>
-            <div>{storyDict.title}</div>
-            <div>{storyDict.author.displayName}</div>
-        </>
-    )
-
-    {/*<SubmissionButtons writeOrReview={writeOrReview} currentContent={currentContent} segmentID={tabID} removeCurrentStory={removeCurrentStory} />*/ }
-    {/*<Comments selections={selectedSegmentDict} storyDict={storyDict} />*/ }
-}
-
-function AuthorBrowser(props) {
-    const outlet = useOutlet();
-
-    return (
-        <div >
-            <LeftSidebar type="authors"/>
-            {outlet || <BrowserPlaceHolder />}
-        </div >
-    )
-}
-
-
-{/*<Route path="author/"*/ }
-{/*    element={<StoryDashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}*/ }
-{/*    />}*/ }
-{/*>*/ }
-{/*    <Route path=":tabID/"*/ }
-{/*        element={<AuthorProfile writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts} />} />*/ }
-{/*</Route>*/ }
-
-
-
-//const authorDicts = [{
-//    "id": data.authorInfo.id,
-//    "displayName": data.authorInfo.displayName,
-//    "statsDTO": {
-//        "writeCount": 0,
-//        "reviewCount": 0,
-//        "storyCount":0
-//    }
-//    }]
-//Object.assign(data, {
-//    "authorDicts": authorDicts
-//});

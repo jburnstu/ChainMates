@@ -1,15 +1,14 @@
 
 import React, { StrictMode, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
-import { SubmissionButton } from './storyButtons.jsx';
+import { SubmissionButton } from './workshopButtons.js';
 
-import { Comments } from "./comments.jsx";
-import { getArrayObjByID } from "./utilityFuncs";
-import { contactAPI } from "./utilityFuncs";
+import { Comments } from "./comments.js";
+import { getArrayObjByID, contactAPI } from "./utilityFuncs.js";
 
-export default { StoryTab , SegmentDisplay};
+export default { WorkshopTab , SegmentDisplay};
 
-export function StoryTab(props) {
+export function WorkshopTab(props) {
 
     let writeOrReview = props.writeOrReview;
     const { tabID } = useParams();
@@ -44,10 +43,6 @@ export function StoryTab(props) {
     }
 
     const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
-
-    //storyDict.segmentHistoryList.foreach((segmentDict) => {
-    //    console.log(segmentDict);
-    //                    });
 
     return (
         <div className="storyTabContainer tabContainer" id={"storyContainer" + { tabID }}>

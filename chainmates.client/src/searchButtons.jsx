@@ -42,16 +42,6 @@ export function AuthorSearchButton() {
     )
 }
 
-export function AuthorNameLink({ authorInfo }) {
-    console.log(authorInfo)
-    return (
-        <Link to={`/authors/${authorInfo.id}`}><button type="button">{authorInfo.displayName}</button></Link>
-    )
-}
-
-
-
-
 export function StorySearchButton() {
 
     const [isOpen, setIsOpen] = useState(false);
@@ -85,6 +75,14 @@ export function StorySearchButton() {
                 </div>
                 : null}
         </div>
+    )
+}
+
+
+export function AuthorNameLink({ authorInfo }) {
+    console.log(authorInfo)
+    return (
+        <Link to={`/authors/${authorInfo.id}`}><button type="button">{authorInfo.displayName}</button></Link>
     )
 }
 

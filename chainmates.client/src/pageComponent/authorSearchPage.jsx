@@ -1,13 +1,13 @@
 import { getRandomItem, contactAPI, getArrayObjByID } from "./utilityFuncs";
-import { AuthorContext } from "./context.jsx";
+import { AuthorContext } from "./context.js";
 import React, { StrictMode, useState, authoref, useEffect, createContext, useContext } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
-import { SegmentDisplay } from "./storyTabComponents";
-import { FollowButton, UnFollowButton } from "./authorButtons";
+import { SegmentDisplay } from "./workshopTab";
+import { FollowButton, UnFollowButton } from "./searchButtons";
 
-export default { AuthorProfile };
+export default { AuthorSearchPage };
 
-export function AuthorProfile(props) {
+export function AuthorSearchPage(props) {
 
     const { authorID } = useParams();
     const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
