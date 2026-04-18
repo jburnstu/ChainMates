@@ -22,7 +22,7 @@ export function CircleNotifications(props) {
 
     return (
         <div className="circleNotificationListContainer">
-            <header>Circle Notifications</header>
+            <header>Circle Notifications (Coming soon!)</header>
             <div>
                 {circleNotificationDTOList.map((circleNotificationDTO) =>
                     <CircleNotificationPanel key={circleNotificationDTO.id}

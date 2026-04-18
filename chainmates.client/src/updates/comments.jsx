@@ -13,6 +13,7 @@ export function Comments(props) {
 
     return (
         <div className="rightSidebar comments">
+            <header>COMMENTS</header>
             <StoryCommentPanel />
             {segmentTraceWithInfo.map(segmentObj =>
                 <SegmentInfoPanel key={segmentObj.id} selections={selections} segmentInfo={segmentObj} />
@@ -22,6 +23,9 @@ export function Comments(props) {
 }
 
 function StoryCommentPanel(props) {
+    return (
+        <header>Story Comments (Coming Soon)</header>
+    )
 }
 
 
@@ -36,7 +40,7 @@ function SegmentInfoPanel(props) {
     return (<div className={`segmentInfoContainer ${props.selections[segmentInfo.id] ? undefined : 'hidden'}`} >
         <div>{segmentInfo.displayName}</div>
         <div className="moderationContainer">
-            <button onClick={() => setIsModerationOpen(!isModerationOpen)}>LOOK AT MODERATION</button>
+            <button onClick={() => setIsModerationOpen(!isModerationOpen)}>Moderation Info</button>
             <div className={isModerationOpen ? undefined : 'hidden'}>MODERATION PANEL</div>
         </div>
         <div className="segmentCommentsContainer">

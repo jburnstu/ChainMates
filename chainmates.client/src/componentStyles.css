@@ -191,6 +191,7 @@
 
                 .recentSegmentsContainer {
                     display: flex;
+                    flex-direction: column;
                     background-color: var(--col-5);
                     padding: 5px;
                     margin: 5px;
@@ -215,13 +216,6 @@
                         background-color: var(--col-1);
                         padding: 5px;
                         margin: 5px;
-
-
-                        header {
-                            background-color: var(--col-2);
-                            padding: 5px;
-                            margin: 5px;
-                        }
                     }
 
 

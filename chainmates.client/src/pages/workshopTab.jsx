@@ -10,6 +10,8 @@ import { Comments } from "../updates/comments";
 
 import { PageOrTabLayout } from "../layouts/layouts"
 
+import { SegmentDisplay } from "../segmentDisplay"
+
 export default { WorkshopTab };
 
 export function WorkshopTab(props) {
@@ -95,10 +97,12 @@ function WorkshopStoryHeader(props) {
     let storyData = props.storyDict["storyData"];
     let length = props.storyDict.segmentHistoryList.length;
 
-    return (<div className="storyTabHeader tabHeader">
-        <div>{storyData.title ? storyData.title : "Untitled"}</div>
-        <div>{"Section : " + length + (storyData.maxNumberOfSegments ? " / " + storyData.maxSnumberOfSegments : "")}</div>
-        <div>{"Word Count :" + props.wordCount + (storyData.maxSegmentLength ? " / " + storyData.maxSegmentLength : "")}</div>
-    </div>)
+    return (
+        <>
+            <div>{storyData.title ? storyData.title : "Untitled"}</div>
+            <div>{"Section : " + length + (storyData.maxNumberOfSegments ? " / " + storyData.maxSnumberOfSegments : "")}</div>
+            <div>{"Word Count :" + props.wordCount + (storyData.maxSegmentLength ? " / " + storyData.maxSegmentLength : "")}</div>
+        </>
+    )
 }
 

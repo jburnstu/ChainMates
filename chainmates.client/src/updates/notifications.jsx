@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { contactAPI } from "../supportFuncs/utilityFuncs";
 
 export function Notifications() {
-
+    console.log("In notifications");
     const [notificationDTOList, setNotificationDTOList] = useState([]);
 
     useEffect(() => {
@@ -16,9 +16,11 @@ export function Notifications() {
                     setNotificationDTOList(value);
                 })
         }
+        console.log("in notifUseEffect");
         fetchData();
     }, [])
 
+    console.log(notificationDTOList)
     return (
         <div className="rightSidebar notifications">
             <header>Notifications</header>
