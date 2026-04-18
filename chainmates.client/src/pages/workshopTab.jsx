@@ -1,10 +1,14 @@
 
 import React, { StrictMode, useState } from "react";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext} from 'react-router-dom';
-import { SubmissionButton } from './workshopButtons.js';
+import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext } from 'react-router-dom';
 
-import { Comments } from "./comments.js";
-import { getArrayObjByID} from "./utilityFuncs.js";
+import { getArrayObjByID } from "../supportFuncs/utilityFuncs";
+
+import { SubmissionButton } from '../buttons/workshopButtons';
+
+import { Comments } from "../updates/comments";
+
+import { PageOrTabLayout } from "../layouts/layouts"
 
 export default { WorkshopTab };
 
@@ -45,21 +49,20 @@ export function WorkshopTab(props) {
     const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
 
     return (
-        <TabOrPageLayout 
+        <PageOrTabLayout 
             topLine={
                 <WorkshopStoryHeader storyDict={storyDict} wordCount={wordCount} />
             }
             mainContent ={ 
-                {storyDict.segmentHistoryList.map(segmentDict =>
+                storyDict.segmentHistoryList.map(segmentDict =>
                     <SegmentDisplay key={segmentDict.id}
                         id={segmentDict.id}
                         isFinalSegment={segmentDict.id == tabID}
                         fixedContent={segmentDict.content}
                         currentContent={currentContent}
                         changeSelection={changeSegmentSelection}
-                        onChange={handleChange} />
+                        onChange={handleChange}/>
                 )
-                }
             }
             footer={
                 props.type == "write"
@@ -70,7 +73,7 @@ export function WorkshopTab(props) {
                                 submissionType={buttonType}
                                 currentContent={props.currentContent}
                                 segmentID={props.segmentID}
-                                removeCurrentStory={props.removeCurrentStory} />)
+                                removeCurrentStory={removeCurrentStory} />)
                     :
                         ["APPROVE"].map(buttonType =>
                             <SubmissionButton
@@ -78,7 +81,7 @@ export function WorkshopTab(props) {
                                 submissionType={buttonType}
                                 currentContent={props.currentContent}
                                 segmentID={props.segmentID}
-                                removeCurrentStory={props.removeCurrentStory} />)
+                                removeCurrentStory={removeCurrentStory} />)
             }
             rightSidebar={
                 <Comments selections={selectedSegmentDict} storyDict={storyDict} />

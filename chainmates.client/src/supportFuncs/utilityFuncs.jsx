@@ -1,10 +1,4 @@
-//import { useContext } from "react";
-import { AuthorContext} from "./context.jsx";
-//import { useNavigate } from "react-router-dom";
-
 export default { getRandomItem, contactAPI, getArrayObjByID }
-
-
 
 export async function contactAPI(urlTarget, method, authorized = false, bodyDict = {}, onFailReturn = null) {
 
@@ -51,8 +45,6 @@ export function getArrayObjByID(array, id) {
     const idMatch = (obj) => obj.id == id;
     return array.find(idMatch);
 }
-
-
 
 export function getRandomItem(array, numberOfResults = 1, arrayOfOne = false) {
     console.log("started getRandomItem");

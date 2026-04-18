@@ -1,7 +1,7 @@
 
 import React, { StrictMode, useState } from "react";
-import { AuthorContext } from "../context.jsx";
-import { contactAPI } from "./utilityFuncs.jsx";
+
+import { contactAPI } from "../supportFuncs/utilityFuncs";
 
 export default { Comments };
 

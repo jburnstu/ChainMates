@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { createPortal } from 'react-dom';
 import { useNavigate } from "react-router-dom";
 
-import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
+import { contactAPI, getRandomItem } from "../supportFuncs/utilityFuncs";
 
 export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton };
 

@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect, useContext } from "react";
-import { createPortal } from 'react-dom';
-import { AuthorContext } from "./context.jsx";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
-import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
+import React, { useState } from "react";
+import { Link } from 'react-router-dom';
+
+import { contactAPI } from "../supportFuncs/utilityFuncs";
 
 export default { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink, FollowButton, UnFollowButton };
 

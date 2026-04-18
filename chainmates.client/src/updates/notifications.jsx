@@ -1,10 +1,9 @@
 
 
 
-import React, { StrictMode, useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-import { contactAPI } from "./utilityFuncs.jsx";
-
+import { contactAPI } from "../supportFuncs/utilityFuncs";
 
 export function Notifications() {
 

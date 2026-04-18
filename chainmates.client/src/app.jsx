@@ -1,18 +1,19 @@
 
-import React, { StrictMode, useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useOutlet, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Link, Outlet, Route, Routes, useNavigate, useOutlet } from 'react-router-dom';
 
-import { getArrayObjByID} from "./buttons/utilityFuncs";
 import { initialLoad, Login, Signup } from "./supportFuncs/authFuncs";
+import { getArrayObjByID } from "./supportFuncs/utilityFuncs";
 
-import { WorkshopTab } from "./pages/workshopTab";
 import { ModalSelectSegmentFromOptionsButton, StartNewStoryButton } from './buttons/workshopButtons.jsx';
+import { WorkshopTab } from "./pages/workshopTab";
 
-import { AuthorSearchPage } from "./pages/authorSearchPage.jsx";
-import { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink } from "./buttons/searchButtons.jsx";
+import { AuthorSearchButton, StorySearchButton } from "./buttons/searchButtons.jsx";
+import { AuthorSearchPage } from "./pages/authorSearchPage";
+import { StorySearchPage } from "./pages/storySearchPage";
 
-import { LeftSidebar } from "./borders.jsx"
-import { DashboardLayout } from "./layouts/layouts";
+
+import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
 
 
 export default function App() {
@@ -21,7 +22,7 @@ export default function App() {
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
-        initialLoad();
+        initialLoad(setData);
         }, []);
 
     if (!data) {
@@ -229,7 +230,7 @@ function WorkshopDashboard(props) {
                 )
             }
             pageOrTab={
-                outlet || <TabOrPageLayout/>
+                outlet || <PageOrTabLayout/>
             }
         />
     )
@@ -250,7 +251,7 @@ function SearchDashboard(props) {
                 null
             }
             pageOrTab={
-                outlet || <TabOrPageLayout/>
+                outlet || <PageOrTabLayout/>
             }
         />
     )

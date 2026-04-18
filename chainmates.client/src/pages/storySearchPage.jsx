@@ -1,13 +1,10 @@
-import React, { StrictMode, useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams } from 'react-router-dom';
 
-import { contactAPI } from "./utilityFuncs";
-import { SegmentDisplay } from "./workshopComponents";
-import { FollowButton, UnFollowButton } from "./authorButtons";
+import { PageOrTabLayout } from "../layouts/layouts";
+import { contactAPI } from "../supportFuncs/utilityFuncs";
 
 export default { StorySearchPage };
-
-
 export function StorySearchPage() {
 
     const { storyID } = useParams();
@@ -34,7 +31,7 @@ export function StorySearchPage() {
     }
 
     return (
-        <TabOrPageLayout 
+        <PageOrTabLayout 
             topLine={
                 <StorySeachPageTopLine storyDict={storyDict} />
             }

@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 
 
-import { TabOrPageLayout } from "../layouts/layouts";
-import { FollowButton, UnFollowButton } from "./searchButtons";
-import { contactAPI } from "./utilityFuncs";
-import { CircleNotifications, Awards } from "../drafts/drafts";
+import { Awards, CircleNotifications } from "../drafts/drafts";
+import { PageOrTabLayout } from "../layouts/layouts";
+import { RecentSegmentDisplay } from "../segmentDisplay";
+import { contactAPI } from "../supportFuncs/utilityFuncs";
+import { FollowButton, UnFollowButton } from "../buttons/searchButtons";
+import { Activity } from "../updates/activity";
+import { Notifications } from "../updates/notifications";
 
-export default function AuthorSearchPage(props) {
+export default { AuthorSearchPage }
+export function AuthorSearchPage(props) {
 
     const { authorID } = useParams();
     const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
@@ -54,12 +58,12 @@ export default function AuthorSearchPage(props) {
     }
 
     return (
-        <TabOrPageLayout 
+        <PageOrTabLayout 
             topLine={
                 <AuthorHeader authorDict={authorDict} />
             }
             mainContent ={ 
-                <div className="authorTabContent tabContent"> 
+                <>
                     <div className="recentSegmentsContainer">
                             <header>Recent Segments
                             </header>
@@ -71,7 +75,7 @@ export default function AuthorSearchPage(props) {
                         <CircleNotifications circleNotificationDTOList={circleNotificationDTOList} />
                         <Awards />
                     </div>
-                </div>
+                </>
             }
             footer={
                 props.self
