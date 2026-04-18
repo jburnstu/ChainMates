@@ -3,6 +3,7 @@ import { AuthorContext } from "./context.jsx";
 import React, { StrictMode, useState, authoref, useEffect, createContext, useContext } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
 import { SegmentDisplay } from "./storyTabComponents";
+import { FollowButton, UnFollowButton } from "./authorButtons";
 
 export default { AuthorProfile };
 
@@ -45,6 +46,10 @@ export function AuthorProfile(props) {
         }
     }, [authorDict?.id]);
 
+
+    if (!authorDict?.id) {
+        return null;
+    }
     console.log(authorDict);
 
     return (
@@ -62,7 +67,7 @@ export function AuthorProfile(props) {
                     <Awards />
                 </div>
             </div>
-            <div className="footer"></div>
+            {props.self ? <div className="footer"></div> : <OtherAuthorActions authorDict={authorDict} />}
             {props.self ? <Notifications notificationDTOList={notificationDTOList} /> : <Activity/>}
         </div>
     )
@@ -72,7 +77,7 @@ function AuthorHeader(props) {
 
     console.log(props.authorDict);
     return (<div className="tabHeader authorTabHeader">
-        {/*<div>{props.authorDict.displayName}</div>*/}
+        <header>{props.authorDict.displayName}</header>
         {/*<div>{props.statsDTO.writeCount + " Segments Published"}</div>*/}
         {/*<div>{props.statsDTO.reivewCount + " Segments Reviewed"}</div>*/}
         {/*<div>{props.statsDTO.storyCount + " Stories Joined"}</div>*/}
@@ -222,7 +227,19 @@ function NotificationPanel(props) {
 
 function Activity() {
 
-    <div className="rightSidebar activity">
-    <header>Recent Activity</header>
+    return (
+        <div className="rightSidebar activity">
+            <header>Recent Activity</header>
+        </div>
+    )
+}
+
+
+function OtherAuthorActions(props) {
+
+    return <div className="footer submissions">
+        <FollowButton authorDict={props.authorDict} />
+        <UnFollowButton authorDict={props.authorDict} />
     </div>
+
 }

@@ -119,7 +119,7 @@ export default function App() {
             <BrowserRouter>
                 <Routes>
                 <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
-                        <Route path="" relative element={<Home startingURL={startingURL} />}
+                    <Route path="" relative element={<Home startingURL={startingURL} authorDict={data.authorInfo } />}
                             index />
                         <Route path="write/" element={<StoryDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                         >
@@ -169,7 +169,7 @@ function Home(props) {
          <div className="storyDashboardContainer dashboardContainer">
             <LeftSidebar type={null} />
             <nav className="tabsList" />
-            <AuthorProfile self={true} />
+            <AuthorProfile self={true} authorDict={props.authorDict} />
         </div >
     )
 }

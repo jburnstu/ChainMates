@@ -60,7 +60,7 @@ namespace ChainMates.Server.Services
         }
 
 
-        public async Task<List<AuthorDto>> GetFollowedAuthors(int authorId)
+        public async Task<List<AuthorDto>> GetAuthorsWhoYouFollow(int authorId)
         {
             return await (from ar in _context.AuthorRelation
                           join a in _context.Author
@@ -74,7 +74,7 @@ namespace ChainMates.Server.Services
                           }
                           ).ToListAsync();
         }
-        public async Task<List<AuthorDto>> GetFollowingAuthors(int authorId)
+        public async Task<List<AuthorDto>> GetAuthorsWhoFollowYou(int authorId)
         {
             return await (from ar in _context.AuthorRelation
                           join a in _context.Author
@@ -95,13 +95,30 @@ namespace ChainMates.Server.Services
                 AuthorId = authorId,
                 RelatedAuthorId = authorToFollowId,
                 AuthorRelationTypeId = 1
-
             };
             _context.AuthorRelation.Add(authorRelation);
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.InnerException.Message);
+            }
             return authorRelation;
         }
+
+        public async Task<int> UnFollowAuthor(int authorId, int authorToUnFollowId)
+        {
+            var deleteRelation = await (from ar in _context.AuthorRelation
+                                        where ar.AuthorId == authorId
+                                        where ar.RelatedAuthorId == authorToUnFollowId
+                                        select ar
+                                        ).ExecuteDeleteAsync();
+            return deleteRelation;
+        }
+
 
         public async Task<List<Circle>> GetCircles()
         {
