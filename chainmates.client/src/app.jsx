@@ -150,7 +150,7 @@ export default function App() {
 function UniversalHeader(props) {
 
     return (
-        <>
+        <div className="container">
             <header className="universalHeader">
                 <h1>CHAIN MATES</h1>
                 <h1>Hi, {props.displayName}!</h1>
@@ -163,7 +163,7 @@ function UniversalHeader(props) {
                 </nav>
             </header >
             <Outlet />
-        </>
+        </div> 
     )
 }
 function RedirectToStartingURL(props) {

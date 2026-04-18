@@ -9,272 +9,294 @@
     --col-5: #333333;
 }
 
-
-button {
-    color: var(--col-2-A);
-    background-color: var(--col-3-A);
-}
-
 * {
     margin: 2px;
     padding: 0.1%;
     border-radius: 5px;
     font-family: Georgia, 'Times New Roman', Times, serif;
-}
-
-header {
-    color: var(--col-4);
-    background-color: var(--col-3-A);
-}
-
-html, body {
-    height: 100%;
-    margin: 0;
-}
-
-textarea {
-    font-family: Georgia, 'Times New Roman', Times, serif;
-}
-
-div.container {
-    display: grid;
-    grid-template-areas:
-        'universalHeader'
-        'dashboardContainer'
-    ;
-    grid-template-rows: 1fr 9fr;
-    gap: 3px;
-    background-color: var(--col-4);
-    padding: 5px;
-    height: 100%;
-    margin: 0.5%;
-    border-radius: 3%;
-}
-
-.universalHeader {
-    grid-area: universalHeader;
-    background-color: var(--col-1);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    max-height: 30px;
-}
-
-.universalHeader>h1,
-nav {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: row;
-}
 
 
-.dashboardContainer {
-    grid-area: dashboardContainer;
-    display: grid;
-    grid-template-areas:
-        "leftSidebar tabsList"
-        "leftSidebar pageOrTabContainer";
-    grid-template-rows: min-content auto;
-    grid-template-columns: min-content auto;
-    height: 100%;
-}
+    button {
+        color: var(--col-2-A);
+        background-color: var(--col-3-A);
+    }
 
-.leftSidebar {
-    grid-area: leftSidebar;
-    background-color: var(--col-5);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.leftSidebar>button {
-    flex-grow: 1;
-}
-
-.tabsList {
-    grid-area: tabsList;
-    display: flex;
-    justify-content: space-evenly;
-    background-color: var(--col-3);
-}
-
-.tabLink {
-    flex-grow: 1;
-    width: 100%;
-}
-
-.tabButton {
-    flex-grow: 1;
-    width: 100%;
-}
+    header {
+        color: var(--col-4);
+        background-color: var(--col-3-A);
+    }
 
 
-.pageOrTabInnerContainer {
-    grid-area: pageOrTabContainer;
-    display: grid;
-    grid-template-areas:
-        "topLine topLine"
-        "mainContent rightSidebar"
-        "footer rightSidebar";
-    grid-template-columns: 3fr 1fr;
-    grid-template-rows: min-content auto min-content;
-    gap: 3px;
-    background-color: var(--col-5);
-    padding: 5px;
-    height: 100%;
-    width: 100%;
-}
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
 
-.topLine {
-    background-color: var(--col-1);
-    grid-area: topLine;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-}
-
-.topLine>div {
-    background-color: var(--col-1-A);
-}
-
-.topLine>div:first-child {
-    flex-grow: 50;
-}
-
-.tabContent {
-    grid-area: tabContent;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--col-4);
-    height: 100%;
-    overflow: scroll;
-}
-
-.footer {
-    grid-area: footer;
-    display: flex;
-    justify-content: space-evenly;
-    background-color: var(--col-1);
-    height: min-content
-}
-
-.footer>div {
-    flex-grow: 1;
-}
-
-.segmentDisplay {
-    grid-area: read-only-content;
-    background-color: var(--col-2);
-    min-height: 50px;
-    width: 90%;
-    padding: 5px;
-    margin: 5px;
-    overflow: auto;
-}
-
-.currentSegmentDisplay {
-    grid-area: input-content;
-    background-color: var(--col-1);
-    min-height: 50px;
-    width: 90%;
-    padding: 5px;
-    margin: 5px;
-}
-
-.recentSegmentsContainer {
-    display: flex;
-    background-color: var(--col-5);
-    padding: 5px;
-    margin: 5px;
-}
-
-.circleNotificationsAndAwardsContainer {
-    display: flex;
-    background-color: var(--col-5);
-    padding: 5px;
-    margin: 5px;
-}
-
-.circleNotificationsAndAwardsContainer>div {
-    background-color: var(--col-1);
-    padding: 5px;
-    margin: 5px;
-}
-
-.circleNotificationsAndAwardsContainer>div>header {
-    background-color: var(--col-2);
-    padding: 5px;
-    margin: 5px;
-}
-
-.circleNotificationContainer {
-    background-color: var(--col-2);
-    padding: 5px;
-    margin: 5px;
-}
+    textarea {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+    }
 
 
-.modalPortal {
-    position: 'fixed';
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: 'rgba(0, 0, 0, 0.5)';
-    display: 'flex';
-    align-items: 'center';
-    justify-content: 'center';
-}
 
-.modalButtonContainer {
-    background: 'white';
-    padding: '20px';
-    border-radius: '8px'
-}
-
-.newStoryModalFieldset {
-    background-color: var(--col-3-A);
-    display: flex;
-    flex-direction: column;
-}
+    div.container {
+        display: grid;
+        grid-template-areas:
+            'universalHeader'
+            'dashboardContainer';
+        grid-template-rows: 1fr 9fr;
+        gap: 3px;
+        background-color: var(--col-4);
+        padding: 5px;
+        height: 100%;
+        margin: 0.5%;
+        border-radius: 3%;
 
 
-.allDisplayStoriesContainer {
-    display: flex;
-    flex-direction: row;
-    width: fit-content;
-    justify-content: space-evenly;
-}
+        .universalHeader {
+            grid-area: universalHeader;
+            background-color: var(--col-1);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            max-height: 30px;
 
 
-.displaypageOrTabContainer {
-    display: flex;
-    flex-direction: column;
-}
+            h1,
+            nav {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: row;
+            }
+        }
 
 
-div.rightSidebar {
-    grid-area: rightSidebar;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--col-5);
-    height: 100%;
-}
+        .dashboardContainer {
+            grid-area: dashboardContainer;
+            display: grid;
+            grid-template-areas:
+                "leftSidebar tabsList"
+                "leftSidebar pageOrInnerTabContainer";
+            grid-template-rows: min-content auto;
+            grid-template-columns: min-content auto;
+            height: 100%;
 
 
-.segmentInfoContainer {
-    background-color: var(--col-3);
-}
-
-.segmentCommentContainer {
-    background-color: var(--col-1);
-}
-
-.commentCommentContainer {
-    background-color: var(--col-2);
-}
+            .leftSidebar {
+                grid-area: leftSidebar;
+                background-color: var(--col-5);
+                display: flex;
+                flex-direction: column;
+                height: 100%;
 
 
-.hidden {
-    display: none;
+
+                .button {
+                    flex-grow: 1;
+                }
+            }
+
+            .tabsList {
+                grid-area: tabsList;
+                display: flex;
+                justify-content: space-evenly;
+                background-color: var(--col-3);
+
+
+                .tabLink {
+                    flex-grow: 1;
+                    width: 100%;
+                }
+
+                .tabButton {
+                    flex-grow: 1;
+                    width: 100%;
+                }
+            }
+
+
+            .pageOrTabInnerContainer {
+                grid-area: pageOrTabContainer;
+                display: grid;
+                grid-template-areas:
+                    "topLine topLine"
+                    "mainContent rightSidebar"
+                    "footer rightSidebar";
+                grid-template-columns: 3fr 1fr;
+                grid-template-rows: min-content auto min-content;
+                gap: 3px;
+                background-color: var(--col-5);
+                padding: 5px;
+                height: 100%;
+                width: 100%;
+
+
+                .topLine {
+                    background-color: var(--col-1);
+                    grid-area: topLine;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-evenly;
+
+
+                    div {
+                        background-color: var(--col-1-A);
+                    }
+
+                    .div:first-child {
+                        flex-grow: 50;
+                    }
+                }
+
+                .mainContent {
+                    grid-area: mainContent;
+                    display: flex;
+                    flex-direction: column;
+                    background-color: var(--col-4);
+                    height: 100%;
+                    overflow: scroll;
+
+                    .segmentDisplay {
+                        grid-area: readOnlyContent;
+                        background-color: var(--col-2);
+                        min-height: 50px;
+                        width: 90%;
+                        padding: 5px;
+                        margin: 5px;
+                        overflow: auto;
+                    }
+
+                    .currentSegmentDisplay {
+                        grid-area: inputContent;
+                        background-color: var(--col-1);
+                        min-height: 50px;
+                        width: 90%;
+                        padding: 5px;
+                        margin: 5px;
+                    }
+                }
+
+                .footer {
+                    grid-area: footer;
+                    display: flex;
+                    justify-content: space-evenly;
+                    background-color: var(--col-1);
+                    height: min-content;
+
+
+                    div {
+                        flex-grow: 1;
+                    }
+                }
+
+
+                .recentSegmentsContainer {
+                    display: flex;
+                    background-color: var(--col-5);
+                    padding: 5px;
+                    margin: 5px;
+
+
+                    .recentSegmentsArray {
+                        display: flex;
+                        background-color: var(--col-1);
+                        padding: 5px;
+                        margin: 5px;
+                    }
+                }
+
+                .circleNotificationsAndAwardsContainer {
+                    display: flex;
+                    background-color: var(--col-5);
+                    padding: 5px;
+                    margin: 5px;
+
+
+                    div {
+                        background-color: var(--col-1);
+                        padding: 5px;
+                        margin: 5px;
+
+
+                        header {
+                            background-color: var(--col-2);
+                            padding: 5px;
+                            margin: 5px;
+                        }
+                    }
+
+
+                    .circleNotificationContainer {
+                        background-color: var(--col-2);
+                        padding: 5px;
+                        margin: 5px;
+                    }
+                }
+
+
+                div.rightSidebar {
+                    grid-area: rightSidebar;
+                    display: flex;
+                    flex-direction: column;
+                    background-color: var(--col-5);
+                    height: 100%;
+
+
+
+                    .segmentInfoContainer {
+                        background-color: var(--col-3);
+                    }
+
+                    .segmentCommentContainer {
+                        background-color: var(--col-1);
+                    }
+
+                    .commentCommentContainer {
+                        background-color: var(--col-2);
+                    }
+                }
+
+                .hidden {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .modalPortal {
+        position: 'fixed';
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: 'rgba(0, 0, 0, 0.5)';
+        display: 'flex';
+        align-items: 'center';
+        justify-content: 'center';
+    }
+
+    .modalButtonContainer {
+        background: 'white';
+        padding: '20px';
+        border-radius: '8px'
+    }
+
+    .newStoryModalFieldset {
+        background-color: var(--col-3-A);
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    .allDisplayStoriesContainer {
+        display: flex;
+        flex-direction: row;
+        width: fit-content;
+        justify-content: space-evenly;
+    }
+
+
+    .displaypageOrTabContainer {
+        display: flex;
+        flex-direction: column;
+    }
 }

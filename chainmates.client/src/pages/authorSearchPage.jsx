@@ -65,11 +65,12 @@ export function AuthorSearchPage(props) {
             mainContent ={ 
                 <>
                     <div className="recentSegmentsContainer">
-                            <header>Recent Segments
-                            </header>
+                        <header>Recent Segments</header>
+                         <div className="recentSegmentsArray">
                         {recentSegmentTraceDTOList.map(recentSegmentTraceDTO =>
                             <RecentSegmentDisplay key={recentSegmentTraceDTO.id} segmentTraceInfo={recentSegmentTraceDTO} />)
-                        }
+                            }
+                        </div>
                     </div>
                     <div className="circleNotificationsAndAwardsContainer">
                         <CircleNotifications circleNotificationDTOList={circleNotificationDTOList} />
@@ -89,7 +90,6 @@ export function AuthorSearchPage(props) {
             rightSidebar={
                 props.self
                     ? <Notifications notificationDTOList={notificationDTOList} />
-
                     : <Activity />
             }
         /> 
