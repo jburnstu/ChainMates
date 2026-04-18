@@ -81,8 +81,9 @@ namespace ChainMates.Server.Services
         public async Task<SegmentHistoryIncludingCommentsDto?> GetSegmentTraceBySegment(int segmentId)
         {
             StoryService storyService = new StoryService(_context);
-            CommentService commentService = new CommentService(_context);
             var story = await storyService.GetStoryBySegment(segmentId);
+
+            CommentService commentService = new CommentService(_context);
             var storyComments = await commentService.GetStoryCommentAndChildrenForTrace(story.Id);
             var storyDto = new StoryIncludingCommentsDto
             {

@@ -2,6 +2,8 @@ import { getRandomItem, contactAPI, getArrayObjByID } from "./utilityFuncs";
 import { AuthorContext } from "./context.jsx";
 import React, { StrictMode, useState, authoref, useEffect, createContext, useContext } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
+import { SegmentDisplay } from "./storyTabComponents";
+
 export default { AuthorProfile };
 
 export function AuthorProfile(props) {
@@ -50,6 +52,7 @@ export function AuthorProfile(props) {
             <AuthorHeader authorDict={authorDict} /> 
              <div className="authorTabContent tabContent"> 
                 <div className="recentSegmentsContainer">
+                <header>Recent Segments</header>
                     {recentSegmentTraceDTOList.map(recentSegmentTraceDTO =>
                         <RecentSegmentDisplay key={recentSegmentTraceDTO.id} segmentTraceInfo={recentSegmentTraceDTO} />)
                     }
@@ -60,7 +63,7 @@ export function AuthorProfile(props) {
                 </div>
             </div>
             <div className="footer"></div>
-            {props.self ? <Notifications notificationDTOList={notificationDTOList} /> : null}
+            {props.self ? <Notifications notificationDTOList={notificationDTOList} /> : <Activity/>}
         </div>
     )
 }
@@ -85,21 +88,20 @@ function RecentSegmentDisplay(props) {
     console.log(finalSegment)
     return (
         <div className="recentSegmentDisplayContainer">
+            {/*<SegmentDisplay*/}
+            {/*    id={penultimateSegment.id}*/}
+            {/*    isFinalSegment={false}*/}
+            {/*    fixedContent={penultimateSegment.content}*/}
+            {/*    currentContent={null}*/}
+            {/*    changeSelection={null}*/}
+            {/*    onChange={null} />*/}
             <SegmentDisplay
-                id={segmentDict.id}
-                isFinalSegment={false}
-                fixedContent={penultimateSegment.content}
-                currentContent={null}
-                changeSelection={null}
-                onChange={null} />
-            <SegmentDisplay
-                id={segmentDict.id}
+                id={finalSegment.id}
                 isFinalSegment={false}
                 fixedContent={finalSegment.content}
                 currentContent={null}
                 changeSelection={null}
                 onChange={null} />
-            )
         </div>
     )
 }
@@ -135,7 +137,8 @@ function CircleNotificationPanel(props) {
         </div>
     )
 
-                }
+}
+
 function Awards(props) {
     //Leaving this for now!
     return (
@@ -215,4 +218,11 @@ function NotificationPanel(props) {
             <textarea readonly>{content}</textarea>
         </>
     )
+}
+
+function Activity() {
+
+    <div className="rightSidebar activity">
+    <header>Recent Activity</header>
+    </div>
 }

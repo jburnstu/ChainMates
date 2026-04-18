@@ -45,7 +45,7 @@ export function AuthorSearchButton() {
 export function AuthorNameLink({ authorInfo }) {
     console.log(authorInfo)
     return (
-        <Link to={`/authors/${authorInfo.id}`}>{authorInfo.displayName}</Link>
+        <Link to={`/authors/${authorInfo.id}`}><button type="button">{authorInfo.displayName}</button></Link>
     )
 }
 
@@ -90,7 +90,7 @@ export function StorySearchButton() {
 
 export function StoryNameLink({ storyInfo }) {
     return (
-        <Link to={`${storyInfo.id}`}>{storyInfo.title}</Link>
+        <Link to={`${storyInfo.id}`}><button type="button">{ storyInfo.title }</button ></Link>
     )
 }
 

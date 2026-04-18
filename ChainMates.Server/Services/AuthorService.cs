@@ -163,13 +163,15 @@ namespace ChainMates.Server.Services
         public async Task<List<SegmentHistoryIncludingCommentsDto>> GetRecentSegmentHistoriesByAuthorId(int authorId, int numberOfSegments)
         {
             var segmentService = new SegmentService(_context);
+            var acceptedStatusIds = new[] { 4, 5 };
 
-            var segmentIdList = (from s in _context.Segment
-                                     where s.SegmentStatusId == 4
-                                     where s.AuthorId == authorId
-                                     orderby s.Id descending
-                                     select s.Id)
-                              .Take(numberOfSegments);
+            var segmentIdList = await (from s in _context.Segment
+                                       where acceptedStatusIds.Contains(s.SegmentStatusId)
+                                       where s.AuthorId == authorId
+                                       orderby s.DateCreated descending
+                                       select s.Id)
+                              .Take(numberOfSegments)
+                              .ToListAsync();
             List<SegmentHistoryIncludingCommentsDto> dtoList = new List<SegmentHistoryIncludingCommentsDto>();
             foreach (var segmentId in segmentIdList)
             {
