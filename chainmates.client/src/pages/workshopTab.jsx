@@ -1,12 +1,12 @@
 
-import React, { StrictMode, useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
+import React, { StrictMode, useState } from "react";
+import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext} from 'react-router-dom';
 import { SubmissionButton } from './workshopButtons.js';
 
 import { Comments } from "./comments.js";
-import { getArrayObjByID, contactAPI } from "./utilityFuncs.js";
+import { getArrayObjByID} from "./utilityFuncs.js";
 
-export default { WorkshopTab , SegmentDisplay};
+export default { WorkshopTab };
 
 export function WorkshopTab(props) {
 
@@ -45,9 +45,11 @@ export function WorkshopTab(props) {
     const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
 
     return (
-        <div className="storyTabContainer tabContainer" id={"storyContainer" + { tabID }}>
-            <StoryHeader storyDict={storyDict} wordCount={wordCount} />
-            <div className="storyTabContent tabContent">
+        <TabOrPageLayout 
+            topLine={
+                <WorkshopStoryHeader storyDict={storyDict} wordCount={wordCount} />
+            }
+            mainContent ={ 
                 {storyDict.segmentHistoryList.map(segmentDict =>
                     <SegmentDisplay key={segmentDict.id}
                         id={segmentDict.id}
@@ -58,14 +60,34 @@ export function WorkshopTab(props) {
                         onChange={handleChange} />
                 )
                 }
-            </div>
-            <SubmissionButtons writeOrReview={writeOrReview} currentContent={currentContent} segmentID={tabID} removeCurrentStory={removeCurrentStory} />
-            <Comments selections={selectedSegmentDict} storyDict={storyDict} />
-        </div>
+            }
+            footer={
+                props.type == "write"
+                    ?
+                        ["SAVE", "SUBMIT", "ABANDON"].map(buttonType =>
+                            <SubmissionButton
+                                key={buttonType}
+                                submissionType={buttonType}
+                                currentContent={props.currentContent}
+                                segmentID={props.segmentID}
+                                removeCurrentStory={props.removeCurrentStory} />)
+                    :
+                        ["APPROVE"].map(buttonType =>
+                            <SubmissionButton
+                                key={buttonType}
+                                submissionType={buttonType}
+                                currentContent={props.currentContent}
+                                segmentID={props.segmentID}
+                                removeCurrentStory={props.removeCurrentStory} />)
+            }
+            rightSidebar={
+                <Comments selections={selectedSegmentDict} storyDict={storyDict} />
+            }
+        /> 
     )
 }
 
-function StoryHeader(props) {
+function WorkshopStoryHeader(props) {
 
     let storyData = props.storyDict["storyData"];
     let length = props.storyDict.segmentHistoryList.length;
@@ -77,53 +99,3 @@ function StoryHeader(props) {
     </div>)
 }
 
-export function SegmentDisplay(props) {
-
-    console.log(props.id)
-
-    let readOnly = true;
-    let onChange = null;
-    let value = props.fixedContent;
-
-    if (props.isFinalSegment) {
-        readOnly = false;
-        onChange = props.onChange;
-        value = props.currentContent;
-    }
-
-    const onClick = () => {
-        props.changeSelection(props.id)
-    }
-
-
-    return (
-        <textarea className={`segmentDisplay ${readOnly ? undefined : 'currentSegmentDisplay'}`} readOnly={readOnly} value={value}
-            onChange={onChange} onClick={onClick} ></ textarea>)
-
-}
-
-
-function SubmissionButtons(props) {
-
-    let arrayOfButtonTypes;
-    switch (props.writeOrReview) {
-        case "review":
-            arrayOfButtonTypes = ["APPROVE"];
-            break;
-        case "write":
-        default:
-            arrayOfButtonTypes = ["SAVE", "SUBMIT", "ABANDON"];
-    }
-
-    return (
-        <div className="footer submissions">
-            {arrayOfButtonTypes.map(buttonType =>
-                <SubmissionButton
-                    key={buttonType}
-                    submissionType={buttonType}
-                    currentContent={props.currentContent}
-                    segmentID={props.segmentID}
-                    removeCurrentStory={props.removeCurrentStory} />)}
-        </div>
-    )
-}

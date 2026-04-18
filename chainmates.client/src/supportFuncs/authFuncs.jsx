@@ -3,8 +3,17 @@
 
 import React, { useState } from "react";
 import { contactAPI } from "./utilityFuncs.jsx";
-export default { Login, Signup };
+export default { initialLoad, Login, Signup };
 
+
+
+export async function initialLoad() {
+    await contactAPI("load", "get", true)
+        .then(function (value) {
+            console.log(value);
+            setData(value)
+        });
+}
 
 export function Login({ onLogin, switchToSignup}) {
     const [emailAddress, setEmailAddress] = useState("");

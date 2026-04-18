@@ -1,15 +1,18 @@
 
 import React, { StrictMode, useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useOutlet, useNavigate } from 'react-router-dom';
 
-import { getArrayObjByID, contactAPI } from "./utilityFuncs";
-import { Login, Signup } from "./authFuncs";
+import { getArrayObjByID} from "./buttons/utilityFuncs";
+import { initialLoad, Login, Signup } from "./supportFuncs/authFuncs";
 
-import { WorkshopTab } from "./workshopTabComponents";
-import { ModalSelectSegmentFromOptionsButton, ModalNewButton } from './workshopButtons.jsx';
+import { WorkshopTab } from "./pages/workshopTab";
+import { ModalSelectSegmentFromOptionsButton, StartNewStoryButton } from './buttons/workshopButtons.jsx';
 
-import { AuthorSearchPage } from "./authorSearchPageComponents.jsx";
-import { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink } from "./searchButtons.jsx";
+import { AuthorSearchPage } from "./pages/authorSearchPage.jsx";
+import { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink } from "./buttons/searchButtons.jsx";
+
+import { LeftSidebar } from "./borders.jsx"
+import { DashboardLayout } from "./layouts/layouts";
 
 
 export default function App() {
@@ -18,11 +21,7 @@ export default function App() {
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
-        contactAPI("load", "get", true)
-            .then(function (value) {
-                console.log(value);
-                setData(value)
-            })
+        initialLoad();
         }, []);
 
     if (!data) {
@@ -41,7 +40,6 @@ export default function App() {
                         switchToSignup={() => setAuthMode("signup")}
                     />
                 );
-                break;
             case "signup":
             default:
                 return (
@@ -50,7 +48,6 @@ export default function App() {
                         switchToLogin={() => setAuthMode("login")}
                     />
                 );
-                break;
         }
     }
 
@@ -181,14 +178,19 @@ function RedirectToStartingURL(props) {
 
 function HomeDashboard(props) {
     return (
-         <div className="storyDashboardContainer dashboardContainer">
-            <LeftSidebar type={null} />
-            <nav className="tabsList" />
-            <AuthorSearchPage self={true} authorDict={props.authorDict} />
-        </div >
+         <DashboardLayout 
+            leftSidebar={
+                null
+            }
+            tabsList={
+                null
+            }
+            pageOrTab={
+                <AuthorSearchPage self={true} authorDict={props.authorDict} />
+            }
+        />
     )
 }
-
 
 function WorkshopDashboard(props) {
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
@@ -207,47 +209,50 @@ function WorkshopDashboard(props) {
     const outlet = useOutlet([currentContentByStory, setCurrentContentByStory]);
 
     return (
-        <div className={props.writeOrReview + "storyDashboardContainer storyDashboardContainer dashboardContainer"}>
-            <LeftSidebar type={props.writeOrReview} addNewTab={addNewTab} />
-            <nav className="tabsList">
-                {arrayOfTabIDs.map((tabID, index) =>
+        <DashboardLayout 
+            leftSidebar={
+                (props.writeOrReview == "write")
+                    ?
+                    <>
+                        <StartNewStoryButton addNewStory={addNewTab} />
+                        <ModalSelectSegmentFromOptionsButton type="JOIN" addNewStory={addNewTab} />
+                    </>
+                    :
+                        <ModalSelectSegmentFromOptionsButton type="MODERATE" addNewStory={addNewTab} />
+            }
+            tabsList={
+                arrayOfTabIDs.map((tabID, index) =>
                     <Link to={tabID + "/"} key={index + tabID} className="tabLink">
-                        <button className="tabButton">{getTabName(tabID, index)}</button>
+                        <button className="tabButton">{getTabName(tabID, index)}
+                        </button>
                     </Link>
-                )}
-            </nav>
-            {outlet || <WorkshopTabPlaceHolder />}
-        </div >
-    )
-}
-
-function WorkshopTabPlaceHolder() {
-    return (
-        <div className="tabContainer">PLACEHOLDER
-        <div className="tabContent"></div>
-        <div className="footer submissions"></div>
-        <div className="rightSidebar comments"></div>
-    </div>
+                )
+            }
+            pageOrTab={
+                outlet || <TabOrPageLayout/>
+            }
+        />
     )
 }
 
 function SearchDashboard(props) {
     const outlet = useOutlet();
     return (
-        <div className={props.type + "storyDashboardContainer searchDashboardContainer dashboardContainer"}>
-            <LeftSidebar type={props.type} />
-            {outlet || <BrowserPagePlaceHolder />}
-        </div >
-    )
-}
-
-function BrowserPagePlaceHolder() {
-    return (
-    <div className="tabContainer">PLACEHOLDER
-        <div className="tabContent"></div>
-        <div className="footer submissions"></div>
-        <div className="rightSidebar comments"></div>
-    </div>
+         <DashboardLayout 
+            leftSidebar={
+                (props.type == "authors") 
+                    ?
+                    <AuthorSearchButton />
+                    :
+                    <StorySearchButton />
+            }
+            tabsList={
+                null
+            }
+            pageOrTab={
+                outlet || <TabOrPageLayout/>
+            }
+        />
     )
 }
 
@@ -258,33 +263,4 @@ function NoMatch() {
             <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
         </div>
     );
-}
-
-function LeftSidebar(props) {
-
-    let buttonList = <></>;
-    switch (props.type) {
-        case "write":
-            buttonList = <>
-                            <ModalNewButton addNewStory={props.addNewTab} />
-                            <ModalSelectSegmentFromOptionsButton type="JOIN" addNewStory={props.addNewTab} />
-                        </>
-            break;
-        case "review":
-            buttonList = <ModalSelectSegmentFromOptionsButton type="MODERATE" addNewStory={props.addNewTab} />
-            break;
-        case "authors":
-            buttonList = <AuthorSearchButton />
-            break;
-        case "stories":
-            buttonList = <StorySearchButton />
-            break;
-        default:
-            break;
-    }
-    return (
-        <div className="leftSidebar">
-            {buttonList}
-        </div>
-    )
 }

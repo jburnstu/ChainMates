@@ -1,21 +1,19 @@
 
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState } from "react";
 import { createPortal } from 'react-dom';
-export default { SubmissionButton, ModalNewButton, ModalSelectSegmentFromOptionsButton };
-import { AuthorContext } from "./context.jsx";
-import { useNavigate, useLocation, redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
 
-
+export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton };
 
 async function uploadNewSegment(previousSegmentID) {
 
-
     let updatePreviousSegmentData = await contactAPI(`segments/${previousSegmentID}/`,"patch",true,
-        { 'segmentStatusId': 5 }
+        {
+            'segmentStatusId': 5
+        }
     );
-
-    await console.log(updatePreviousSegmentData);
     let createSegmentData = await contactAPI("segments/","post",true,
         {
             'storyId': updatePreviousSegmentData.storyId,
@@ -23,18 +21,11 @@ async function uploadNewSegment(previousSegmentID) {
             'previousSegmentId': previousSegmentID
         }
     );
-
-    
     let getNewFullStoryInfoData = await contactAPI(`segments/traces/${createSegmentData.id}`, "get",true);
-    console.log("FULL STORY INFO", getNewFullStoryInfoData)
-
-
-
     return getNewFullStoryInfoData
 }
 
 async function uploadNewStoryAndSegment(storyParameters) {
-    console.log("calling uploadNewStoryAndSegment")
 
     let storyCreationData = await contactAPI("stories/", "post",true,
         storyParameters
@@ -45,16 +36,15 @@ async function uploadNewStoryAndSegment(storyParameters) {
         }
     )
     let getNewFullStoryInfoData = await contactAPI(`segments/traces/${createSegmentData.id}`, "get",true);
-
     return getNewFullStoryInfoData
 }
 
 async function uploadNewModerationAssignment(previousSegmentID) {
-    
     await contactAPI("segments/", "patch",
-        { "segmentStatusId": 3 }
+        {
+            "segmentStatusId": 3
+        }
     );
-
     let moderationAssignmentCreationData = await contactAPI("moderationassignments/", "post",true,
         {
             'segmentId': previousSegmentID
@@ -63,9 +53,7 @@ async function uploadNewModerationAssignment(previousSegmentID) {
     return moderationAssignmentCreationData;
 }
 
-export function ModalNewButton(props) {
-
-
+export function StartNewStoryButton(props) {
     const [isOpen, setIsOpen] = useState(false);
 
     function createModal() {
@@ -75,7 +63,7 @@ export function ModalNewButton(props) {
 
     return (
         <>
-            <button onClick={createModal}> ModalNew
+            <button onClick={createModal}> Start A New Story
             </ button >
             <ModalWindow isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <div className="allDisplayStoriesContainer">
@@ -88,7 +76,6 @@ export function ModalNewButton(props) {
 
 function NewStoryOptionspanel(props) {
     let navigate = useNavigate();
-    // let location = useLocation();
     const urlStub = `/chainlettersstories/`;
 
     const [storyParameters, setStoryParameters] = useState({});
@@ -107,14 +94,10 @@ function NewStoryOptionspanel(props) {
 
     function createNewStoryAndSegment() {
         props.close()
-        console.log("Creating new story/seg");
         uploadNewStoryAndSegment(storyParameters)
             .then(function (value) {
-                console.log("inside then function", value, value.id)
                 props.addNewStory(value)
                     .then(function (innerValue) {
-                        console.log("INNER VALUE", innerValue)
-                        console.log("NEW URL", `${urlStub}write/${value.id}`)
                         navigate(`/write/${value.id}/`)
                     })
             }
@@ -176,8 +159,6 @@ function NewStoryOptionspanel(props) {
 
 export function SubmissionButton(props) {
     let navigate = useNavigate();
-    let location = useLocation();
-    //const urlStub = `/chainlettersstories/`;
 
     let segmentStatusID;
     switch (props.submissionType) {
@@ -196,14 +177,10 @@ export function SubmissionButton(props) {
     }
 
     async function handleSubmit(e) {
-        console.log(props.segmentID);
         let getNewFullStoryInfoData = await contactAPI(`segments/traces/${props.segmentID}`, "get");
 
         if (props.submissionType != "SAVE") {
-            props.removeCurrentStory(getNewFullStoryInfoData)
-                .then(function (value) {
-                    console.log("WRITE DICTS WITHIN CODE", value)
-                });
+            props.removeCurrentStory(getNewFullStoryInfoData);
         }
         let currentContent = !props.currentContent ? "(Blank)" : props.currentContent;
 
@@ -213,33 +190,25 @@ export function SubmissionButton(props) {
                 'content': currentContent
             }
         )
-            .then(
-                function (value) {
-                    console.log(value)
-                    if (props.submissionType == "ABANDON") {
-                        if (value.previousSegmentId != null) {
-                            console.log("second conditional!");
-                            contactAPI(`segments/${value.previousSegmentId}/`, "patch",
-                                {
-                                    'segmentStatusId': 4
-                                }
-                            )
-                        }
-                        console.log(location.pathname);
-
+        .then(
+            function (value) {
+                if (props.submissionType == "ABANDON") {
+                    if (value.previousSegmentId != null) {
+                        contactAPI(`segments/${value.previousSegmentId}/`, "patch",
+                            {
+                                'segmentStatusId': 4
+                            }
+                        )
                     }
-                })
-        console.log("about to navigate:")
+                }
+            })
         navigate(`/write`);
-        // return
     }
 
     return (
         <button onClick={handleSubmit}>{props.submissionType}</button>
     )
 }
-
-
 
 export function ModalSelectSegmentFromOptionsButton(props) {
     let navigate = useNavigate();
@@ -300,7 +269,7 @@ export function ModalSelectSegmentFromOptionsButton(props) {
             <ModalWindow isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <div className="allDisplayStoriesContainer">
                     {arrayOfAvailableStories.map(availableStory =>
-                        <StoryDisplayInModal key={availableStory.id} selectStory={selectStory} storyDict={availableStory} />
+                        <SegmentDisplayInModal key={availableStory.id} selectStory={selectStory} storyDict={availableStory} />
                     )}
                 </div>
             </ModalWindow >
@@ -308,7 +277,7 @@ export function ModalSelectSegmentFromOptionsButton(props) {
     )
 }
 
-function StoryDisplayInModal(props) {
+function SegmentDisplayInModal(props) {
     console.log(props.storyDict);
     let firstSegment = props.storyDict.segmentHistoryList[0]
     let finalSegment = props.storyDict.segmentHistoryList.slice(-1)[0]
