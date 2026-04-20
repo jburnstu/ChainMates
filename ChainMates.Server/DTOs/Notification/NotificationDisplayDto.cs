@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using ChainMates.Server.DTOs.Notification.Info;
+using System.Text.Json;
 
 namespace ChainMates.Server.DTOs.Notification
 {
@@ -11,7 +12,7 @@ namespace ChainMates.Server.DTOs.Notification
         //public int RecipientAuthorId { get; set; }
         //public int InstigatorAuthorId { get; set; }
 
-        public string Info { get; set; }
+        public JsonDocument Info { get; set; }
 
     }
 }

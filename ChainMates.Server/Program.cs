@@ -13,6 +13,8 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<StoryService>();
 builder.Services.AddScoped<SegmentService>();
+builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
 

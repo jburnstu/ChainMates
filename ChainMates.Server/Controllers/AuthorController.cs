@@ -76,7 +76,7 @@ namespace ChainMates.Server.Controllers
             }
 
             var data = await _authorService.FollowAuthor(authorId, authorToFollowId);
-            await _notificationService.Notify
+            await _notificationService.NotifyYouFollowedSomeone(authorToFollowId, authorId);
             return Ok(data);
         }
 

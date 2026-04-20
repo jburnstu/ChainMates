@@ -265,3 +265,26 @@ function NoMatch() {
         </div>
     );
 }
+
+
+//function Header() {
+//    const navigate = useNavigate();
+
+//    function handleLogout() {
+//        // 1. Clear auth data
+//        localStorage.removeItem("token");
+
+//        // 2. (optional) clear anything else
+//        // sessionStorage.clear();
+
+//        // 3. Redirect
+//        navigate("/login");
+//    }
+
+//    return (
+//        <div className="header">
+//            <h1>My App</h1>
+//            <button onClick={handleLogout}>Logout</button>
+//        </div>
+//    );
+//}

@@ -1,10 +1,12 @@
 ﻿using ChainMates.Server.DTOs.Author;
 using ChainMates.Server.DTOs.Story;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ChainMates.Server.DTOs.Notification.Info
 {
-
+    [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+    [JsonDerivedType(typeof(AuthorFollowedYou), "author_followed_you")]
     abstract public class NotificationInfoDto { }
 
     public class AuthorFollowedYou : NotificationInfoDto
