@@ -223,7 +223,7 @@ namespace ChainMates.Server.Services
 
             await CreateNotifications(new NotificationCreationDto
             {
-                NotificationTypeId = 4,
+                NotificationTypeId = 1,
                 Info = new AuthorFollowedYou
                 {
                     Instigator = instigator
