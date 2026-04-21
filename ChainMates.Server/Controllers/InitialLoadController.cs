@@ -76,14 +76,14 @@ public class InitialLoadController : ControllerBase
             StoryId = null
         };
 
-        var followingAuthors = await authorService.GetFollowingAuthors(authorId);
-        var followedAuthors = await authorService.GetFollowedAuthors(authorId);
+        var authorsWhoYouFollow = await authorService.GetAuthorsWhoYouFollow(authorId);
+        var authorsWhoFollowYou = await authorService.GetAuthorsWhoFollowYou(authorId);
         var circles = await authorService.GetCirclesByAuthorId(authorId);
 
         relationInfoDto = new RelationInfoDto
         {
-            FollowingAuthors = followingAuthors,
-            FollowedAuthors = followedAuthors,
+            AuthorsWhoYouFollow = authorsWhoYouFollow,
+            AuthorsWhoFollowYou = authorsWhoFollowYou,
             Circles = circles
         };
 

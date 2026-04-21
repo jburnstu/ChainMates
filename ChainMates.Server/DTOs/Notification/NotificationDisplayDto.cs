@@ -11,7 +11,7 @@ namespace ChainMates.Server.DTOs.Notification
         //public int RecipientAuthorId { get; set; }
         //public int InstigatorAuthorId { get; set; }
 
-        public JsonDocument Info { get; set; }
+        public string Info { get; set; }
 
     }
 }

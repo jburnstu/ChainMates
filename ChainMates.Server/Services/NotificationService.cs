@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using ChainMates.Server.DTOs.Notification;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Text.Json;
+using ChainMates.Server.DTOs.Notification.Info;
 
 namespace ChainMates.Server.Services
 {
@@ -29,7 +30,7 @@ namespace ChainMates.Server.Services
 
         public async Task<List<NotificationDisplayDto>> GetRecentNotificationsByRecipient(int recipientId, int? numberToFetch = null, List<int>? includeTypesById = null)
         {
-            includeTypesById ??= [1,2,3,4,5,6,7,8,9,10]; //Very lazy, I'll figure out a better way later
+            includeTypesById ??= [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; //Very lazy, I'll figure out a better way later
 
             var query = from n in _context.Notification
                         where n.RecipientAuthorId == recipientId
@@ -52,50 +53,151 @@ namespace ChainMates.Server.Services
             return await query.ToListAsync();
         }
 
-        public async Task<List<int>> GetNotificationRecipientsFromInfo(int notificationTypeId, JsonDocument info)
-        {
-            List<int> recipientIds = new List<int>();
-            switch (notificationTypeId)
-            {
-                case 1: //Someone followed you
-                    recipientIds.Add(info.followedId);
-                    break;
-                case 2: //Your segment is approved
-                    recipientIds.Add(info.segmentAuthorId);
-                    break;
-                case 3: //Someone you follow published a segment
-                    recipientIds.Add(await (from ar in _context.AuthorRelation
-                                            where ar.RelatedAuthorId == info.authorId
-                                            select ar.AuthorId).ToListAsync());
-                    break;
-            }
-            return recipientIds;
-        }
-        
 
-        public async Task<List<Notification>> CreateNotifications(NotificationCreationDto dto)
+        public async Task<List<Notification>> CreateNotifications(NotificationCreationDto dto, List<int> recipientIds)
         {
-            var recipientIds = await GetNotificationRecipientsFromInfo(dto.NotificationTypeId, dto.Info);
 
-            var createdNotifications = new List<Notification>();
-            foreach (int recipientId in recipientIds)
-            {
-                var notification = new Notification
+            var createdNotifications = recipientIds.Select(
+                recipientId => new Notification
                 {
                     RecipientAuthorId = recipientId,
                     DateCreated = DateTime.Now,
                     NotificationTypeId = dto.NotificationTypeId,
-                    Info = dto.Info
-                };
-                _context.Notification.Add(notification);
-                createdNotifications.Add(notification);
-            }
-            _context.SaveChangesAsync();
+                    Info = JsonSerializer.Serialize(dto.Info)
+                }).ToList();
+
+            await _context.Notification.AddRangeAsync(createdNotifications);
+            await _context.SaveChangesAsync();
             return createdNotifications;
 
-           
+        }
+
+
+
+        public async Task<string> NotifySegemntApproved(int segmentId, int moderatorAuthorId)
+        {
+
+            var previousAuthorIds = await (from st in _context.SegmentTrace
+                                           where st.FinalSegmentId == segmentId
+                                           select st.EarlierSegmentAuthorId)
+                                  .ToListAsync();
+            var finalAuthorId = previousAuthorIds.FirstOrDefault();
+            var finalAuthorFollowerIds = await (from ar in _context.AuthorRelation
+                                                where ar.RelatedAuthorId == finalAuthorId
+                                                select ar.AuthorId).ToListAsync();
+
+            var instigator = await (from a in _context.Author
+                                    where a.Id == moderatorAuthorId
+                                    select new AuthorDto
+                                    {
+                                        Id = a.Id,
+                                        DisplayName = a.DisplayName
+                                    }).FirstOrDefaultAsync();
+
+            var followedAuthor = await (from a in _context.Author
+                                    where a.Id == finalAuthorId
+                                        select new AuthorDto
+                                    {
+                                        Id = a.Id,
+                                        DisplayName = a.DisplayName
+                                    }).FirstOrDefaultAsync();
+
+            var story = await (from s in _context.Segment
+                               where s .Id == segmentId
+                               join st in _context.Story
+                               on s.StoryId equals st.Id
+                               join a in _context.Author
+                               on st.AuthorId equals a.Id
+                               select new StoryInfoDto
+                               {
+                                   Id = st.Id,
+                                   Title = st.Title,
+                                   Author = new AuthorDto
+                                   {
+                                       Id = a.Id,
+                                       DisplayName = a.DisplayName
+                                   }
+                               }).FirstOrDefaultAsync();
+
+            await CreateNotifications(new NotificationCreationDto
+            {
+                NotificationTypeId = 2,
+                Info = new AuthorApprovedYourSegmentDto
+                {
+                    SegmentId = segmentId,
+                    Instigator = instigator
+                }
+            }, [finalAuthorId]);
+
+            await CreateNotifications(new NotificationCreationDto
+            {
+                NotificationTypeId = 3,
+                Info = new AuthorYouFollowPublishedSegmentDto
+                {
+                    SegmentId = segmentId,
+                    Instigator = instigator,
+                    FollowedAuthor = followedAuthor
+                }
+            }, finalAuthorFollowerIds);
+
+            await CreateNotifications(new NotificationCreationDto
+            {
+                NotificationTypeId = 4,
+                Info = new StoryYouJoinedWasExtendedDto
+                {
+                    SegmentId = segmentId,
+                    Story = story
+                }
+            }, previousAuthorIds.Skip(1).ToList());
+
+            return "Done"; //fix later?
+        }
+
+        public async Task<string> NotifyCommentPosted(int commentTypeId, int parentId, int authorId)
+        {
+            int recipientId;
+            switch (commentTypeId)
+            {
+                case 1:
+                    recipientId = await (from s in _context.Story
+                                         where s.Id == parentId
+                                         select s.AuthorId).FirstOrDefaultAsync();
+                    break;
+                case 2:
+                    recipientId = await (from s in _context.Segment
+                                         where s.Id == parentId
+                                         select s.AuthorId).FirstOrDefaultAsync();
+                    break;
+                case 3:
+                default:
+                    recipientId = await (from s in _context.Comment
+                                         where s.Id == parentId
+                                         select s.AuthorId).FirstOrDefaultAsync();
+                    break;
+            }
+
+            var instigator = await (from a in _context.Author
+                                    where a.Id == authorId
+                                    select new AuthorDto
+                                    {
+                                        Id = a.Id,
+                                        DisplayName = a.DisplayName
+                                    }).FirstOrDefaultAsync();
+
+            await CreateNotifications(new NotificationCreationDto
+            {
+                NotificationTypeId = 4,
+                Info = new AuthorAddedACommentDto
+                {
+                    CommentTypeId = commentTypeId,
+                    ParentId = parentId,
+                    Instigator = instigator
+                }
+            }, [recipientId]);
+
+            return "Done"; //fix later?
+
         }
 
     }
-
 }

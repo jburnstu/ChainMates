@@ -2,18 +2,29 @@ import { getRandomItem, contactAPI, getArrayObjByID } from "./utilityFuncs";
 import { AuthorContext } from "./context.jsx";
 import React, { StrictMode, useState, authoref, useEffect, createContext, useContext } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
+import { SegmentDisplay } from "./storyTabComponents";
+import { FollowButton, UnFollowButton } from "./authorButtons";
+
 export default { AuthorProfile };
 
 export function AuthorProfile(props) {
 
-    let writeOrReview = props.writeOrReview;
-    const { tabID } = useParams();
+    const { authorID } = useParams();
     const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
 
+    const [authorDict, setAuthorDict] = useState(null);
 
-    console.log(props.dicts, tabID)
-    let authorDict = getArrayObjByID(props.dicts, tabID);
-    console.log(authorDict);
+    useEffect(() => {
+        const fetchData = async () => {
+            await contactAPI(`authors/${authorID}`, "get", false)
+                .then(function (value) {
+                    setAuthorDict(value);
+                })
+        }
+        if (authorID) {
+            fetchData();
+        }
+    }, [authorID]);
 
 
     async function getRecentSegmentTraceDTOList() {
@@ -26,25 +37,27 @@ export function AuthorProfile(props) {
     let notificationDTOList;
 
     useEffect(() => {
-        async function fetchData() {
+        const fetchData = async () => {
             let segmentTraceDataArray = await getRecentSegmentTraceDTOList();
             setRecentSegmentTraceDTOList(segmentTraceDataArray);
-
-
         }
         if (authorDict?.id) {
             fetchData();
         }
     }, [authorDict?.id]);
 
-    console.log(recentSegmentTraceDTOList)
-    // const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
+
+    if (!authorDict?.id) {
+        return null;
+    }
+    console.log(authorDict);
 
     return (
-        <div className="authorTabContainer tabContainer" id={"authorTabContainer" + { tabID }}>
-            <AuthorHeader statsDTO={authorDict.statsDTO} displayName={ authorDict.displayName} /> 
+        <div className="authorTabContainer tabContainer" id={"authorTabContainer" + { authorID }}>
+            <AuthorHeader authorDict={authorDict} /> 
              <div className="authorTabContent tabContent"> 
                 <div className="recentSegmentsContainer">
+                <header>Recent Segments</header>
                     {recentSegmentTraceDTOList.map(recentSegmentTraceDTO =>
                         <RecentSegmentDisplay key={recentSegmentTraceDTO.id} segmentTraceInfo={recentSegmentTraceDTO} />)
                     }
@@ -54,19 +67,20 @@ export function AuthorProfile(props) {
                     <Awards />
                 </div>
             </div>
-            <div className="footer"></div>
-            <Notifications notificationDTOList={notificationDTOList} />
+            {props.self ? <div className="footer"></div> : <OtherAuthorActions authorDict={authorDict} />}
+            {props.self ? <Notifications notificationDTOList={notificationDTOList} /> : <Activity/>}
         </div>
     )
 }
 
 function AuthorHeader(props) {
 
+    console.log(props.authorDict);
     return (<div className="tabHeader authorTabHeader">
-        <div>{props.displayName}</div>
-        <div>{props.statsDTO.writeCount + " Segments Published"}</div>
-        <div>{props.statsDTO.reivewCount + " Segments Reviewed"}</div>
-        <div>{props.statsDTO.storyCount + " Stories Joined"}</div>
+        <header>{props.authorDict.displayName}</header>
+        {/*<div>{props.statsDTO.writeCount + " Segments Published"}</div>*/}
+        {/*<div>{props.statsDTO.reivewCount + " Segments Reviewed"}</div>*/}
+        {/*<div>{props.statsDTO.storyCount + " Stories Joined"}</div>*/}
     </div>)
 }
 
@@ -79,21 +93,20 @@ function RecentSegmentDisplay(props) {
     console.log(finalSegment)
     return (
         <div className="recentSegmentDisplayContainer">
+            {/*<SegmentDisplay*/}
+            {/*    id={penultimateSegment.id}*/}
+            {/*    isFinalSegment={false}*/}
+            {/*    fixedContent={penultimateSegment.content}*/}
+            {/*    currentContent={null}*/}
+            {/*    changeSelection={null}*/}
+            {/*    onChange={null} />*/}
             <SegmentDisplay
-                id={segmentDict.id}
-                isFinalSegment={false}
-                fixedContent={penultimateSegment.content}
-                currentContent={null}
-                changeSelection={null}
-                onChange={null} />
-            <SegmentDisplay
-                id={segmentDict.id}
+                id={finalSegment.id}
                 isFinalSegment={false}
                 fixedContent={finalSegment.content}
                 currentContent={null}
                 changeSelection={null}
                 onChange={null} />
-            )
         </div>
     )
 }
@@ -101,6 +114,10 @@ function RecentSegmentDisplay(props) {
 function CircleNotifications(props) {
 
     let circleNotificationDTOList = [];
+
+    //useEffect(() => {
+    //    circleNotificationDTOList = await contactAPI("notifications/","get",true)
+    //})
 
     return (
         <div className="circleNotificationListContainer">
@@ -125,7 +142,8 @@ function CircleNotificationPanel(props) {
         </div>
     )
 
-                }
+}
+
 function Awards(props) {
     //Leaving this for now!
     return (
@@ -138,7 +156,17 @@ function Awards(props) {
 
 function Notifications(props) {
 
-    let notificationDTOList = [];
+    const [notificationDTOList, setNotificationDTOList] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            contactAPI("notifications/", "get", true)
+                .then(function (value) {
+                    setNotificationDTOList(value);
+                })
+        }
+        fetchData();
+    },[])
 
     return (
         <div className="rightSidebar notifications">
@@ -157,27 +185,36 @@ function Notifications(props) {
 function NotificationPanel(props) {
 
     let dto = props.notificationDTO;
+    console.log(dto);
+    let typeID = dto.notificationTypeId;
+
     let content;
-    switch (dto.type) {
-        case "MODERATION":
-            content = dto.DisplayName + " finished moderating your segment!";
-            break;
-        case "ADDITION":
-            content = dto.DisplayName + " published a follow-up on your segment!";
-            break;
-        case "NEWFOLLOW":
+    switch (typeID) {
+        case "authorFollowedYou":
             content = dto.DisplayName + " started following you.";
+            // Nothing else
             break;
-        case "PUBLISHBYFOLLOW":
+        case "authorApprovedYourSegment":
+            content = "Your segment was published!";
+            // view segment
+            break;
+        case "authorApprovedSegmentYouFollow":
             content = dto.DisplayName + "'s segment was published!";
+            // view segment
             break;
-        case "COMMENT":
-            content = dto.DisplayName + " commented on your " +dto.targetType + " .";
+        case "authorApprovedSegmentInYourChain":
+            content = dto.DisplayName + " published a follow-up on your segment!";
+            // Want link to finished segment
             break;
-        case "LIKE":
+        case "authorAddedComment":
+            content = dto.DisplayName + " commented on your " + dto.ParentType + " .";
+            //  View comment
+            break;
+        case "LIKE": //doesn't exist yet
             content = dto.DisplayName + " liked your " + dto.targetType + " .";
             break;
-
+        default:
+            content = "Something happened!";
     }
 
     return (
@@ -186,4 +223,23 @@ function NotificationPanel(props) {
             <textarea readonly>{content}</textarea>
         </>
     )
+}
+
+function Activity() {
+
+    return (
+        <div className="rightSidebar activity">
+            <header>Recent Activity</header>
+        </div>
+    )
+}
+
+
+function OtherAuthorActions(props) {
+
+    return <div className="footer submissions">
+        <FollowButton authorDict={props.authorDict} />
+        <UnFollowButton authorDict={props.authorDict} />
+    </div>
+
 }

@@ -2,130 +2,119 @@
 import React, { useState, useEffect, useContext } from "react";
 import { createPortal } from 'react-dom';
 import { AuthorContext } from "./context.jsx";
-import { useNavigate, useLocation, redirect } from "react-router";
+import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
 import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
 
-export default { AuthorListDisplayButton };
+export default { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink, FollowButton, UnFollowButton };
 
-export function AuthorListDisplayButton(props) {
-    const authorID = useContext(AuthorContext);
-
-    const [threeMostRecentAuthors, setThreeMostRecentAuthors] = useState([])
+export function AuthorSearchButton() {
 
     const [isOpen, setIsOpen] = useState(false);
-
-    // let arrayOfFriendDicts = contactAPI(`author_relation_by_author/${authorID}/`, "get");
     const [authorArray, setAuthorArray] = useState([])
 
-    const onClick = () => {
+    async function onClick() {
         if (!isOpen) {
-            contactAPI(`author_relation_by_author/${authorID}/`, "get")
+            contactAPI(`authors`, "get", false)
                 .then(function (value) {
                     console.log(value)
-                    setAuthorArray(value.related_authors)
+                    setAuthorArray(value)
                 })
                 .then(function (innerValue) {
                     setIsOpen(true);
-                }
-                )
+                })
         }
         else { setIsOpen(false) }
     }
 
     return (
-        <div className="friendSearchContainer">
+        <div className="authorSearchButton">
             <button onClick={onClick}>AUTHORS</button>
-            {authorArray.map(authorDict =>
-                <FriendProfileButton key={authorDict.id} addAuthorTab={props.addAuthorTab} authorInfo={authorDict} />)}
+            {isOpen 
+               ? <div className="searchContainer">
+                    {authorArray.map(authorDict =>
+                        <div className="searchResultContainer" key={authorDict.id}>
+                            <AuthorNameLink authorInfo={authorDict} />
+                        </div>
+                    )}
+                </div>
+               : null}
         </div>
     )
 }
 
-function FriendProfileButton(props) {
-
-    const onClick = () => { props.addAuthorTab(props.authorInfo, "author", "add") }
-
-    console.log(props.authorInfo)
+export function AuthorNameLink({ authorInfo }) {
+    console.log(authorInfo)
     return (
-        <button onClick={onClick}>
-            {props.authorInfo.display_name}
-        </button>)
+        <Link to={`/authors/${authorInfo.id}`}><button type="button">{authorInfo.displayName}</button></Link>
+    )
 }
 
 
 
-// export function ModalSelectFriendButton(props) {
-//     return (<>
-//         <button onClick={createModal}>{props.type}
-//         </ button >
-//         <ModalWindow isOpen={isOpen} onClose={() => setIsOpen(false)}>
-//             <div className="allDisplayStoriesContainer">
-//                 {arrayOfSe.map(availableStory =>
-//                     <FriendListDisplayInModal key={availableStory.id} selectStory={selectStory} storyDict={availableStory} />
-//                 )}
-//             </div>
-//         </ModalWindow >
-//     </>
-//     )
-// }
 
+export function StorySearchButton() {
 
-// function SearchDisplayInModal(props) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [storyArray, setStoryArray] = useState([])
 
-//     return (
-//         <button onClick={selectStory} className="displayStoryContainer">
-//             <textarea value={firstSegment.earlier_segment_content} readOnly />
-//             {(finalSegment != null) ? <textarea value={finalSegment.earlier_segment_content} readOnly /> : null}
-//         </button>
-//     )
-// }
+    async function onClick() {
+        if (!isOpen) {
+            contactAPI(`stories`, "get", false)
+                .then(function (value) {
+                    console.log(value)
+                    setStoryArray(value)
+                })
+                .then(function (innerValue) {
+                    setIsOpen(true);
+                })
+        }
+        else { setIsOpen(false) }
+    }
 
+    return (
+        <div className="storySearchButton">
+            <button onClick={onClick}>STORIES</button>
+            {isOpen
+                ? <div className="searchContainer">
+                    {storyArray.map(storyDict =>
+                        <div className="searchResultContainer" key={storyDict.id}>
+                            <StoryNameLink storyInfo={storyDict} />)
+                            <AuthorNameLink authorInfo={storyDict.author} />
+                        </div>
+                    )}
+                </div>
+                : null}
+        </div>
+    )
+}
 
-// export function ModalAuthorSearchButton(props) {
-//     return (<>
-//         <button onClick={createModal}>{props.type}
-//         </ button >
-//         <ModalWindow isOpen={isOpen} onClose={() => setIsOpen(false)}>
-//             <div className="allDisplayStoriesContainer">
-//                 {arrayOfSe.map(availableStory =>
-//                     <SearchDisplayInModal key={availableStory.id} selectStory={selectStory} storyDict={availableStory} />
-//                 )}
-//             </div>
-//         </ModalWindow >
-//     </>
-//     )
-// }
+export function StoryNameLink({ storyInfo }) {
+    return (
+        <Link to={`${storyInfo.id}`}><button type="button">{ storyInfo.title }</button ></Link>
+    )
+}
 
+export function FollowButton(props) {
 
-// function SearchDisplayInModal(props) {
+    async function handleSubmit(e) {
+        await contactAPI(`authors/whoyoufollow/${props.authorDict.id}`, "post", true)
+    }
 
-//     return (
-//         <button onClick={selectStory} className="displayStoryContainer">
-//             <textarea value={firstSegment.earlier_segment_content} readOnly />
-//             {(finalSegment != null) ? <textarea value={finalSegment.earlier_segment_content} readOnly /> : null}
-//         </button>
-//     )
-// }
+    return (
+        <button onClick={handleSubmit}>FOLLOW
+        </button>
+    )
+}
 
+export function UnFollowButton(props) {
 
+    async function handleSubmit(e) {
+        await contactAPI(`authors/whoyoufollow/${props.authorDict.id}`, "delete", true,)
+    }
 
-//function AuthorListDisplayButton(props) {
-
-//    friendsDict = props.friendsDict;
-
-//    const [threeMostRecentAuthors, setThreeMostRecentAuthors] = useState([])
-
-//    const [authorArray, setAuthorArray] = useState([])
-
-//    const addAuthorTab = (authorID) => { props.etc }
-
-//    return (
-//        <div className="friendSearchContainer">
-//            {authorArray.map(authorDict =>
-//                <FriendProfileButton onClick={addAuthorTab} authorInfo={authorDict} />)}
-//        </div>
-
-//    )
-
-//}
+    return (
+        <button onClick={handleSubmit}>UNFOLLOW
+        </button>
+    )
+}
 

@@ -23,10 +23,15 @@ namespace ChainMates.Server.Services
             return await _context.Author.ToListAsync();
         }
 
-        public async Task<Author> GetAuthorById(int authorId)
+        public async Task<AuthorDto?> GetAuthorById(int authorId)
         {
-            return await _context.Author
-                .SingleAsync(a => a.Id == authorId);
+            return await (from a in _context.Author
+                          where a.Id == authorId
+                          select new AuthorDto
+                          {
+                              Id = a.Id,
+                              DisplayName = a.DisplayName
+                          }).FirstOrDefaultAsync();
         }
 
         public async Task<AuthorDto?> GetAuthorDtoById(int authorID)
@@ -55,7 +60,7 @@ namespace ChainMates.Server.Services
         }
 
 
-        public async Task<List<AuthorDto>> GetFollowedAuthors(int authorId)
+        public async Task<List<AuthorDto>> GetAuthorsWhoYouFollow(int authorId)
         {
             return await (from ar in _context.AuthorRelation
                           join a in _context.Author
@@ -69,7 +74,7 @@ namespace ChainMates.Server.Services
                           }
                           ).ToListAsync();
         }
-        public async Task<List<AuthorDto>> GetFollowingAuthors(int authorId)
+        public async Task<List<AuthorDto>> GetAuthorsWhoFollowYou(int authorId)
         {
             return await (from ar in _context.AuthorRelation
                           join a in _context.Author
@@ -90,13 +95,30 @@ namespace ChainMates.Server.Services
                 AuthorId = authorId,
                 RelatedAuthorId = authorToFollowId,
                 AuthorRelationTypeId = 1
-
             };
             _context.AuthorRelation.Add(authorRelation);
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.InnerException.Message);
+            }
             return authorRelation;
         }
+
+        public async Task<int> UnFollowAuthor(int authorId, int authorToUnFollowId)
+        {
+            var deleteRelation = await (from ar in _context.AuthorRelation
+                                        where ar.AuthorId == authorId
+                                        where ar.RelatedAuthorId == authorToUnFollowId
+                                        select ar
+                                        ).ExecuteDeleteAsync();
+            return deleteRelation;
+        }
+
 
         public async Task<List<Circle>> GetCircles()
         {
@@ -158,13 +180,15 @@ namespace ChainMates.Server.Services
         public async Task<List<SegmentHistoryIncludingCommentsDto>> GetRecentSegmentHistoriesByAuthorId(int authorId, int numberOfSegments)
         {
             var segmentService = new SegmentService(_context);
+            var acceptedStatusIds = new[] { 4, 5 };
 
-            var segmentIdList = (from s in _context.Segment
-                                     where s.SegmentStatusId == 4
-                                     where s.AuthorId == authorId
-                                     orderby s.Id descending
-                                     select s.Id)
-                              .Take(numberOfSegments);
+            var segmentIdList = await (from s in _context.Segment
+                                       where acceptedStatusIds.Contains(s.SegmentStatusId)
+                                       where s.AuthorId == authorId
+                                       orderby s.DateCreated descending
+                                       select s.Id)
+                              .Take(numberOfSegments)
+                              .ToListAsync();
             List<SegmentHistoryIncludingCommentsDto> dtoList = new List<SegmentHistoryIncludingCommentsDto>();
             foreach (var segmentId in segmentIdList)
             {

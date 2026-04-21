@@ -7,7 +7,7 @@ import { Comments } from "./comments.jsx";
 import { getArrayObjByID } from "./utilityFuncs";
 import { contactAPI } from "./utilityFuncs";
 
-export default { StoryTab };
+export default { StoryTab , SegmentDisplay};
 
 export function StoryTab(props) {
 
@@ -82,7 +82,7 @@ function StoryHeader(props) {
     </div>)
 }
 
-function SegmentDisplay(props) {
+export function SegmentDisplay(props) {
 
     console.log(props.id)
 

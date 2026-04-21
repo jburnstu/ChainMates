@@ -33,8 +33,8 @@ namespace ChainMates.Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("following")]
-        public async Task<IActionResult> GetFollowing()
+        [HttpGet("whoyoufollow")]
+        public async Task<IActionResult> GetAuthorsWhoYouFollow()
         {
             int authorId = _currentUserService.UserId ?? 0;
 
@@ -43,12 +43,12 @@ namespace ChainMates.Server.Controllers
                 return Unauthorized();
             }
 
-            var data = await _authorService.GetFollowingAuthors(authorId);
+            var data = await _authorService.GetAuthorsWhoYouFollow(authorId);
             return Ok(data);
         }
 
         [Authorize]
-        [HttpGet("followed")]
+        [HttpGet("whofollowyou")]
         public async Task<IActionResult> GetFollowed()
         {
             int authorId = _currentUserService.UserId ?? 0;
@@ -58,12 +58,12 @@ namespace ChainMates.Server.Controllers
                 return Unauthorized();
             }
 
-            var data = await _authorService.GetFollowedAuthors(authorId);
+            var data = await _authorService.GetAuthorsWhoFollowYou(authorId);
             return Ok(data);
         }
 
         [Authorize]
-        [HttpGet("following/{'authorToFollowId'}")]
+        [HttpPost("whoyoufollow/{authorToFollowId}")]
         public async Task<IActionResult> CreateFollowingRelation(int authorToFollowId)
         {
             int authorId = _currentUserService.UserId ?? 0;
@@ -76,6 +76,22 @@ namespace ChainMates.Server.Controllers
             var data = await _authorService.FollowAuthor(authorId, authorToFollowId);
             return Ok(data);
         }
+
+        [Authorize]
+        [HttpDelete("whoyoufollow/{authorToUnFollowId}")]
+        public async Task<IActionResult> DeleteFollowingRelation(int authorToUnFollowId)
+        {
+            int authorId = _currentUserService.UserId ?? 0;
+
+            if (authorId == 0)
+            {
+                return Unauthorized();
+            }
+
+            var data = await _authorService.UnFollowAuthor(authorId, authorToUnFollowId);
+            return Ok(data);
+        }
+
 
 
         [HttpGet("circles/all")]

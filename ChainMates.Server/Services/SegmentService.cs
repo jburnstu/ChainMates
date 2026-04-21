@@ -81,8 +81,9 @@ namespace ChainMates.Server.Services
         public async Task<SegmentHistoryIncludingCommentsDto?> GetSegmentTraceBySegment(int segmentId)
         {
             StoryService storyService = new StoryService(_context);
-            CommentService commentService = new CommentService(_context);
             var story = await storyService.GetStoryBySegment(segmentId);
+
+            CommentService commentService = new CommentService(_context);
             var storyComments = await commentService.GetStoryCommentAndChildrenForTrace(story.Id);
             var storyDto = new StoryIncludingCommentsDto
             {
@@ -267,6 +268,27 @@ namespace ChainMates.Server.Services
                 segment.PreviousSegment.SegmentStatusId = 4;
             }
             //await _context.SaveChangesAsync();
+            return segment;
+        }
+
+        public async Task<Segment> ApproveModeration(ModerationAssignmentDto dto, int authorId)
+        {
+
+            var segment = await (from s in _context.Segment
+                                 where s.Id == dto.SegmentId
+                                 select s).FirstOrDefaultAsync();
+            segment.SegmentStatusId = 4;
+            if (segment.PreviousSegmentId is not null)
+            {
+                segment.PreviousSegment.SegmentStatusId = 4;
+            }
+            var moderationAssignment = await (from ma in _context.ModerationAssignment
+                                              where ma.AuthorId == authorId
+                                              where ma.SegmentId == dto.SegmentId
+                                              select ma)
+                                          .FirstOrDefaultAsync();
+            moderationAssignment.IsClosed = true;
+            await _context.SaveChangesAsync();
             return segment;
         }
 
