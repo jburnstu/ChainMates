@@ -6,9 +6,10 @@ import React, { useEffect, useState } from "react";
 import { contactAPI } from "../supportFuncs/utilityFuncs";
 
 export function Notifications() {
-    console.log("In notifications");
-    const [notificationDTOList, setNotificationDTOList] = useState([]);
 
+    /////// Grab notifications when the component is loaded --  ///////
+    /////// not passed in initial data load  //////////////////////////
+    const [notificationDTOList, setNotificationDTOList] = useState([]);
     useEffect(() => {
         const fetchData = async () => {
             contactAPI("notifications/", "get", true)
@@ -16,11 +17,9 @@ export function Notifications() {
                     setNotificationDTOList(value);
                 })
         }
-        console.log("in notifUseEffect");
         fetchData();
     }, [])
 
-    console.log(notificationDTOList)
     return (
         <div className="rightSidebar notifications">
             <header>Notifications</header>
@@ -37,15 +36,12 @@ export function Notifications() {
 
 function NotificationPanel(props) {
 
-    console.log(props.notificationDTO)
     let dto = props.notificationDTO.info;
     let typeID = props.notificationDTO.notificationTypeId;
-    console.log(dto);
-    console.log(typeID);
       
-
     let content;
     switch (typeID) {
+        // At some point will change this to a clearer enum 
         case 1:
             content = dto.Instigator.DisplayName + " started following you!";
             // Nothing else

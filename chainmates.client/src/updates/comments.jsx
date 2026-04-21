@@ -6,7 +6,7 @@ import { contactAPI } from "../supportFuncs/utilityFuncs";
 export default { Comments };
 
 export function Comments(props) {
-
+    // Selections is passed by the tab to determine which per-segment-comments to show
     let selections = props.selections;
     let storyDict = props.storyDict;
     let segmentTraceWithInfo = storyDict.segmentHistoryList;
@@ -23,6 +23,7 @@ export function Comments(props) {
 }
 
 function StoryCommentPanel(props) {
+    // Not set up yet
     return (
         <header>Story Comments (Coming Soon)</header>
     )
@@ -33,6 +34,8 @@ function SegmentInfoPanel(props) {
 
     let segmentInfo = props.segmentInfo;
 
+    // Creating a separate window to view comments from this segment's moderation
+    // (Not yet actually functionality that exists)
     const [isModerationOpen, setIsModerationOpen] = useState(false);
 
 
@@ -82,6 +85,7 @@ function CommentCreationPanel(props) {
 
     let typeID;
     switch (props.parentType) {
+        //Could probably be removed with an enum of some sort
         case "story":
             typeID = 1;
             break;
@@ -93,13 +97,14 @@ function CommentCreationPanel(props) {
             break;
     }
 
-    console.log(props.parentID, typeID);
 
     function onChange(e) {
         setCurrentContent(e.target.value);
     }
 
     async function createAndSubmitComment() {
+        //Note that unlike segments, there's no saving comments (hence no deleting
+        // for now) -- they're only registered in the backend when they're finalised
         await contactAPI("comments/", "post", true,
             {
                 commentTypeId: typeID,
@@ -107,7 +112,6 @@ function CommentCreationPanel(props) {
                 content: currentContent 
             });
     }
-
 
     return (
         <div className="addCommentContainer">

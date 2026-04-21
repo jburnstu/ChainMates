@@ -5,7 +5,6 @@ using ChainMates.Server.DTOs.Segment;
 using ChainMates.Server.Services;
 using System.Diagnostics;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace ChainMates.Server.Controllers
 {
@@ -36,6 +35,9 @@ namespace ChainMates.Server.Controllers
             return Ok(data);
         }
 
+
+        ///////////////// Next few endpoints handle the creation, saving, submission, and deletion of segments
+        /// (i.e. all actions on the write-tab)    ////////////////////////////////////////////////////////////
 
         [Authorize]
         [HttpPost]
@@ -86,6 +88,58 @@ namespace ChainMates.Server.Controllers
 
         }
 
+
+        //////////////// Handle the assignment of a user to a segment as moderator, and approval   ///////////
+        /////////////       (i.e. actions on review-tab). API structure here could be cleaned up.   ///////////
+
+
+        [Authorize]
+        [HttpPost("moderationassignments/{segmentId}")]
+
+        public async Task<IActionResult> PostModerationAssignmentAsync(int segmentId)
+        {
+            int authorId = _currentUserService.UserId ?? 0;
+
+            if (authorId == 0)
+            {
+                return Unauthorized();
+            }
+            await _service.CreateModerationAssignment(segmentId, authorId);
+            return Ok("Done!"); // Nothing needed for now
+
+        }
+
+        [Authorize]
+        [HttpPost("moderationassignments/{segmentId}/approve")]
+
+        public async Task<IActionResult> PostModerationApprove(int segmentId)
+        {
+            Debug.WriteLine("In Patch Moderation");
+            int authorId = _currentUserService.UserId ?? 0;
+
+            if (authorId == 0)
+            {
+                return Unauthorized();
+            }
+            await _service.ApproveModeration(segmentId, authorId);
+            await _notificationService.NotifySegmentApproved(segmentId, authorId);
+            return Ok(segmentId);
+
+        }
+
+
+        /////////////// Used extensively -- delivers a DTO with all the data in that segment's chain
+
+        [HttpGet("{idForTrace}/history")]
+        public async Task<IActionResult> GetSegmentHistory(int idForTrace)
+        {
+            var data = await _service.GetSegmentHistoryBySegment(idForTrace);
+            return Ok(data);
+        }
+
+
+        ////////////////////////// Endpoints for segments available per author. Could put under authors/ instead?
+
         [Authorize]
         [HttpGet("joinablesegments")]
 
@@ -118,48 +172,6 @@ namespace ChainMates.Server.Controllers
             var data = _service.GetModeratableSegmentIdsByAuthor(authorId, traces);
             return Ok(data);
 
-        }
-
-        [Authorize]
-        [HttpPost("moderationassignments/{segmentId}")]
-
-        public async Task<IActionResult> PostModerationAssignmentAsync(int segmentId)
-        {
-            int authorId = _currentUserService.UserId ?? 0;
-
-            if (authorId == 0)
-            {
-                return Unauthorized();
-            }
-            await _service.CreateModerationAssignment(segmentId, authorId);
-            return Ok("Done!"); // Nothing needed for now
-
-        }
-
-        [Authorize]
-        [HttpPost("moderationassignments/{segmentId}/approve")]
-
-        public async Task<IActionResult> PostModerationApprove(int segmentId)
-        {
-            Debug.WriteLine("In Patch Moderation");
-            int authorId = _currentUserService.UserId ?? 0;
-
-            if (authorId == 0)
-            {
-                return Unauthorized();
-            }
-            await _service.ApproveModeration(segmentId, authorId);
-            await _notificationService.NotifySegemntApproved(segmentId, authorId);
-            return Ok(segmentId);
-
-        }
-
-
-        [HttpGet("{idForTrace}/history")]
-        public async Task<IActionResult> GetSegmentHistory(int idForTrace)
-        {
-            var data = await _service.GetSegmentHistoryBySegment(idForTrace);
-            return Ok(data);
         }
 
     }

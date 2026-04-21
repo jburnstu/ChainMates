@@ -15,40 +15,24 @@ import { SegmentDisplay } from "../segmentDisplay"
 export default { WorkshopTab };
 
 export function WorkshopTab(props) {
-    const navigate = useNavigate();
+
     let writeOrReview = props.writeOrReview;
+    const navigate = useNavigate();
     const { tabID } = useParams();
+    const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
 
-
-    const [wordCount, setWordCount] = useState(0);
-    const [currentContentByStory, setCurrentContentByStory] = useOutletContext();
-
-    console.log(tabID, props.dicts);
-    console.log(writeOrReview)
-
+    // Attempt to load up this story's info, else navigate back to the dashobard ////////////
     let storyDict = getArrayObjByID(props.dicts, tabID);
     if (storyDict == undefined) {
         console.log("navigating....");
         navigate(`/${writeOrReview}/`);
     }
-    console.log(storyDict);
+  
+
+    ////// Handle changes to the text in the active ie final segment (if this is a write-tab) ///////////////
+    const [currentContentByStory, setCurrentContentByStory] = useOutletContext();
     let currentContent = currentContentByStory[tabID];
-
-
-
-    let noSelections = {};
-    storyDict.segmentHistoryList.forEach(dictInArray =>
-        noSelections[dictInArray.id] = false)
-    const [selectedSegmentDict, setSelectedSegmentDict] = useState(noSelections);
-
-    function changeSegmentSelection(segmentID) {
-        setSelectedSegmentDict({ ...selectedSegmentDict, [segmentID]: !selectedSegmentDict[segmentID] })
-    }
-
-    function handleChange(e) {
-        setCurrentContentByStory({ ...currentContentByStory, [tabID]: e.target.value });
-        setWordCount(getWordCount(currentContent));
-    }
+    const [wordCount, setWordCount] = useState(0);
 
     function getWordCount(myText) {
         // const spaceMatchPattern = /[\w\d][\s\W*\d*]+[\w\d]/;
@@ -56,8 +40,21 @@ export function WorkshopTab(props) {
         let numberOfSpaces = myText.match(spaceMatchPattern);
         return (numberOfSpaces ? numberOfSpaces : []).length;
     }
+    function handleChange(e) {
+        setCurrentContentByStory({ ...currentContentByStory, [tabID]: e.target.value });
+        setWordCount(getWordCount(currentContent));
+    }
 
-    const removeCurrentStory = (storyDict) => props.setDicts(storyDict, writeOrReview, "remove");
+
+    ///////////////// Assign each segment an on-off selection for the Comments + Info sidebar ///////////////
+    let noSelections = {};
+    storyDict.segmentHistoryList.forEach(dictInArray =>
+        noSelections[dictInArray.id] = false);
+    const [selectedSegmentDict, setSelectedSegmentDict] = useState(noSelections);
+    function changeSegmentSelection(segmentID) {
+        setSelectedSegmentDict({ ...selectedSegmentDict, [segmentID]: !selectedSegmentDict[segmentID] })
+    }
+
 
     return (
         <PageOrTabLayout 
@@ -69,7 +66,7 @@ export function WorkshopTab(props) {
                     <SegmentDisplay key={segmentDict.id}
                         id={segmentDict.id}
                         isFinalSegment={writeOrReview =="write" && segmentDict.id == tabID} //Fixed to avoid any formatting of final segment in review tab -- will change this at some point
-                        fixedContent={segmentDict.content}
+                        fixedContent={segmentDict.content} 
                         currentContent={currentContent}
                         changeSelection={changeSegmentSelection}
                         onChange={handleChange}/>

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 
 namespace ChainMates.Server.Services
+    ////DISCLOSURE: used AI to generate this section, as ever ensuring that i understood how it worked after the fact.
 {
     public class CurrentUserService
     {
@@ -20,8 +21,6 @@ namespace ChainMates.Server.Services
         {
             get
             {
-                Console.WriteLine("Inside UserIdGet");
-                Debug.WriteLine("DEBUG: Inside UserIdGet");
                 var user = _httpContextAccessor.HttpContext?.User;
 
                 var claim = user?.FindFirst(ClaimTypes.NameIdentifier);

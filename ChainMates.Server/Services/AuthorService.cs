@@ -59,13 +59,13 @@ namespace ChainMates.Server.Services
             return author;
         }
 
-
+        ///////////// Methods for follow-relations
         public async Task<List<AuthorDto>> GetAuthorsWhoYouFollow(int authorId)
         {
             return await (from ar in _context.AuthorRelation
                           join a in _context.Author
                           on ar.RelatedAuthorId equals a.Id
-                          where ar.AuthorRelationTypeId == 1
+                          where ar.AuthorRelationTypeId == 1 //actually the only ID but added this check for posterity
                           where ar.AuthorId == authorId
                           select new AuthorDto
                           {
@@ -97,17 +97,7 @@ namespace ChainMates.Server.Services
                 AuthorRelationTypeId = 1
             };
             _context.AuthorRelation.Add(authorRelation);
-
-
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.InnerException.Message);
-            }
+            await _context.SaveChangesAsync();
             return authorRelation;
         }
 
@@ -122,11 +112,37 @@ namespace ChainMates.Server.Services
         }
 
 
+       
+
+        public async Task<List<SegmentHistoryDto>> GetRecentSegmentHistoriesByAuthorId(int authorId, int numberOfSegments)
+            //Used for the author-search page, where recent work is displayed
+        {
+            var segmentService = new SegmentService(_context);
+            var acceptedStatusIds = new[] { 4, 5 }; //not deleted, in moderation, etc
+
+            var segmentIdList = await (from s in _context.Segment
+                                       where acceptedStatusIds.Contains(s.SegmentStatusId)
+                                       where s.AuthorId == authorId
+                                       orderby s.DateCreated descending
+                                       select s.Id)
+                              .Take(numberOfSegments)
+                              .ToListAsync();
+            List<SegmentHistoryDto> dtoList = new List<SegmentHistoryDto>();
+            foreach (var segmentId in segmentIdList)
+            {
+                var segmentTrace = await segmentService.GetSegmentHistoryBySegment(segmentId);
+                dtoList.Add(segmentTrace);
+            }
+            return dtoList;
+        }
+
+
+        /// //////////// From here, it's circle methods that aren't used yet
         public async Task<List<Circle>> GetCircles()
         {
             return await _context.Circle.ToListAsync();
         }
-        
+
         public async Task<List<CircleDto>> GetCirclesByAuthorId(int authorId)
         {
             return await (from ca in _context.CircleAssignment
@@ -179,25 +195,5 @@ namespace ChainMates.Server.Services
             return circleAssignment;
         }
 
-        public async Task<List<SegmentHistoryDto>> GetRecentSegmentHistoriesByAuthorId(int authorId, int numberOfSegments)
-        {
-            var segmentService = new SegmentService(_context);
-            var acceptedStatusIds = new[] { 4, 5 };
-
-            var segmentIdList = await (from s in _context.Segment
-                                       where acceptedStatusIds.Contains(s.SegmentStatusId)
-                                       where s.AuthorId == authorId
-                                       orderby s.DateCreated descending
-                                       select s.Id)
-                              .Take(numberOfSegments)
-                              .ToListAsync();
-            List<SegmentHistoryDto> dtoList = new List<SegmentHistoryDto>();
-            foreach (var segmentId in segmentIdList)
-            {
-                var segmentTrace = await segmentService.GetSegmentHistoryBySegment(segmentId);
-                dtoList.Add(segmentTrace);
-            }
-            return dtoList;
-        }
     }
 }

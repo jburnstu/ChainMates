@@ -7,6 +7,7 @@ import { contactAPI } from "../supportFuncs/utilityFuncs";
 export default { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink, FollowButton, UnFollowButton };
 
 export function AuthorSearchButton() {
+    // Currently just loads up all authors (no filtering)
 
     const [isOpen, setIsOpen] = useState(false);
     const [authorArray, setAuthorArray] = useState([])
@@ -15,10 +16,9 @@ export function AuthorSearchButton() {
         if (!isOpen) {
             contactAPI(`authors`, "get", false)
                 .then(function (value) {
-                    console.log(value)
                     setAuthorArray(value)
                 })
-                .then(function (innerValue) {
+                .then(() => {
                     setIsOpen(true);
                 })
         }
@@ -42,7 +42,7 @@ export function AuthorSearchButton() {
 }
 
 export function StorySearchButton() {
-
+    // Same as above, except also loads up the author who began the story
     const [isOpen, setIsOpen] = useState(false);
     const [storyArray, setStoryArray] = useState([])
 
@@ -79,22 +79,22 @@ export function StorySearchButton() {
 
 
 export function AuthorNameLink({ authorInfo }) {
-    console.log(authorInfo)
+    // Would be nice to turn this into something more universal, i.e. everywhere you see their name
     return (
         <Link to={`/authors/${authorInfo.id}`}><button type="button">{authorInfo.displayName}</button></Link>
     )
 }
 
 export function StoryNameLink({ storyInfo }) {
+    // Same as above
     return (
         <Link to={`${storyInfo.id}`}><button type="button">{ storyInfo.title }</button ></Link>
     )
 }
 
 export function FollowButton(props) {
-
+    // Need something to prevent double-follow / self-follow 
     async function handleSubmit(e) {
-        console.log(props.authorDict)
         await contactAPI(`authors/whoyoufollow/${props.authorDict.id}`, "post", true)
     }
 
@@ -105,6 +105,7 @@ export function FollowButton(props) {
 }
 
 export function UnFollowButton(props) {
+    // Need to prevent double-un-follow
 
     async function handleSubmit(e) {
         await contactAPI(`authors/whoyoufollow/${props.authorDict.id}`, "delete", true,)

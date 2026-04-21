@@ -24,6 +24,9 @@ namespace ChainMates.Server.Services
         }
 
         public SegmentService()
+            // This contextless service exists for testing. It does prompt a whole load of null warnings,
+            // which suggests separating out the database calls here into a repository layer and only 
+            // leaving methods that can be given an object array.
         {
             _rnd = new Random();
         }
@@ -59,6 +62,7 @@ namespace ChainMates.Server.Services
 
 
         public async Task<HistoricalSegmentDto?> GetHistoricalSegment(int segmentId)
+            // The DTO that is nested inside another segment's info when its history is needed
         {
             CommentService commentService = new CommentService(_context);
             var childComments = await commentService.GetHistoricalSegmentCommentAndChildren(segmentId);
@@ -88,7 +92,6 @@ namespace ChainMates.Server.Services
             var storyComments = await commentService.GetStoryCommentAndChildrenForHistory(story.Id);
             var storyDto = new StoryIncludingCommentsDto
             {
-                //Id = story.Id,
                 Title = story.Title,
                 MaxSegments = story.MaxSegments,
                 MaxSegmentLength = story.MaxSegmentLength,
@@ -125,7 +128,7 @@ namespace ChainMates.Server.Services
         public async Task<Segment> CreateSegment(SegmentCreationDto dto, int authorId, bool save)
         {
             var storyId = dto.StoryId ?? 0;
-            if (dto.PreviousSegmentId != null)
+            if (dto.PreviousSegmentId != null) // lock previous segment until this one has been approved
             {
 
                 Segment? previousSegment = await (from s in _context.Segment
@@ -146,9 +149,8 @@ namespace ChainMates.Server.Services
             };
 
                 _context.Segment.Add(segment);
-            if (save == true)
+            if (save == true) // From when I was bulk-calling this method -- will delete soon if not reintroduced
             {
-                Debug.WriteLine("Save is true");
                 await _context.SaveChangesAsync();
             }
             return segment;
@@ -164,7 +166,6 @@ namespace ChainMates.Server.Services
         
         public async Task<string> SubmitSegmentForModeration(int segmentId, string content)
         {
-            Debug.WriteLine("in SubmitSegmentForModeration");
             var segment = await GetSegment(segmentId);
             segment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForModeration;
             segment.Content = content;
@@ -175,7 +176,6 @@ namespace ChainMates.Server.Services
 
         public async Task<ModerationAssignment> CreateModerationAssignment(int segmentId, int authorId)
         {
-            Debug.WriteLine("CreateModerationAssignment");
 
             var moderationAssignment = new ModerationAssignment
             {
@@ -185,8 +185,10 @@ namespace ChainMates.Server.Services
             };
             _context.ModerationAssignment.Add(moderationAssignment);
 
-            Debug.WriteLine(segmentId);
             var segment = await GetSegment(segmentId);
+            // Currently moderation is tracked both by moderationassignment objects and by segmentstatusid.
+            // This isn't ideal, but it's slightly for posterity in case segments need to be reviewed
+            // multiple times in the future.
             segment.SegmentStatusId = (int)enums.SegmentStatus.LockedForModeration;
 
             await _context.SaveChangesAsync();
@@ -203,12 +205,13 @@ namespace ChainMates.Server.Services
 
             moderationAssignment.IsClosed = true;
 
+            // Set the segment as available for addition (ie approved)
             Segment segment = await (from s in _context.Segment
                                      where s.Id == moderationAssignment.SegmentId
                                      select s).FirstOrDefaultAsync();
             segment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForAddition;
 
-
+            // Same for previous segment if exists
             Segment? previousSegment = await (from s in _context.Segment
                                          where s.Id == moderationAssignment.SegmentId
                                          select s.PreviousSegment)
@@ -220,15 +223,18 @@ namespace ChainMates.Server.Services
             await _context.SaveChangesAsync();
             return segmentId;
         }
+
         public async Task<string> AbandonSegment(int segmentId, string content)
         {
             var segment = await GetSegment(segmentId);
             segment.SegmentStatusId = (int)enums.SegmentStatus.Abandoned;
             segment.Content = content;
+
+            // If there's a previous segment, it becomes available again
             if (segment.PreviousSegmentId != null)
             {
                 Segment? previousSegment = await GetSegment((int)segment.PreviousSegmentId);
-                previousSegment?.SegmentStatusId = (int)enums.SegmentStatus.LockedForAddition;
+                previousSegment?.SegmentStatusId = (int)enums.SegmentStatus.AvailableForAddition;
             }
 
             await _context.SaveChangesAsync();
@@ -239,13 +245,15 @@ namespace ChainMates.Server.Services
 
         public async Task<List<SegmentTrace>> GetSegmentTraces()
         {
-        
+            // used in the joinable/moderatable checks. The idea is that this could eventually be separated
+            // into a repository layer, where the DB isn't required.
             return await _context.SegmentTrace.ToListAsync();
         }
 
         public async Task<List<int>> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
         {
-
+            // Blocked if any previous segment was written by the author
+            // Might also introduce "blocked if any future segment written by the author"
             var blockedSegmentIdList = traces
                 .Where(t => t.EarlierSegmentAuthorId == authorId)
                 .Select(t => t.FinalSegmentId)
@@ -262,7 +270,7 @@ namespace ChainMates.Server.Services
 
         public List<int> GetModeratableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
         {
-
+            // Blocked if any previous segment was written by the author
             var blockedSegmentIdList = traces
                 .Where(t => t.EarlierSegmentAuthorId == authorId)
                 .Select(t => t.FinalSegmentId)

@@ -13,8 +13,9 @@ import { Notifications } from "../updates/notifications";
 export default { AuthorSearchPage }
 export function AuthorSearchPage(props) {
 
+    /////////////// Load up the author's data, return null if it  /////////
+    //////////////  can't be found (/while it's being loaded)    /////////////////////
     const { authorID } = useParams();
-    const [recentSegmentHistoryDTOList, setRecentSegmentHistoryDTOList] = useState([]);
     const [authorDict, setAuthorDict] = useState(null);
 
     useEffect(() => {
@@ -32,8 +33,9 @@ export function AuthorSearchPage(props) {
         fetchData();
     }, [authorID]);
 
-    let circleNotificationDTOList;
-    let notificationDTOList;
+    ///// Load up some of the author's most recent segments 
+
+    const [recentSegmentHistoryDTOList, setRecentSegmentHistoryDTOList] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -46,9 +48,13 @@ export function AuthorSearchPage(props) {
     }, [authorDict?.id]);
 
 
+    // Circles aren't up and running yet
+    let circleNotificationDTOList;
+
     if (!authorDict?.id) {
         return null;
     }
+
 
     return (
         <PageOrTabLayout 
@@ -61,7 +67,7 @@ export function AuthorSearchPage(props) {
                         <header>Recent Segments</header>
                          <div className="recentSegmentsArray">
                         {recentSegmentHistoryDTOList.map(recentSegmentHistoryDTO =>
-                            <RecentSegmentDisplay key={recentSegmentHistoryDTO.id} segmentTraceInfo={recentSegmentHistoryDTO} />)
+                            <RecentSegmentDisplay key={recentSegmentHistoryDTO.id} segmentHistoryInfo={recentSegmentHistoryDTO} />)
                             }
                         </div>
                     </div>
@@ -75,6 +81,8 @@ export function AuthorSearchPage(props) {
                 props.self
                     ? null
                     :
+                    // NB: haven't yet set up these buttons to refuse invalid calls, or to not 
+                    // be present on the author's own page if searched
                         <>
                             <FollowButton authorDict={authorDict} />
                             <UnFollowButton authorDict={authorDict} />
@@ -82,7 +90,7 @@ export function AuthorSearchPage(props) {
             }
             rightSidebar={
                 props.self
-                    ? <Notifications notificationDTOList={notificationDTOList} />
+                    ? <Notifications/>
                     : <Activity />
             }
         /> 
