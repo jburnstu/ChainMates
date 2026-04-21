@@ -1,6 +1,6 @@
 # ChainMates (Working Title)
 
-This is the development code-base for my personal project, ChainMates (one of many working titles) -- a **desktop (for now) app** on which users *create, write and submit stories*, which are then sent on for other users to continue and *branch off of*.<br><br>
+This is the development code-base for my personal project, ChainMates (one of many working titles) -- a **desktop (for now) app** on which users *create, write and submit stories*, which are then sent on for other users to continue and branch off of.<br><br>
 
 This app started life in Django (see the repo "chainletters", from which I've copied over this ReadMe as a starting point), with the aim of keeping my Python / SQL skills sharp, and expand my knowledge of HTML / CSS / Javascript, in particular JS-React.
 
