@@ -13,8 +13,9 @@ import { Notifications } from "../updates/notifications";
 export default { AuthorSearchPage }
 export function AuthorSearchPage(props) {
 
+    /////////////// Load up the author's data, return null if it  /////////
+    //////////////  can't be found (/while it's being loaded)    /////////////////////
     const { authorID } = useParams();
-    const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
     const [authorDict, setAuthorDict] = useState(null);
 
     useEffect(() => {
@@ -32,16 +33,19 @@ export function AuthorSearchPage(props) {
         fetchData();
     }, [authorID]);
 
+    if (!authorDict?.id) {
+        return null;
+    }
 
+
+    ///// Load up some of the author's most recent segments 
+
+    const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
     async function getRecentSegmentTraceDTOList() {
         let recentSegmentByAuthorData = await contactAPI(`authors/${authorDict.id}/recentsegments/`, "get", true, {}, []);
         console.log(recentSegmentByAuthorData);
         return recentSegmentByAuthorData;
     }
-
-    let circleNotificationDTOList;
-    let notificationDTOList;
-
     useEffect(() => {
         const fetchData = async () => {
             let segmentTraceDataArray = await getRecentSegmentTraceDTOList();
@@ -53,9 +57,8 @@ export function AuthorSearchPage(props) {
     }, [authorDict?.id]);
 
 
-    if (!authorDict?.id) {
-        return null;
-    }
+    // Circles aren't up and running yet
+    let circleNotificationDTOList;
 
     return (
         <PageOrTabLayout 
@@ -82,6 +85,8 @@ export function AuthorSearchPage(props) {
                 props.self
                     ? null
                     :
+                    // NB: haven't yet set up these buttons to refuse invalid calls, or to not 
+                    // be present on the author's own page if searched
                         <>
                             <FollowButton authorDict={authorDict} />
                             <UnFollowButton authorDict={authorDict} />
@@ -89,7 +94,7 @@ export function AuthorSearchPage(props) {
             }
             rightSidebar={
                 props.self
-                    ? <Notifications notificationDTOList={notificationDTOList} />
+                    ? <Notifications/>
                     : <Activity />
             }
         /> 
