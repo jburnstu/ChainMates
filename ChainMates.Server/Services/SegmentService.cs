@@ -8,6 +8,7 @@ using ChainMates.Server.DTOs.Segment;
 using ChainMates.Server.DTOs.Story;
 using System;
 using System.Diagnostics;
+using ChainMates.Server.enums;
 
 namespace ChainMates.Server.Services
 {
@@ -27,22 +28,16 @@ namespace ChainMates.Server.Services
             _rnd = new Random();
         }
 
-        public async Task<List<Segment>> GetSegments()
-        {
-            return await _context.Segment.ToListAsync();
-        }
 
-        public async Task<Segment> GetSegmentById(int segmentId)
+        public async Task<Segment> GetSegment(int segmentId)
         {
-            Debug.WriteLine("In getSegmentById");
-            Debug.WriteLine(segmentId);
             return await _context.Segment
                 .SingleAsync(s => s.Id == segmentId);
 
         }
 
-
         public async Task<List<int>> GetSegmentIdsByAuthorIdAndStatusId(int authorId, int segmentStatusId)
+        //Revisit naming of functions like this -- do we need "Id" after everything?
         {
             return await (from s in _context.Segment
                           where s.AuthorId == authorId
@@ -63,14 +58,14 @@ namespace ChainMates.Server.Services
 
 
 
-        public async Task<SegmentForTraceIncludingCommentsDto?> GetSegmentForTraceById(int segmentId)
+        public async Task<HistoricalSegmentDto?> GetHistoricalSegment(int segmentId)
         {
             CommentService commentService = new CommentService(_context);
-            var childComments = await commentService.GetSegmentCommentAndChildrenForTrace(segmentId);
+            var childComments = await commentService.GetHistoricalSegmentCommentAndChildren(segmentId);
 
             return await _context.Segment
                 .Where(st => st.Id == segmentId)
-                .Select(st => new SegmentForTraceIncludingCommentsDto
+                .Select(st => new HistoricalSegmentDto
                 {
                     Id = st.Id,
                     Content = st.Content,
@@ -84,13 +79,13 @@ namespace ChainMates.Server.Services
                 ).FirstOrDefaultAsync();
         }
 
-        public async Task<SegmentHistoryIncludingCommentsDto?> GetSegmentTraceBySegment(int segmentId)
+        public async Task<SegmentHistoryDto?> GetSegmentHistoryBySegment(int segmentId)
         {
             StoryService storyService = new StoryService(_context);
             var story = await storyService.GetStoryBySegment(segmentId);
 
             CommentService commentService = new CommentService(_context);
-            var storyComments = await commentService.GetStoryCommentAndChildrenForTrace(story.Id);
+            var storyComments = await commentService.GetStoryCommentAndChildrenForHistory(story.Id);
             var storyDto = new StoryIncludingCommentsDto
             {
                 //Id = story.Id,
@@ -103,7 +98,7 @@ namespace ChainMates.Server.Services
                 ChildComments = storyComments
             };
 
-            List<SegmentForTraceIncludingCommentsDto> segmentHistoryList = new List<SegmentForTraceIncludingCommentsDto>();
+            List<HistoricalSegmentDto> segmentHistoryList = new List<HistoricalSegmentDto>();
 
             List<int> earlierSegmentIdList = await _context.SegmentTrace
                 .Where(st => st.FinalSegmentId == segmentId)
@@ -111,12 +106,12 @@ namespace ChainMates.Server.Services
 
             foreach (int earlierSegmentId in earlierSegmentIdList)
             {
-                SegmentForTraceIncludingCommentsDto segmentDto = await GetSegmentForTraceById(earlierSegmentId);
+                HistoricalSegmentDto segmentDto = await GetHistoricalSegment(earlierSegmentId);
                 segmentHistoryList.Add(segmentDto);
             }
 
 
-            return new SegmentHistoryIncludingCommentsDto
+            return new SegmentHistoryDto
             {
                 Id = segmentId,
                 StoryData = storyDto,
@@ -129,10 +124,6 @@ namespace ChainMates.Server.Services
 
         public async Task<Segment> CreateSegment(SegmentCreationDto dto, int authorId, bool save)
         {
-            Debug.WriteLine("CreateSegment");
-            Debug.WriteLine("STORY ID:");
-            Debug.WriteLine(dto.StoryId);
-
             var storyId = dto.StoryId ?? 0;
             if (dto.PreviousSegmentId != null)
             {
@@ -140,7 +131,7 @@ namespace ChainMates.Server.Services
                 Segment? previousSegment = await (from s in _context.Segment
                                                   where s.Id == dto.PreviousSegmentId
                                                   select s).FirstOrDefaultAsync();
-                previousSegment.SegmentStatusId = 5;
+                previousSegment.SegmentStatusId = (int)enums.SegmentStatus.LockedForAddition;
                 storyId = previousSegment.StoryId;
 
             }
@@ -149,7 +140,7 @@ namespace ChainMates.Server.Services
             {
                 AuthorId = authorId,
                 StoryId = storyId,
-                SegmentStatusId = dto.SegmentStatusId ?? 1,
+                SegmentStatusId = dto.SegmentStatusId ?? (int)enums.SegmentStatus.InProgress,
                 PreviousSegmentId = dto.PreviousSegmentId,
                 Content = (dto.Content ?? "").ToString()
             };
@@ -165,7 +156,7 @@ namespace ChainMates.Server.Services
 
         public async Task<string> UpdateSegmentContent(int segmentId, string content)
         {
-            var segment = await GetSegmentById(segmentId);
+            var segment = await GetSegment(segmentId);
             segment.Content = content;
             await _context.SaveChangesAsync();
             return content;
@@ -174,8 +165,8 @@ namespace ChainMates.Server.Services
         public async Task<string> SubmitSegmentForModeration(int segmentId, string content)
         {
             Debug.WriteLine("in SubmitSegmentForModeration");
-            var segment = await GetSegmentById(segmentId);
-            segment.SegmentStatusId = 2;
+            var segment = await GetSegment(segmentId);
+            segment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForModeration;
             segment.Content = content;
             await _context.SaveChangesAsync();
             return "Done!";
@@ -195,8 +186,8 @@ namespace ChainMates.Server.Services
             _context.ModerationAssignment.Add(moderationAssignment);
 
             Debug.WriteLine(segmentId);
-            var segment = await GetSegmentById(segmentId);
-            segment.SegmentStatusId = 3;
+            var segment = await GetSegment(segmentId);
+            segment.SegmentStatusId = (int)enums.SegmentStatus.LockedForModeration;
 
             await _context.SaveChangesAsync();
             return moderationAssignment;
@@ -205,9 +196,6 @@ namespace ChainMates.Server.Services
         
         public async Task<int> ApproveModeration(int segmentId, int authorId)
         {
-            Debug.WriteLine("ApproveModeration");
-            Debug.WriteLine(segmentId);
-            Debug.WriteLine(authorId);
             var moderationAssignment = await (from ma in _context.ModerationAssignment
                                         where ma.SegmentId == segmentId
                                         where ma.AuthorId == authorId
@@ -218,7 +206,7 @@ namespace ChainMates.Server.Services
             Segment segment = await (from s in _context.Segment
                                      where s.Id == moderationAssignment.SegmentId
                                      select s).FirstOrDefaultAsync();
-            segment.SegmentStatusId = 4;
+            segment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForAddition;
 
 
             Segment? previousSegment = await (from s in _context.Segment
@@ -227,22 +215,20 @@ namespace ChainMates.Server.Services
                                          .FirstOrDefaultAsync();
             if (previousSegment != null)
             {
-                previousSegment.SegmentStatusId = 4;
+                previousSegment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForAddition;
             }
             await _context.SaveChangesAsync();
             return segmentId;
         }
         public async Task<string> AbandonSegment(int segmentId, string content)
         {
-            var segment = await GetSegmentById(segmentId);
-
-            
-            segment.SegmentStatusId = 6;
+            var segment = await GetSegment(segmentId);
+            segment.SegmentStatusId = (int)enums.SegmentStatus.Abandoned;
             segment.Content = content;
             if (segment.PreviousSegmentId != null)
             {
-                Segment? previousSegment = await GetSegmentById((int)segment.PreviousSegmentId);
-                previousSegment?.SegmentStatusId = 5;
+                Segment? previousSegment = await GetSegment((int)segment.PreviousSegmentId);
+                previousSegment?.SegmentStatusId = (int)enums.SegmentStatus.LockedForAddition;
             }
 
             await _context.SaveChangesAsync();
@@ -260,22 +246,16 @@ namespace ChainMates.Server.Services
         public async Task<List<int>> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
         {
 
-            var blockedSegmentIds = traces
+            var blockedSegmentIdList = traces
                 .Where(t => t.EarlierSegmentAuthorId == authorId)
                 .Select(t => t.FinalSegmentId)
                 .ToHashSet();
 
-            //var lockedSegmentIds = await (from t in traces
-            //                              join s in _context.Segment
-            //                              on sbyte.Id = t.F
-                
-                
-
             return traces
-                .Where(t => t.FinalSegmentStatusId == 4)
+                .Where(t => t.FinalSegmentStatusId == (int)enums.SegmentStatus.AvailableForAddition)
                 .Select(t => t.FinalSegmentId)
                 .Distinct()
-                .Where(id => !blockedSegmentIds.Contains(id))
+                .Where(id => !blockedSegmentIdList.Contains(id))
                 .ToList();
                 
         }
@@ -283,16 +263,16 @@ namespace ChainMates.Server.Services
         public List<int> GetModeratableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
         {
 
-            var blockedSegmentIds = traces
+            var blockedSegmentIdList = traces
                 .Where(t => t.EarlierSegmentAuthorId == authorId)
                 .Select(t => t.FinalSegmentId)
                 .ToHashSet();
 
             return traces
-                .Where(t => t.FinalSegmentStatusId == 2)
+                .Where(t => t.FinalSegmentStatusId == (int)enums.SegmentStatus.AvailableForModeration)
                 .Select(t => t.FinalSegmentId)
                 .Distinct()
-                .Where(id => !blockedSegmentIds.Contains(id))
+                .Where(id => !blockedSegmentIdList.Contains(id))
                 .ToList();
 
         }

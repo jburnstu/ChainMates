@@ -20,8 +20,8 @@ public class InitialLoadController : ControllerBase
     protected AuthorService authorService;
     protected SegmentService segmentService;
     protected StoryService storyService;
-    protected List<SegmentHistoryIncludingCommentsDto> writeDicts;
-    protected List<SegmentHistoryIncludingCommentsDto> reviewDicts;
+    protected List<SegmentHistoryDto> writeDicts;
+    protected List<SegmentHistoryDto> reviewDicts;
     protected AuthorDto authorInfo;
     protected StartingUrlDto startingUrlDto;
     protected RelationInfoDto relationInfoDto;
@@ -34,8 +34,8 @@ public class InitialLoadController : ControllerBase
         authorService = new AuthorService(_context);
         storyService = new StoryService(_context);
         segmentService = new SegmentService(_context);
-        writeDicts = new List<SegmentHistoryIncludingCommentsDto>();
-        reviewDicts = new List<SegmentHistoryIncludingCommentsDto>();
+        writeDicts = new List<SegmentHistoryDto>();
+        reviewDicts = new List<SegmentHistoryDto>();
     }
 
 
@@ -53,11 +53,11 @@ public class InitialLoadController : ControllerBase
 
         authorInfo = await authorService.GetAuthorDtoById(authorId);
 
-        var activeWriteSegments = await segmentService.GetSegmentIdsByAuthorIdAndStatusId(authorId, 1);
+        var activeWriteSegments = await segmentService.GetSegmentIdsByAuthorIdAndStatusId(authorId, (int)ChainMates.Server.enums.SegmentStatus.InProgress);
 
         foreach (int finalSegmentId in activeWriteSegments)
         {
-            var activeSegmentHistoryDto = await segmentService.GetSegmentTraceBySegment(finalSegmentId);
+            var activeSegmentHistoryDto = await segmentService.GetSegmentHistoryBySegment(finalSegmentId);
 
             writeDicts.Add(activeSegmentHistoryDto);
         }
@@ -66,7 +66,7 @@ public class InitialLoadController : ControllerBase
 
         foreach (int finalSegmentId in activeReviewSegments)
         {
-            var activeSegmentHistoryDto = await segmentService.GetSegmentTraceBySegment(finalSegmentId);
+            var activeSegmentHistoryDto = await segmentService.GetSegmentHistoryBySegment(finalSegmentId);
             reviewDicts.Add(activeSegmentHistoryDto);
         }
 

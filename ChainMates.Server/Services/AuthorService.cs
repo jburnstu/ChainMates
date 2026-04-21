@@ -179,7 +179,7 @@ namespace ChainMates.Server.Services
             return circleAssignment;
         }
 
-        public async Task<List<SegmentHistoryIncludingCommentsDto>> GetRecentSegmentHistoriesByAuthorId(int authorId, int numberOfSegments)
+        public async Task<List<SegmentHistoryDto>> GetRecentSegmentHistoriesByAuthorId(int authorId, int numberOfSegments)
         {
             var segmentService = new SegmentService(_context);
             var acceptedStatusIds = new[] { 4, 5 };
@@ -191,10 +191,10 @@ namespace ChainMates.Server.Services
                                        select s.Id)
                               .Take(numberOfSegments)
                               .ToListAsync();
-            List<SegmentHistoryIncludingCommentsDto> dtoList = new List<SegmentHistoryIncludingCommentsDto>();
+            List<SegmentHistoryDto> dtoList = new List<SegmentHistoryDto>();
             foreach (var segmentId in segmentIdList)
             {
-                var segmentTrace = await segmentService.GetSegmentTraceBySegment(segmentId);
+                var segmentTrace = await segmentService.GetSegmentHistoryBySegment(segmentId);
                 dtoList.Add(segmentTrace);
             }
             return dtoList;
