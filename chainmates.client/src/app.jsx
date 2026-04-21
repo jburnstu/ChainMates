@@ -1,15 +1,19 @@
 
-import React, { StrictMode, useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Link, Outlet, Route, Routes, useNavigate, useOutlet } from 'react-router-dom';
 
-import { getArrayObjByID, contactAPI } from "./utilityFuncs";
-import { Login, Signup } from "./authFuncs";
+import { initialLoad, Login, Signup } from "./supportFuncs/authFuncs";
+import { getArrayObjByID } from "./supportFuncs/utilityFuncs";
 
-import { StoryTab } from "./storyTabComponents";
-import { ModalSelectSegmentFromOptionsButton, ModalNewButton } from './storyButtons.jsx';
+import { ModalSelectSegmentFromOptionsButton, StartNewStoryButton } from './buttons/workshopButtons.jsx';
+import { WorkshopTab } from "./pages/workshopTab";
 
-import { AuthorProfile } from "./authorTabComponents.jsx";
-import { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink } from "./authorButtons.jsx";
+import { AuthorSearchButton, StorySearchButton } from "./buttons/searchButtons.jsx";
+import { AuthorSearchPage } from "./pages/authorSearchPage";
+import { StorySearchPage } from "./pages/storySearchPage";
+
+
+import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
 
 
 export default function App() {
@@ -18,11 +22,7 @@ export default function App() {
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
-        contactAPI("load", "get", true)
-            .then(function (value) {
-                console.log(value);
-                setData(value)
-            })
+        initialLoad(setData);
         }, []);
 
     if (!data) {
@@ -41,7 +41,6 @@ export default function App() {
                         switchToSignup={() => setAuthMode("signup")}
                     />
                 );
-                break;
             case "signup":
             default:
                 return (
@@ -50,7 +49,6 @@ export default function App() {
                         switchToLogin={() => setAuthMode("login")}
                     />
                 );
-                break;
         }
     }
 
@@ -60,7 +58,7 @@ export default function App() {
 
     let startingURL;
     if (startingWriteOrReview == null) {
-        startingURL = "";
+        startingURL = "home";
     }
     else if (
         (startingWriteOrReview == "write" &&
@@ -118,27 +116,29 @@ export default function App() {
     return (
             <BrowserRouter>
                 <Routes>
-                <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
-                    <Route path="" relative element={<Home startingURL={startingURL} authorDict={data.authorInfo } />}
-                            index />
-                        <Route path="write/" element={<StoryDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
+                    <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
+                        <Route path="" relative element={<RedirectToStartingURL startingURL={startingURL} />}
+                            index/>
+                        <Route path="home/" relative element={<HomeDashboard authorDict={data.authorInfo} />}
+                        />
+                        <Route path="write/" element={<WorkshopDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                         >
                             <Route path=":tabID/"
-                                element={<StoryTab writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
+                                element={<WorkshopTab writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
-                        <Route path="review/" element={<StoryDashboard writeOrReview="review" dicts={data.reviewDicts}
+                        <Route path="review/" element={<WorkshopDashboard writeOrReview="review" dicts={data.reviewDicts}
                             setDicts={changeStoryDicts} />}
                         >
                             <Route path=":tabID/"
-                                element={<StoryTab writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
+                                element={<WorkshopTab writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
                             />
                         </Route>
-                        <Route path="authors/" element={<AuthorBrowser />}>
-                        <Route path=":authorID/" element={<AuthorProfile self={false} />} />
+                        <Route path="authors/" element={<SearchDashboard type="authors" />}>
+                            <Route path=":authorID/" element={<AuthorSearchPage self={false} />} />
                         </Route>
-                        <Route path="stories/" element={<StoryBrowser/>}>
-                            <Route path=":storyID/" element={<StoryProfile />} />
+                        <Route path="stories/" element={<SearchDashboard type="stories" />}>
+                            <Route path=":storyID/" element={<StorySearchPage />} />
                         </Route>
                     </Route>
                     <Route path="*" element={<NoMatch />} />
@@ -147,16 +147,26 @@ export default function App() {
     );
 }
 
-function NoMatch() {
-    return (
-        <div style={{ padding: 20 }}>
-            <h2>404: Page Not Found</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
-        </div>
-    );
-}
+function UniversalHeader(props) {
 
-function Home(props) {
+    return (
+        <div className="container">
+            <header className="universalHeader">
+                <h1>CHAIN MATES</h1>
+                <h1>Hi, {props.displayName}!</h1>
+                <nav>
+                    <Link to="home" ><button type="button">HOME</button></Link>|{" "}
+                    <Link to="write" ><button type="button">WRITE</button></Link>|{" "}
+                    <Link to="review"><button type="button">READ</button></Link>
+                    <Link to="authors"><button type="button">AUTHORS</button></Link>
+                    <Link to="stories"><button type="button">STORIES</button></Link>
+                </nav>
+            </header >
+            <Outlet />
+        </div> 
+    )
+}
+function RedirectToStartingURL(props) {
 
     let navigate = useNavigate();
 
@@ -165,47 +175,30 @@ function Home(props) {
         navigate(props.startingURL);
     }, [navigate, props.startingURL])
 
+}
+
+function HomeDashboard(props) {
     return (
-         <div className="storyDashboardContainer dashboardContainer">
-            <LeftSidebar type={null} />
-            <nav className="tabsList" />
-            <AuthorProfile self={true} authorDict={props.authorDict} />
-        </div >
+         <DashboardLayout 
+            leftSidebar={
+                null
+            }
+            tabsList={
+                null
+            }
+            pageOrTab={
+                <AuthorSearchPage self={true} authorDict={props.authorDict} />
+            }
+        />
     )
 }
 
-
-function UniversalHeader(props) {
-
-    return (
-        <>
-            <header className="universalHeader">
-                <h1>CHAIN MATES</h1>
-                <h1>Hi, {props.displayName}!</h1>
-                <nav>
-                    <Link to="" ><button type="button">HOME</button></Link>|{" "}
-                    <Link to="write" ><button type="button">WRITE</button></Link>|{" "}
-                    <Link to="review"><button type="button">READ</button></Link>
-                    <Link to="authors"><button type="button">AUTHORS</button></Link>
-                    <Link to="stories"><button type="button">STORIES</button></Link>
-                </nav>
-            </header >
-            <Outlet />
-        </>
-    )
-}
-
-
-
-function StoryDashboard(props) {
-
-    console.log(props.dicts)
+function WorkshopDashboard(props) {
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
     const addNewTab = (tabID) => props.setDicts(tabID, props.writeOrReview, "add");
 
     const getTabName = (id, index) =>
         getArrayObjByID(props.dicts, id).storyData.title ?? `${index}.`;
-
 
     let presavedCurrentContentByStory = {};
     props.dicts.forEach(dictInArray => {
@@ -217,152 +210,58 @@ function StoryDashboard(props) {
     const outlet = useOutlet([currentContentByStory, setCurrentContentByStory]);
 
     return (
-        <div className={props.writeOrReview + "storyDashboardContainer storyDashboardContainer dashboardContainer"}>
-            <LeftSidebar type={props.writeOrReview} addNewTab={addNewTab} />
-            <nav className="tabsList">
-                {arrayOfTabIDs.map((tabID, index) =>
+        <DashboardLayout 
+            leftSidebar={
+                (props.writeOrReview == "write")
+                    ?
+                    <>
+                        <StartNewStoryButton addNewStory={addNewTab} />
+                        <ModalSelectSegmentFromOptionsButton type="JOIN" addNewStory={addNewTab} />
+                    </>
+                    :
+                        <ModalSelectSegmentFromOptionsButton type="MODERATE" addNewStory={addNewTab} />
+            }
+            tabsList={
+                arrayOfTabIDs.map((tabID, index) =>
                     <Link to={tabID + "/"} key={index + tabID} className="tabLink">
-                        <button className="tabButton">{getTabName(tabID, index)}</button>
+                        <button className="tabButton">{getTabName(tabID, index)}
+                        </button>
                     </Link>
-                )}
-            </nav>
-            {outlet || <PlaceHolder />}
-        </div >
+                )
+            }
+            pageOrTab={
+                outlet || <PageOrTabLayout/>
+            }
+        />
     )
 }
 
-function PlaceHolder() {
+function SearchDashboard(props) {
+    const outlet = useOutlet();
     return (
-        <div className="tabContainer">PLACEHOLDER
-        <div className="tabContent"></div>
-        <div className="footer submissions"></div>
-        <div className="rightSidebar comments"></div>
-    </div>
+         <DashboardLayout 
+            leftSidebar={
+                (props.type == "authors") 
+                    ?
+                    <AuthorSearchButton />
+                    :
+                    <StorySearchButton />
+            }
+            tabsList={
+                null
+            }
+            pageOrTab={
+                outlet || <PageOrTabLayout/>
+            }
+        />
     )
 }
 
-
-function BrowserPlaceHolder() {
+function NoMatch() {
     return (
-    <div className="tabContainer">PLACEHOLDER
-        <div className="tabContent"></div>
-        <div className="footer submissions"></div>
-        <div className="rightSidebar comments"></div>
-    </div>
-    )
-}
-
-function LeftSidebar(props) {
-
-    let buttonList = <></>;
-    switch (props.type) {
-        case "write":
-            buttonList = <>
-                            <ModalNewButton addNewStory={props.addNewTab} />
-                            <ModalSelectSegmentFromOptionsButton type="JOIN" addNewStory={props.addNewTab} />
-                        </>
-            break;
-        case "review":
-            buttonList = <ModalSelectSegmentFromOptionsButton type="MODERATE" addNewStory={props.addNewTab} />
-            break;
-        case "authors":
-            buttonList = <AuthorSearchButton />
-            break;
-        case "stories":
-            buttonList = <StorySearchButton />
-            break;
-        default:
-            break;
-    }
-    return (
-        <div className="leftSidebar">
-            {buttonList}
+        <div style={{ padding: 20 }}>
+            <h2>404: Page Not Found</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
         </div>
-    )
+    );
 }
-
-
-function StoryBrowser(props) {
-    const outlet = useOutlet();
-
-    return (
-        <div className={props.writeOrReview + "storyDashboardContainer storyDashboardContainer dashboardContainer"}>
-            <LeftSidebar type="stories" />
-        {outlet || <BrowserPlaceHolder />}
-        </div >
-    )
-}
-
-
-function StoryProfile() {
-
-    const { storyID } = useParams();
-    const [storyDict, setStoryDict] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            await contactAPI(`stories/${storyID}`, "get", false)
-                .then(function (value) {
-                    setStoryDict(value);
-                    console.log(value);
-                })
-        }
-        
-        if (storyID) {
-            fetchData();
-        }
-    },[storyID]);
-
-    if (!storyDict) {
-        if (storyDict != null) {
-            console.log("DIDN@T WORK");
-        }
-       
-        return null;
-    }
-
-    return (
-        <>
-            <div>{storyDict.title}</div>
-            <div>{storyDict.author.displayName}</div>
-        </>
-    )
-
-    {/*<SubmissionButtons writeOrReview={writeOrReview} currentContent={currentContent} segmentID={tabID} removeCurrentStory={removeCurrentStory} />*/ }
-    {/*<Comments selections={selectedSegmentDict} storyDict={storyDict} />*/ }
-}
-
-function AuthorBrowser(props) {
-    const outlet = useOutlet();
-
-    return (
-        <div >
-            <LeftSidebar type="authors"/>
-            {outlet || <BrowserPlaceHolder />}
-        </div >
-    )
-}
-
-
-{/*<Route path="author/"*/ }
-{/*    element={<StoryDashboard writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts}*/ }
-{/*    />}*/ }
-{/*>*/ }
-{/*    <Route path=":tabID/"*/ }
-{/*        element={<AuthorProfile writeOrReview="author" dicts={authorDicts} setDicts={changeStoryDicts} />} />*/ }
-{/*</Route>*/ }
-
-
-
-//const authorDicts = [{
-//    "id": data.authorInfo.id,
-//    "displayName": data.authorInfo.displayName,
-//    "statsDTO": {
-//        "writeCount": 0,
-//        "reviewCount": 0,
-//        "storyCount":0
-//    }
-//    }]
-//Object.assign(data, {
-//    "authorDicts": authorDicts
-//});

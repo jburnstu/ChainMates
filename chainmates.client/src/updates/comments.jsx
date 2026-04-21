@@ -1,25 +1,19 @@
 
-import React, { StrictMode, useState, authoref, useEffect, createContext, useContext } from "react";
-import { createRoot } from 'react-dom/client';
-// import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet } from 'react-router-dom';
-// import { SubmissionButton, ModalJoinButton, ModalNewButton, NewModerationModalButton } from './storyButtons.jsx';
-import { AuthorContext } from "./context.jsx";
-import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
-export default { Comments };
+import React, { StrictMode, useState } from "react";
 
+import { contactAPI } from "../supportFuncs/utilityFuncs";
+
+export default { Comments };
 
 export function Comments(props) {
 
     let selections = props.selections;
-    // console.log(selections)
-
     let storyDict = props.storyDict;
-    let segmentTraceWithInfo = storyDict.segmentHistoryList
-    // segmentTraceWithInfo.map(segmentObj =>
-    //     console.log(segmentObj.id))
+    let segmentTraceWithInfo = storyDict.segmentHistoryList;
 
     return (
         <div className="rightSidebar comments">
+            <header>COMMENTS</header>
             <StoryCommentPanel />
             {segmentTraceWithInfo.map(segmentObj =>
                 <SegmentInfoPanel key={segmentObj.id} selections={selections} segmentInfo={segmentObj} />
@@ -29,15 +23,15 @@ export function Comments(props) {
 }
 
 function StoryCommentPanel(props) {
+    return (
+        <header>Story Comments (Coming Soon)</header>
+    )
 }
 
 
 function SegmentInfoPanel(props) {
 
     let segmentInfo = props.segmentInfo;
-     console.log(segmentInfo);
-    // console.log(props.selections)
-    // console.log(props.selections[segmentInfo.id]);
 
     const [isModerationOpen, setIsModerationOpen] = useState(false);
 
@@ -46,7 +40,7 @@ function SegmentInfoPanel(props) {
     return (<div className={`segmentInfoContainer ${props.selections[segmentInfo.id] ? undefined : 'hidden'}`} >
         <div>{segmentInfo.displayName}</div>
         <div className="moderationContainer">
-            <button onClick={() => setIsModerationOpen(!isModerationOpen)}>LOOK AT MODERATION</button>
+            <button onClick={() => setIsModerationOpen(!isModerationOpen)}>Moderation Info</button>
             <div className={isModerationOpen ? undefined : 'hidden'}>MODERATION PANEL</div>
         </div>
         <div className="segmentCommentsContainer">
@@ -60,7 +54,6 @@ function SegmentInfoPanel(props) {
 function SegmentComment(props) {
 
     let segmentCommentInfo = props.segmentCommentInfo;
-    console.log(segmentCommentInfo);
 
     return (
         <div className="segmentCommentContainer">{segmentCommentInfo.displayName}
@@ -75,8 +68,6 @@ function SegmentComment(props) {
 }
 
 function CommentComment(props) {
-
-    console.log(props.commentCommentInfo);
 
     return (
         <div className="commentCommentContainer">{props.commentCommentInfo.displayName}
@@ -109,7 +100,7 @@ function CommentCreationPanel(props) {
     }
 
     async function createAndSubmitComment() {
-        let commentSubmissionData = await contactAPI("comments/", "post", true,
+        await contactAPI("comments/", "post", true,
             {
                 commentTypeId: typeID,
                 parentId: props.parentID,

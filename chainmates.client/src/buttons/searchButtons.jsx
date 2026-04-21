@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect, useContext } from "react";
-import { createPortal } from 'react-dom';
-import { AuthorContext } from "./context.jsx";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useOutlet, useNavigate } from 'react-router-dom';
-import { getRandomItem, contactAPI } from "./utilityFuncs.jsx";
+import React, { useState } from "react";
+import { Link } from 'react-router-dom';
+
+import { contactAPI } from "../supportFuncs/utilityFuncs";
 
 export default { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink, FollowButton, UnFollowButton };
 
@@ -42,16 +41,6 @@ export function AuthorSearchButton() {
     )
 }
 
-export function AuthorNameLink({ authorInfo }) {
-    console.log(authorInfo)
-    return (
-        <Link to={`/authors/${authorInfo.id}`}><button type="button">{authorInfo.displayName}</button></Link>
-    )
-}
-
-
-
-
 export function StorySearchButton() {
 
     const [isOpen, setIsOpen] = useState(false);
@@ -85,6 +74,14 @@ export function StorySearchButton() {
                 </div>
                 : null}
         </div>
+    )
+}
+
+
+export function AuthorNameLink({ authorInfo }) {
+    console.log(authorInfo)
+    return (
+        <Link to={`/authors/${authorInfo.id}`}><button type="button">{authorInfo.displayName}</button></Link>
     )
 }
 

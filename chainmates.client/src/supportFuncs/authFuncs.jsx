@@ -3,8 +3,17 @@
 
 import React, { useState } from "react";
 import { contactAPI } from "./utilityFuncs.jsx";
-export default { Login, Signup };
+export default { initialLoad, Login, Signup };
 
+
+
+export async function initialLoad(callback) {
+    await contactAPI("load", "get", true)
+        .then(function (value) {
+            console.log(value);
+            callback(value)
+        });
+}
 
 export function Login({ onLogin, switchToSignup}) {
     const [emailAddress, setEmailAddress] = useState("");
@@ -12,7 +21,7 @@ export function Login({ onLogin, switchToSignup}) {
 
 
     const handleSubmit = async () => {
-        let loginData = await contactAPI("auth/login/", "post", true,
+        await contactAPI("auth/login/", "post", true,
                 { "EmailAddress": emailAddress, "Password": password });
 
         contactAPI("load/", "get", true)
@@ -42,7 +51,7 @@ export function Signup({ onSignup, switchToLogin }) {
     const [name, setName] = useState("");
 
     const handleSubmit = async () => {
-            let registerData = await contactAPI("auth/register", "post", true,
+            await contactAPI("auth/register", "post", true,
                 { "EmailAddress": email, "Password": password, "DisplayName": name }
             )
         const dashboardInfoData = await contactAPI("load", "get", true);
