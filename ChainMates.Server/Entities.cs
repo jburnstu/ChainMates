@@ -1,15 +1,17 @@
 
+using ChainMates.Server;
+using ChainMates.Server.DTOs.Notification.Info;
 using EFCore.NamingConventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
-using ChainMates.Server;
+using Npgsql;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Security.Cryptography.X509Certificates;
-using System.Xml.Linq;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace ChainMates.Server
 {
@@ -19,7 +21,7 @@ namespace ChainMates.Server
         public string DisplayName { get; set; }
         public string EmailAddress { get; set; }
         public string Password { get; set; }
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public List<Story> Stories { get; set; } = new();
         public List<Segment> Segments { get; set; } = new();
         public List<ModerationAssignment> ModerationAssignments { get; set; } = new();
@@ -43,7 +45,7 @@ namespace ChainMates.Server
         public int? MinSegmentLength { get; set; } = null;
         public int? MaxBranches { get; set; } = null;
         public bool? IsItMature { get; set; } = false;
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         public Author Author { get; set; }
         public Circle? Circle { get; set; }
@@ -59,7 +61,7 @@ namespace ChainMates.Server
         public int AuthorId { get; set; }
         public int StoryId { get; set; }
         public int? PreviousSegmentId { get; set; } = null;
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public SegmentStatus SegmentStatus { get; set; }
         public Author Author { get; set; }
         public Story Story { get; set; }
@@ -79,7 +81,7 @@ namespace ChainMates.Server
         public int AuthorId { get; set; }
         public int SegmentId { get; set; }
         public bool IsClosed { get; set; } = false;
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public Author Author { get; set; }
         public Segment Segment { get; set; }
     }
@@ -90,7 +92,7 @@ namespace ChainMates.Server
         public string Content { get; set; }
         public int CommentTypeId { get; set; }
         public int CommentStatusId { get; set; }
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public Author Author { get; set; }
         public CommentType CommentType { get; set; }
         public CommentStatus CommentStatus { get; set; }
@@ -167,7 +169,7 @@ namespace ChainMates.Server
         public int AuthorId { get; set; }
         public int RelatedAuthorId { get; set; }
         public int AuthorRelationTypeId { get; set; }
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public Author Author { get; set; }
         public Author RelatedAuthor { get; set; }
         public AuthorRelationType AuthorRelationType { get; set; }
@@ -182,7 +184,7 @@ namespace ChainMates.Server
     public class Circle {
         public int Id { get; set; }
         public string Name { get; set; }
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public List<CircleAssignment> CircleAssignments { get; set; }
 
         public List<Story> Stories { get; set; }
@@ -191,7 +193,7 @@ namespace ChainMates.Server
     public class CircleAssignment {
         public int CircleId { get; set; }
         public int AuthorId { get; set; }
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public Circle Circle { get; set; }
         public Author Author { get; set; }
     }
@@ -202,8 +204,8 @@ namespace ChainMates.Server
         public int NotificationTypeId { get; set; }
         public int RecipientAuthorId { get; set; }
         //public int InstigatorAuthorId { get; set; }
-        public string Info { get; set; }
-        public DateTime DateCreated { get; set; }
+        public JsonDocument Info { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         public NotificationType NotificationType { get; set; }
         public Author RecipientAuthor { get; set; }
@@ -250,7 +252,7 @@ namespace ChainMates.Server
 
 
         public DbSet<Notification> Notification { get; set; }
-        public DbSet<NotificationType> NotificationType { get; set; } 
+        public DbSet<NotificationType> NotificationType { get; set; }
 
         //public DbSet<SegmentCommentBySegment> SegmentCommentBySegment { get; set; }
         //public DbSet<SegmentCommentByComment> SegmentCommentByComment { get; set; }
@@ -261,8 +263,19 @@ namespace ChainMates.Server
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseNpgsql("Host=localhost;Database=postgres;Username=postgres;Password=postgres")
-               .UseSnakeCaseNamingConvention();
+        {
+            var connectionString = "Host=localhost;Database=postgres;Username=postgres;Password=postgres";
+
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+
+            dataSourceBuilder.EnableDynamicJson();
+
+            var dataSource = dataSourceBuilder.Build();
+
+            options.UseNpgsql(dataSource)
+                   .UseSnakeCaseNamingConvention();
+        }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -471,6 +484,9 @@ namespace ChainMates.Server
                     modelBuilder.Entity<Notification>(
                             nestedBuilder =>
                             {
+                                nestedBuilder
+                                    .Property(n => n.Info)
+                                    .HasColumnType("jsonb");
 
                                 nestedBuilder
                                     .HasOne(n => n.NotificationType)

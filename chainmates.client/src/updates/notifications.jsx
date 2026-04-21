@@ -37,34 +37,37 @@ export function Notifications() {
 
 function NotificationPanel(props) {
 
-    let dto = props.notificationDTO;
+    console.log(props.notificationDTO)
+    let dto = props.notificationDTO.info;
+    let typeID = props.notificationDTO.notificationTypeId;
     console.log(dto);
-    let typeID = dto.notificationTypeId;
+    console.log(typeID);
+      
 
     let content;
     switch (typeID) {
-        case "authorFollowedYou":
-            content = dto.DisplayName + " started following you.";
+        case 1:
+            content = dto.Instigator.DisplayName + " started following you.";
             // Nothing else
             break;
-        case "authorApprovedYourSegment":
+        case 2:
             content = "Your segment was published!";
             // view segment
             break;
-        case "authorApprovedSegmentYouFollow":
-            content = dto.DisplayName + "'s segment was published!";
+        case 3:
+            content = dto.FollowedAuthor.DisplayName + "'s segment was published!";
             // view segment
             break;
-        case "authorApprovedSegmentInYourChain":
-            content = dto.DisplayName + " published a follow-up on your segment!";
+        case 4:
+            content = dto.Instigator.DisplayName + " published a follow-up on your segment!";
             // Want link to finished segment
             break;
-        case "authorAddedComment":
-            content = dto.DisplayName + " commented on your " + dto.ParentType + " .";
+        case 5:
+            content = dto.Instigator.DisplayName + " commented on your " + dto.ParentType + " .";
             //  View comment
             break;
-        case "LIKE": //doesn't exist yet
-            content = dto.DisplayName + " liked your " + dto.targetType + " .";
+        case 6: //doesn't exist yet
+            content = dto.Instigator.DisplayName + " liked your " + dto.targetType + " .";
             break;
         default:
             content = "Something happened!";

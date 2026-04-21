@@ -94,6 +94,7 @@ export function StoryNameLink({ storyInfo }) {
 export function FollowButton(props) {
 
     async function handleSubmit(e) {
+        console.log(props.authorDict)
         await contactAPI(`authors/whoyoufollow/${props.authorDict.id}`, "post", true)
     }
 

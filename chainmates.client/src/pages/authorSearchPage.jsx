@@ -83,8 +83,8 @@ export function AuthorSearchPage(props) {
                     ? null
                     :
                         <>
-                            <FollowButton authorDict={props.authorDict} />
-                            <UnFollowButton authorDict={props.authorDict} />
+                            <FollowButton authorDict={authorDict} />
+                            <UnFollowButton authorDict={authorDict} />
                         </>
             }
             rightSidebar={

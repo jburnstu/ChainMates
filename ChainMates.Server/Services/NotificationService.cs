@@ -56,23 +56,31 @@ namespace ChainMates.Server.Services
 
         public async Task<List<Notification>> CreateNotifications(NotificationCreationDto dto, List<int> recipientIds)
         {
-
+            Debug.WriteLine("Reached CreateNotifications");
+            Debug.WriteLine(recipientIds.First());
             var createdNotifications = recipientIds.Select(
                 recipientId => new Notification
                 {
                     RecipientAuthorId = recipientId,
-                    DateCreated = DateTime.Now,
+                    DateCreated = DateTime.UtcNow,
                     NotificationTypeId = dto.NotificationTypeId,
-                    Info = JsonSerializer.Serialize(dto.Info)
+                    Info = JsonDocument.Parse(JsonSerializer.Serialize(dto.Info))
                 }).ToList();
 
             await _context.Notification.AddRangeAsync(createdNotifications);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.InnerException.Message);
+            }
+
             return createdNotifications;
 
         }
-
-
 
         public async Task<string> NotifySegemntApproved(int segmentId, int moderatorAuthorId)
         {
@@ -156,6 +164,7 @@ namespace ChainMates.Server.Services
         public async Task<string> NotifyCommentPosted(int commentTypeId, int parentId, int authorId)
         {
             int recipientId;
+
             switch (commentTypeId)
             {
                 case 1:
@@ -191,6 +200,32 @@ namespace ChainMates.Server.Services
                 {
                     CommentTypeId = commentTypeId,
                     ParentId = parentId,
+                    Instigator = instigator
+                }
+            }, [recipientId]);
+
+            return "Done"; //fix later?
+
+        }
+
+        public async Task<string> NotifyYouFollowedSomeone(int followedId, int followerId)
+        {
+
+            int recipientId = followedId;
+
+            var instigator = await (from a in _context.Author
+                                    where a.Id == followerId
+                                    select new AuthorDto
+                                    {
+                                        Id = a.Id,
+                                        DisplayName = a.DisplayName
+                                    }).FirstOrDefaultAsync();
+
+            await CreateNotifications(new NotificationCreationDto
+            {
+                NotificationTypeId = 1,
+                Info = new AuthorFollowedYou
+                {
                     Instigator = instigator
                 }
             }, [recipientId]);
