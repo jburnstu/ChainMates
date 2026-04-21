@@ -5,6 +5,7 @@ using ChainMates.Server;
 using ChainMates.Server.DTOs.Comment;
 using System;
 using System.Diagnostics;
+using ChainMates.Server.enums;
 
 
 namespace ChainMates.Server.Services
@@ -50,10 +51,12 @@ namespace ChainMates.Server.Services
             };
 
             _context.Comment.Add(comment);
-            //await _context.SaveChangesAsync();
-            switch (dto.CommentTypeId)
+            await _context.SaveChangesAsync();
+
+            var commentType = (enums.CommentType)dto.CommentTypeId;
+            switch (commentType)
             {
-                case 1:
+                case enums.CommentType.Story:
                     var storyComment = new StoryComment
                     {
                         CommentId = comment.Id,
@@ -62,7 +65,7 @@ namespace ChainMates.Server.Services
                     };
                     await _context.StoryComment.AddAsync(storyComment);
                     break;
-                case 2:
+                case enums.CommentType.Segment:
                     var segmentComment = new SegmentComment
                     {
                         CommentId = comment.Id,
@@ -71,7 +74,7 @@ namespace ChainMates.Server.Services
                     };
                     await _context.SegmentComment.AddAsync(segmentComment);
                     break;
-                case 3:
+                case enums.CommentType.Comment:
                     var commentComment = new CommentComment
                     {
                         CommentId = comment.Id,
@@ -81,12 +84,21 @@ namespace ChainMates.Server.Services
                     await _context.CommentComment.AddAsync(commentComment);
                     break;
             };
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.InnerException.Message);
+            }
             return comment.Id;
         }
 
 
         public async Task<CommentPatchDto> UpdateComment(Comment comment, CommentPatchDto dto)
+            // Again, always called with CreateComment (see below)
         {
             comment.Content = dto.Content;
             comment.CommentStatusId = dto.CommentStatusId;
@@ -122,18 +134,20 @@ namespace ChainMates.Server.Services
         }
 
 
-        public async Task<List<CommentForTraceDto>> GetStoryCommentAndChildrenForTrace(int storyId)
+        public async Task<List<HistoricalCommentDto>> GetStoryCommentAndChildrenForHistory(int storyId)
         {
+            // Preps comments for the nested DTO that's passed to the frontend
+            // Note that storylevel comments aren't actually displayed yet
             var storyComments = await (from sc in _context.StoryComment
                                        join c in _context.Comment
                                        on sc.CommentId equals c.Id
                                        join a in _context.Author
                                        on c.AuthorId equals a.Id
                                        where sc.ParentStoryId == storyId
-                                       select new CommentForTraceDto
+                                       select new HistoricalCommentDto
                                        {
                                            Id = c.Id,
-                                           CommentTypeId = 1,
+                                           CommentTypeId = (int)enums.CommentType.Story,
                                            DisplayName = a.DisplayName,
                                            Content = c.Content
                                        }
@@ -149,10 +163,10 @@ namespace ChainMates.Server.Services
                                        select new
                                        {
                                            ParentCommentId = cc.ParentCommentId,
-                                           InnerDto = new CommentForTraceDto
+                                           InnerDto = new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = 3,
+                                               CommentTypeId = (int)enums.CommentType.Comment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }
@@ -169,37 +183,38 @@ namespace ChainMates.Server.Services
             return storyComments.ToList();
         }
 
-        public async Task<List<CommentForTraceDto>> GetSegmentCommentAndChildrenForTrace(int segmentId)
+        public async Task<List<HistoricalCommentDto>> GetHistoricalSegmentCommentAndChildren(int segmentId)
         {
+            // Preps comments for the nested DTO that's passed to the frontend
             var segmentComments = await (from sc in _context.SegmentComment
                                        join c in _context.Comment
                                        on sc.CommentId equals c.Id
                                        join a in _context.Author
                                        on c.AuthorId equals a.Id
                                        where sc.ParentSegmentId == segmentId
-                                       select new CommentForTraceDto
+                                       select new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = 2,
+                                               CommentTypeId = (int)enums.CommentType.Segment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }                                      
                         ).ToListAsync();
-            var listOfSegmentCommentIds = segmentComments.Select(sc => sc.Id).ToList();
+            var segmentCommentIdList = segmentComments.Select(sc => sc.Id).ToList();
 
             var childComments = await (from cc in _context.CommentComment
                                        join c in _context.Comment
                                        on cc.CommentId equals c.Id
                                        join a in _context.Author
                                        on c.AuthorId equals a.Id
-                                       where listOfSegmentCommentIds.Contains(cc.ParentCommentId)
+                                       where segmentCommentIdList.Contains(cc.ParentCommentId)
                                        select new
                                        {
                                            ParentCommentId = cc.ParentCommentId,
-                                           InnerDto = new CommentForTraceDto
+                                           InnerDto = new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = 3,
+                                               CommentTypeId = (int)enums.CommentType.Comment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }

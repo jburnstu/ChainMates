@@ -3,12 +3,12 @@ using ChainMates.Server.DTOs.Comment;
 
 namespace ChainMates.Server.DTOs.Segment
 {
-    public class SegmentForTraceIncludingCommentsDto
+    public class HistoricalSegmentDto
     {
         public int Id { get; set; }
         public string Content { get; set; }
         public AuthorDto Author { get; set; }
 
-        public List<CommentForTraceDto> ChildComments { get; set; } = new List<CommentForTraceDto>();
+        public List<HistoricalCommentDto> ChildComments { get; set; } = new List<HistoricalCommentDto>();
     }
 }

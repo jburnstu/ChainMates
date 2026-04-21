@@ -5,7 +5,6 @@ using ChainMates.Server.DTOs.Segment;
 using ChainMates.Server.Services;
 using System.Diagnostics;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace ChainMates.Server.Controllers
 {
@@ -21,31 +20,25 @@ namespace ChainMates.Server.Controllers
 
         public SegmentController(AppDbContext context, CurrentUserService currentUserService, NotificationService notificationService)
         {
-            Debug.WriteLine("in service constructor");
             _context = context;
             _service = new SegmentService(context);
             _currentUserService = currentUserService;
             _notificationService = notificationService;
         }
 
-        // GET: api/segments
-        [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            var data = _service.GetSegments();
-            return Ok(data);
-        }
 
-        // GET api/segments/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var data = await _service.GetSegmentById(id);
+            var data = await _service.GetSegment(id);
 
             return Ok(data);
         }
 
-        // POST api/segments
+
+        ///////////////// Next few endpoints handle the creation, saving, submission, and deletion of segments
+        /// (i.e. all actions on the write-tab)    ////////////////////////////////////////////////////////////
+
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] SegmentCreationDto dto)
@@ -63,7 +56,6 @@ namespace ChainMates.Server.Controllers
             }
         
 
-        // PATCH api/segments/5
         [Authorize]
         [HttpPatch("{id}")]
         public async Task<IActionResult> PatchSaveAsync(int id, [FromBody] SegmentPatchDto dto)
@@ -97,8 +89,57 @@ namespace ChainMates.Server.Controllers
         }
 
 
+        //////////////// Handle the assignment of a user to a segment as moderator, and approval   ///////////
+        /////////////       (i.e. actions on review-tab). API structure here could be cleaned up.   ///////////
 
-        // PATCH api/segments/5
+
+        [Authorize]
+        [HttpPost("moderationassignments/{segmentId}")]
+
+        public async Task<IActionResult> PostModerationAssignmentAsync(int segmentId)
+        {
+            int authorId = _currentUserService.UserId ?? 0;
+
+            if (authorId == 0)
+            {
+                return Unauthorized();
+            }
+            await _service.CreateModerationAssignment(segmentId, authorId);
+            return Ok("Done!"); // Nothing needed for now
+
+        }
+
+        [Authorize]
+        [HttpPost("moderationassignments/{segmentId}/approve")]
+
+        public async Task<IActionResult> PostModerationApprove(int segmentId)
+        {
+            Debug.WriteLine("In Patch Moderation");
+            int authorId = _currentUserService.UserId ?? 0;
+
+            if (authorId == 0)
+            {
+                return Unauthorized();
+            }
+            await _service.ApproveModeration(segmentId, authorId);
+            await _notificationService.NotifySegmentApproved(segmentId, authorId);
+            return Ok(segmentId);
+
+        }
+
+
+        /////////////// Used extensively -- delivers a DTO with all the data in that segment's chain
+
+        [HttpGet("{idForTrace}/history")]
+        public async Task<IActionResult> GetSegmentHistory(int idForTrace)
+        {
+            var data = await _service.GetSegmentHistoryBySegment(idForTrace);
+            return Ok(data);
+        }
+
+
+        ////////////////////////// Endpoints for segments available per author. Could put under authors/ instead?
+
         [Authorize]
         [HttpGet("joinablesegments")]
 
@@ -131,54 +172,6 @@ namespace ChainMates.Server.Controllers
             var data = _service.GetModeratableSegmentIdsByAuthor(authorId, traces);
             return Ok(data);
 
-        }
-
-        // POST api/moderationassignments/
-        [Authorize]
-        [HttpPost("moderationassignments/{segmentId}")]
-
-        public async Task<IActionResult> PostModerationAssignmentAsync(int segmentId)
-        {
-            int authorId = _currentUserService.UserId ?? 0;
-
-            if (authorId == 0)
-            {
-                return Unauthorized();
-            }
-            Debug.WriteLine("IN PostModerationAssignmentAsync controller");
-            Debug.WriteLine(segmentId);
-            var moderationAssignment = await _service.CreateModerationAssignment(segmentId, authorId);
-            return Ok(moderationAssignment);
-
-        }
-
-        // POST api/moderationassignments/
-        [Authorize]
-        [HttpPost("moderationassignments/{segmentId}/approve")]
-
-        public async Task<IActionResult> PostModerationApprove(int segmentId)
-        {
-            Debug.WriteLine("In Patch Moderation");
-            int authorId = _currentUserService.UserId ?? 0;
-
-            if (authorId == 0)
-            {
-                return Unauthorized();
-            }
-            await _service.ApproveModeration(segmentId, authorId);
-            await _notificationService.NotifySegemntApproved(segmentId, authorId);
-            return Ok(segmentId);
-
-        }
-
-
-        //GET api/segments/traces/5
-
-        [HttpGet("traces/{idForTrace}")]
-        public async Task<IActionResult> GetSegmentTraces(int idForTrace)
-        {
-            var data = await _service.GetSegmentTraceBySegment(idForTrace);
-            return Ok(data);
         }
 
     }

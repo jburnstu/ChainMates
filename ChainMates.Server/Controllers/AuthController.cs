@@ -10,6 +10,10 @@ using ChainMates.Server.DTOs.Auth;
 [Route("chainmates/auth")]
 public class AuthController : ControllerBase
 {
+    // DISCLOSURE: I used AI to generate a lot of the code in this file. I've since made sure I understand how it works --
+    // ultimately this is a kind of toy-example of a project, so authentification was never a high priority, other than 
+    // to give an indication of how it could be worked into the structure elsewhere.
+
     private readonly AppDbContext _context;
     private readonly ILogger<AuthController> _logger;
 
@@ -22,6 +26,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto dto)
     {
+        //Doesn't use displayname at all currently
         var author = await _context.Author
             .FirstOrDefaultAsync(a => a.EmailAddress == dto.EmailAddress);
 
@@ -39,12 +44,6 @@ public class AuthController : ControllerBase
 
         await HttpContext.SignInAsync("Cookies", principal);
 
-        // Log Set-Cookie header if present to help debug client cookie issues
-        if (HttpContext.Response.Headers.TryGetValue("Set-Cookie", out var sc))
-        {
-            _logger.LogInformation("Set-Cookie after login: {cookie}", sc.ToString());
-            Console.WriteLine("Set-Cookie after login: " + sc.ToString());
-        }
 
         return Ok("Successfully Logged In");
     }
@@ -52,10 +51,6 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto dto)
     {
-        Console.WriteLine("INSIDE REGISTER");
-        Debug.WriteLine("INSIDE REGISTER");
-        _logger.LogInformation("INSIDE REGISTER");
-        // Check if user exists
         var existing = await _context.Author
             .FirstOrDefaultAsync(a => a.EmailAddress == dto.EmailAddress);
 
@@ -72,11 +67,13 @@ public class AuthController : ControllerBase
         _context.Author.Add(author);
         await _context.SaveChangesAsync();
 
+
+        // Then sign the user in immediately
         var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, author.Id.ToString()),
-        new Claim(ClaimTypes.Name, author.EmailAddress)
-    };
+        {
+            new Claim(ClaimTypes.NameIdentifier, author.Id.ToString()),
+            new Claim(ClaimTypes.Name, author.EmailAddress)
+        };
 
         var identity = new ClaimsIdentity(claims, "Cookies");
         var principal = new ClaimsPrincipal(identity);

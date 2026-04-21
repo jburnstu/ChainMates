@@ -8,8 +8,10 @@ import { contactAPI, getRandomItem } from "../supportFuncs/utilityFuncs";
 export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton };
 
 
+
 async function getSegmentHistory(segmentID) {
-    return await contactAPI(`segments/traces/${segmentID}`, "get", true);
+    // Used universally to access this endpoint
+    return await contactAPI(`segments/${segmentID}/history/`, "get", true);
 }
 
 async function createNewStoryWithInitialSegment(storyParameters) {
@@ -35,8 +37,9 @@ async function uploadNewSegmentToStory(previousSegmentID) {
 }
 
 async function uploadNewModerationAssignment(id) {
-    await contactAPI(`segments/moderationassignments/${id}`,
-        "post", true);
+    //returns the historyDTO of the moderated segment
+
+    await contactAPI(`segments/moderationassignments/${id}`,"post",true);
     return await getSegmentHistory(id);
 }
 
@@ -231,16 +234,16 @@ export function ModalSelectSegmentFromOptionsButton(props) {
 
 
         // Asynchronously fill an array with the chosen segments' histories
-        let segmentTraceDataArray = [];
-        let segmentTraceData;
+        let segmentHistoryDTOArray = [];
+        let segmentHistoryDTO;
         await Promise.all(randomSegmentIDArray.map(async (segmentID) => {
-            segmentTraceData = await contactAPI(`segments/traces/${segmentID}`, "get");
-            segmentTraceDataArray.push(segmentTraceData);
+            segmentHistoryDTO = await getSegmentHistory(segmentID);
+            segmentHistoryDTOArray.push(segmentHistoryDTO);
         }
         )
         )
-        await setArrayOfAvailableStories(segmentTraceDataArray);
-        return segmentTraceDataArray;
+        await setArrayOfAvailableStories(segmentHistoryDTOArray);
+        return segmentHistoryDTOArray;
     }
 
     //Handle the user's choice of segment to join / moderate 

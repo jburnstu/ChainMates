@@ -87,6 +87,8 @@ namespace ChainMates.Server
     }
     public class Comment
     {
+        // Note there is some class-table-hierarchy going on here -- comments are split by their parent object (but the relations 
+        // back to the main comment table are one-to-one, see the key configurations below)
         public int Id { get; set; }
         public int AuthorId { get; set; }
         public string Content { get; set; }
@@ -102,6 +104,7 @@ namespace ChainMates.Server
         public List<CommentComment> ChildComments { get; set; }
     }
     public class CommentStatus
+        // Not meaningfully used right now
     {
         public int Id { get; set; }
         public string Description { get; set; }
@@ -142,6 +145,7 @@ namespace ChainMates.Server
         public Comment ParentComment { get; set; }
     }
 
+    // The only actively-used view in the DB -- it reformats which segments follow on from which others
     public class SegmentTrace
     {
         public int FinalSegmentId { get; set; }
@@ -153,6 +157,7 @@ namespace ChainMates.Server
 
     }
 
+    // These two functions aren't being used right now -- whether a segment is available is now determined at the servie layer.
     public class JoinableSegmentByAuthor
     {
         public int AuthorId { get; set; }
@@ -176,11 +181,13 @@ namespace ChainMates.Server
     }
 
     public class AuthorRelationType     {
+        // Only one used as yet
         public int Id { get; set; }
         public string Description { get; set; }
         public List<AuthorRelation> AuthorRelations { get; set; }
     }
 
+    // Circles not used yet (to be closed "sessions" of authors and stories only accessible to members)
     public class Circle {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -199,6 +206,8 @@ namespace ChainMates.Server
     }
 
     public class Notification
+        // Note the JsonDocument column, which contains most of the detail about what kind of a notification is at play
+        // (Uses NotificationType to unpack correctly)
     {
         public int Id { get; set; }
         public int NotificationTypeId { get; set; }

@@ -33,23 +33,14 @@ export function AuthorSearchPage(props) {
         fetchData();
     }, [authorID]);
 
-    if (!authorDict?.id) {
-        return null;
-    }
-
-
     ///// Load up some of the author's most recent segments 
 
-    const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
-    async function getRecentSegmentTraceDTOList() {
-        let recentSegmentByAuthorData = await contactAPI(`authors/${authorDict.id}/recentsegments/`, "get", true, {}, []);
-        console.log(recentSegmentByAuthorData);
-        return recentSegmentByAuthorData;
-    }
+    const [recentSegmentHistoryDTOList, setRecentSegmentHistoryDTOList] = useState([]);
+
     useEffect(() => {
         const fetchData = async () => {
-            let segmentTraceDataArray = await getRecentSegmentTraceDTOList();
-            setRecentSegmentTraceDTOList(segmentTraceDataArray);
+            let segmentHistoryDTOList = await contactAPI(`authors/${authorDict.id}/recentsegments/`, "get", true, {}, []);
+            setRecentSegmentHistoryDTOList(segmentHistoryDTOList);
         }
         if (authorDict?.id) {
             fetchData();
@@ -59,6 +50,11 @@ export function AuthorSearchPage(props) {
 
     // Circles aren't up and running yet
     let circleNotificationDTOList;
+
+    if (!authorDict?.id) {
+        return null;
+    }
+
 
     return (
         <PageOrTabLayout 
@@ -70,8 +66,8 @@ export function AuthorSearchPage(props) {
                     <div className="recentSegmentsContainer">
                         <header>Recent Segments</header>
                          <div className="recentSegmentsArray">
-                        {recentSegmentTraceDTOList.map(recentSegmentTraceDTO =>
-                            <RecentSegmentDisplay key={recentSegmentTraceDTO.id} segmentTraceInfo={recentSegmentTraceDTO} />)
+                        {recentSegmentHistoryDTOList.map(recentSegmentHistoryDTO =>
+                            <RecentSegmentDisplay key={recentSegmentHistoryDTO.id} segmentHistoryInfo={recentSegmentHistoryDTO} />)
                             }
                         </div>
                     </div>

@@ -41,8 +41,6 @@ namespace ChainMates.Server.Services
                             Id = n.Id,
                             DateCreated = n.DateCreated,
                             NotificationTypeId = n.NotificationTypeId,
-                            //RecipientAuthorId = n.RecipientAuthorId, //don't really need this? New DTO without it?
-                            //InstigatorAuthorId = n.InstigatorAuthorId,
                             Info = n.Info
                         };
             if (numberToFetch != null)
@@ -56,8 +54,7 @@ namespace ChainMates.Server.Services
 
         public async Task<List<Notification>> CreateNotifications(NotificationCreationDto dto, List<int> recipientIds)
         {
-            Debug.WriteLine("Reached CreateNotifications");
-            Debug.WriteLine(recipientIds.FirstOrDefault());
+            // To be called by every other notification method once the recipients hav ebeen determined
             var createdNotifications = recipientIds.Select(
                 recipientId => new Notification
                 {
@@ -82,9 +79,10 @@ namespace ChainMates.Server.Services
 
         }
 
-        public async Task<string> NotifySegemntApproved(int segmentId, int moderatorAuthorId)
+        public async Task<string> NotifySegmentApproved(int segmentId, int moderatorAuthorId)
         {
-
+            // Not quite sure of the best format to pass variables in -- might be a DTO
+            // involved at some point in the future
             var previousAuthorIds = await (from st in _context.SegmentTrace
                                            where st.FinalSegmentId == segmentId
                                            select st.EarlierSegmentAuthorId)
@@ -129,7 +127,7 @@ namespace ChainMates.Server.Services
 
             await CreateNotifications(new NotificationCreationDto
             {
-                NotificationTypeId = 2,
+                NotificationTypeId = 2, //ENUM these at some point
                 Info = new AuthorApprovedYourSegmentDto
                 {
                     SegmentId = segmentId,
@@ -165,19 +163,20 @@ namespace ChainMates.Server.Services
         {
             int recipientId;
 
-            switch (commentTypeId)
-            {
-                case 1:
+            var commentType = (enums.CommentType)commentTypeId;
+            switch (commentType)
+            { // These enums aren't the cleanest -- at some point change to enum in the DTO?
+                case enums.CommentType.Story:
                     recipientId = await (from s in _context.Story
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
                     break;
-                case 2:
+                case enums.CommentType.Segment:
                     recipientId = await (from s in _context.Segment
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
                     break;
-                case 3:
+                case enums.CommentType.Comment:
                 default:
                     recipientId = await (from s in _context.Comment
                                          where s.Id == parentId

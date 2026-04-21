@@ -6,8 +6,8 @@ namespace ChainMates.Server.DTOs
     public class DashboardDto
     {
         public AuthorDto AuthorInfo { get; set; }
-        public List<SegmentHistoryIncludingCommentsDto>  WriteDicts { get; set; }
-        public List<SegmentHistoryIncludingCommentsDto> ReviewDicts { get; set; }
+        public List<SegmentHistoryDto>  WriteDicts { get; set; }
+        public List<SegmentHistoryDto> ReviewDicts { get; set; }
         public StartingUrlDto StartingUrlDict { get; set; }
 
         public RelationInfoDto RelationInfo { get; set; }
