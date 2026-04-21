@@ -20,6 +20,7 @@ namespace ChainMates.Server.Services
             _rnd = new Random();
         }
 
+        // These generic comment getters aren't used yet because comments only ever get fed into SegmentHistoryDto for now
         public async Task<List<Comment>> GetComments()
         {
             return await _context.Comment.ToListAsync();
@@ -35,6 +36,9 @@ namespace ChainMates.Server.Services
 
 
         public async Task<int> CreateComment(CommentCreationDto dto, int authorId)
+            // Note: this comment method is only ever called as part of "create and submit" --
+            // in actual fact, an empty comment will always be immediately updated with 
+            // content for now. I'm leaving it split out in case that changes later.
         {
 
             var comment = new Comment
@@ -46,10 +50,7 @@ namespace ChainMates.Server.Services
             };
 
             _context.Comment.Add(comment);
-            await _context.SaveChangesAsync();
-            Debug.WriteLine("Made it past first save");
-            Debug.WriteLine(comment.Id);
-            Debug.WriteLine(dto.ParentId);
+            //await _context.SaveChangesAsync();
             switch (dto.CommentTypeId)
             {
                 case 1:
@@ -80,17 +81,8 @@ namespace ChainMates.Server.Services
                     await _context.CommentComment.AddAsync(commentComment);
                     break;
             };
-            Debug.WriteLine("nearly at second save");
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.InnerException.Message);
-            }
+            await _context.SaveChangesAsync();
             return comment.Id;
-                 
         }
 
 
