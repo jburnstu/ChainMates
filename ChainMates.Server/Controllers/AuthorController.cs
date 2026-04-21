@@ -95,8 +95,16 @@ namespace ChainMates.Server.Controllers
             return Ok(data);
         }
 
+        [Authorize]
+        [HttpGet("{authorId}/recentsegments")]
+        public async Task<IActionResult> GetRecentSegmentsByAuthor(int authorId)
+        {
+            var data = await _authorService.GetRecentSegmentHistoriesByAuthorId(authorId, numberOfRecentSegments);
+            return Ok(data);
+        }
 
 
+        // Circle endpoints not currently used
         [HttpGet("circles/all")]
         public async Task<IActionResult> GetCircles()
         {
@@ -116,14 +124,6 @@ namespace ChainMates.Server.Controllers
                 return Unauthorized();
             }
             var data = await _authorService.GetCirclesByAuthorId(authorId);
-            return Ok(data);
-        }
-
-        [Authorize]
-        [HttpGet("{authorId}/recentsegments")]
-        public async Task<IActionResult> GetRecentSegmentsByAuthor(int authorId)
-        {
-            var data = await _authorService.GetRecentSegmentHistoriesByAuthorId(authorId,numberOfRecentSegments);
             return Ok(data);
         }
 

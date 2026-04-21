@@ -98,6 +98,7 @@ namespace ChainMates.Server.Services
 
 
         public async Task<CommentPatchDto> UpdateComment(Comment comment, CommentPatchDto dto)
+            // Again, always called with CreateComment (see below)
         {
             comment.Content = dto.Content;
             comment.CommentStatusId = dto.CommentStatusId;
@@ -135,6 +136,8 @@ namespace ChainMates.Server.Services
 
         public async Task<List<HistoricalCommentDto>> GetStoryCommentAndChildrenForHistory(int storyId)
         {
+            // Preps comments for the nested DTO that's passed to the frontend
+            // Note that storylevel comments aren't actually displayed yet
             var storyComments = await (from sc in _context.StoryComment
                                        join c in _context.Comment
                                        on sc.CommentId equals c.Id
@@ -182,6 +185,7 @@ namespace ChainMates.Server.Services
 
         public async Task<List<HistoricalCommentDto>> GetHistoricalSegmentCommentAndChildren(int segmentId)
         {
+            // Preps comments for the nested DTO that's passed to the frontend
             var segmentComments = await (from sc in _context.SegmentComment
                                        join c in _context.Comment
                                        on sc.CommentId equals c.Id

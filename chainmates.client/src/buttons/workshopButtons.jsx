@@ -234,8 +234,8 @@ export function ModalSelectSegmentFromOptionsButton(props) {
 
 
         // Asynchronously fill an array with the chosen segments' histories
-        let segmentTraceDataArray = [];
-        let segmentTraceData;
+        let segmentHistoryDTOArray = [];
+        let segmentHistoryDTO;
         await Promise.all(randomSegmentIDArray.map(async (segmentID) => {
             segmentHistoryDTO = await getSegmentHistory(segmentID);
             segmentHistoryDTOArray.push(segmentHistoryDTO);

@@ -52,7 +52,6 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            Debug.WriteLine("INSIDE POdST");
             var data = await _service.CreateStoryWithInitialSegment(dto ,authorId);
             return Ok(data);
 
