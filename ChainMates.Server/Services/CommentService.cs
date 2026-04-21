@@ -5,6 +5,7 @@ using ChainMates.Server;
 using ChainMates.Server.DTOs.Comment;
 using System;
 using System.Diagnostics;
+using ChainMates.Server.enums;
 
 
 namespace ChainMates.Server.Services
@@ -47,12 +48,11 @@ namespace ChainMates.Server.Services
 
             _context.Comment.Add(comment);
             await _context.SaveChangesAsync();
-            Debug.WriteLine("Made it past first save");
-            Debug.WriteLine(comment.Id);
-            Debug.WriteLine(dto.ParentId);
-            switch (dto.CommentTypeId)
+
+            var commentType = (enums.CommentType)dto.CommentTypeId;
+            switch (commentType)
             {
-                case 1:
+                case enums.CommentType.Story:
                     var storyComment = new StoryComment
                     {
                         CommentId = comment.Id,
@@ -61,7 +61,7 @@ namespace ChainMates.Server.Services
                     };
                     await _context.StoryComment.AddAsync(storyComment);
                     break;
-                case 2:
+                case enums.CommentType.Segment:
                     var segmentComment = new SegmentComment
                     {
                         CommentId = comment.Id,
@@ -70,7 +70,7 @@ namespace ChainMates.Server.Services
                     };
                     await _context.SegmentComment.AddAsync(segmentComment);
                     break;
-                case 3:
+                case enums.CommentType.Comment:
                     var commentComment = new CommentComment
                     {
                         CommentId = comment.Id,
@@ -80,7 +80,7 @@ namespace ChainMates.Server.Services
                     await _context.CommentComment.AddAsync(commentComment);
                     break;
             };
-            Debug.WriteLine("nearly at second save");
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -141,7 +141,7 @@ namespace ChainMates.Server.Services
                                        select new HistoricalCommentDto
                                        {
                                            Id = c.Id,
-                                           CommentTypeId = 1,
+                                           CommentTypeId = (int)enums.CommentType.Story,
                                            DisplayName = a.DisplayName,
                                            Content = c.Content
                                        }
@@ -160,7 +160,7 @@ namespace ChainMates.Server.Services
                                            InnerDto = new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = 3,
+                                               CommentTypeId = (int)enums.CommentType.Comment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }
@@ -188,7 +188,7 @@ namespace ChainMates.Server.Services
                                        select new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = 2,
+                                               CommentTypeId = (int)enums.CommentType.Segment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }                                      
@@ -207,7 +207,7 @@ namespace ChainMates.Server.Services
                                            InnerDto = new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = 3,
+                                               CommentTypeId = (int)enums.CommentType.Comment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }
