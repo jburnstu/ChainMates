@@ -174,10 +174,10 @@ namespace ChainMates.Server.Controllers
 
         //GET api/segments/traces/5
 
-        [HttpGet("{idForTrace}/traces")]
+        [HttpGet("{idForTrace}/history")]
         public async Task<IActionResult> GetSegmentHistory(int idForTrace)
         {
-            var data = await _service.GetSegmentTraceBySegment(idForTrace);
+            var data = await _service.GetSegmentHistoryBySegment(idForTrace);
             return Ok(data);
         }
 

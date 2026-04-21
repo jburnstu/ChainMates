@@ -2,7 +2,7 @@
 
 namespace ChainMates.Server.DTOs.Segment
 {
-    public class SegmentForTraceDto
+    public class SegmentForTraceExcludingCommentsDto
     {
         public int Id { get; set; }
         public string Content { get; set; }

@@ -130,7 +130,7 @@ namespace ChainMates.Server.Services
         }
 
 
-        public async Task<List<CommentForTraceDto>> GetStoryCommentAndChildrenForTrace(int storyId)
+        public async Task<List<HistoricalCommentDto>> GetStoryCommentAndChildrenForHistory(int storyId)
         {
             var storyComments = await (from sc in _context.StoryComment
                                        join c in _context.Comment
@@ -138,7 +138,7 @@ namespace ChainMates.Server.Services
                                        join a in _context.Author
                                        on c.AuthorId equals a.Id
                                        where sc.ParentStoryId == storyId
-                                       select new CommentForTraceDto
+                                       select new HistoricalCommentDto
                                        {
                                            Id = c.Id,
                                            CommentTypeId = 1,
@@ -157,7 +157,7 @@ namespace ChainMates.Server.Services
                                        select new
                                        {
                                            ParentCommentId = cc.ParentCommentId,
-                                           InnerDto = new CommentForTraceDto
+                                           InnerDto = new HistoricalCommentDto
                                            {
                                                Id = c.Id,
                                                CommentTypeId = 3,
@@ -177,7 +177,7 @@ namespace ChainMates.Server.Services
             return storyComments.ToList();
         }
 
-        public async Task<List<CommentForTraceDto>> GetSegmentCommentAndChildrenForTrace(int segmentId)
+        public async Task<List<HistoricalCommentDto>> GetHistoricalSegmentCommentAndChildren(int segmentId)
         {
             var segmentComments = await (from sc in _context.SegmentComment
                                        join c in _context.Comment
@@ -185,7 +185,7 @@ namespace ChainMates.Server.Services
                                        join a in _context.Author
                                        on c.AuthorId equals a.Id
                                        where sc.ParentSegmentId == segmentId
-                                       select new CommentForTraceDto
+                                       select new HistoricalCommentDto
                                            {
                                                Id = c.Id,
                                                CommentTypeId = 2,
@@ -193,18 +193,18 @@ namespace ChainMates.Server.Services
                                                Content = c.Content
                                            }                                      
                         ).ToListAsync();
-            var listOfSegmentCommentIds = segmentComments.Select(sc => sc.Id).ToList();
+            var segmentCommentIdList = segmentComments.Select(sc => sc.Id).ToList();
 
             var childComments = await (from cc in _context.CommentComment
                                        join c in _context.Comment
                                        on cc.CommentId equals c.Id
                                        join a in _context.Author
                                        on c.AuthorId equals a.Id
-                                       where listOfSegmentCommentIds.Contains(cc.ParentCommentId)
+                                       where segmentCommentIdList.Contains(cc.ParentCommentId)
                                        select new
                                        {
                                            ParentCommentId = cc.ParentCommentId,
-                                           InnerDto = new CommentForTraceDto
+                                           InnerDto = new HistoricalCommentDto
                                            {
                                                Id = c.Id,
                                                CommentTypeId = 3,

@@ -3,7 +3,7 @@ using ChainMates.Server.DTOs.Segment;
 
 namespace ChainMates.Server.DTOs
 {
-    public class DashboardExcludingCommentsDto
+    public class DashboardExcludingRelationsDto
     {
         public AuthorDto AuthorInfo { get; set; }
         public List<SegmentHistoryDto>  WriteDicts { get; set; }

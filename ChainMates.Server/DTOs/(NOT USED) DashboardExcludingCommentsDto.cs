@@ -3,11 +3,11 @@ using ChainMates.Server.DTOs.Segment;
 
 namespace ChainMates.Server.DTOs
 {
-    public class DashboardExcludingRelationsDto
+    public class DashboardExcludingCommentsDto
     {
         public AuthorDto AuthorInfo { get; set; }
-        public List<SegmentHistoryIncludingCommentsDto>  WriteDicts { get; set; }
-        public List<SegmentHistoryIncludingCommentsDto> ReviewDicts { get; set; }
+        public List<SegmentHistoryExcludingCommentsDto>  WriteDicts { get; set; }
+        public List<SegmentHistoryExcludingCommentsDto> ReviewDicts { get; set; }
         public StartingUrlDto StartingUrlDict { get; set; }
     }
 }

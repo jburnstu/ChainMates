@@ -12,6 +12,6 @@ namespace ChainMates.Server.DTOs.Story
         public int? MaxBranches { get; set; }
         public bool? IsItMature { get; set; }
 
-        public List<CommentForTraceDto> ChildComments { get; set; }  = new List<CommentForTraceDto>();
+        public List<HistoricalCommentDto> ChildComments { get; set; }  = new List<HistoricalCommentDto>();
     }
 }

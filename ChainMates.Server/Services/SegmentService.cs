@@ -63,14 +63,14 @@ namespace ChainMates.Server.Services
 
 
 
-        public async Task<SegmentForTraceIncludingCommentsDto?> GetSegmentForTraceById(int segmentId)
+        public async Task<HistoricalSegmentDto?> GetHistoricalSegmentById(int segmentId)
         {
             CommentService commentService = new CommentService(_context);
-            var childComments = await commentService.GetSegmentCommentAndChildrenForTrace(segmentId);
+            var childComments = await commentService.GetHistoricalSegmentCommentAndChildren(segmentId);
 
             return await _context.Segment
                 .Where(st => st.Id == segmentId)
-                .Select(st => new SegmentForTraceIncludingCommentsDto
+                .Select(st => new HistoricalSegmentDto
                 {
                     Id = st.Id,
                     Content = st.Content,
@@ -84,13 +84,13 @@ namespace ChainMates.Server.Services
                 ).FirstOrDefaultAsync();
         }
 
-        public async Task<SegmentHistoryIncludingCommentsDto?> GetSegmentTraceBySegment(int segmentId)
+        public async Task<SegmentHistoryDto?> GetSegmentHistoryBySegment(int segmentId)
         {
             StoryService storyService = new StoryService(_context);
             var story = await storyService.GetStoryBySegment(segmentId);
 
             CommentService commentService = new CommentService(_context);
-            var storyComments = await commentService.GetStoryCommentAndChildrenForTrace(story.Id);
+            var storyComments = await commentService.GetStoryCommentAndChildrenForHistory(story.Id);
             var storyDto = new StoryIncludingCommentsDto
             {
                 //Id = story.Id,
@@ -103,7 +103,7 @@ namespace ChainMates.Server.Services
                 ChildComments = storyComments
             };
 
-            List<SegmentForTraceIncludingCommentsDto> segmentHistoryList = new List<SegmentForTraceIncludingCommentsDto>();
+            List<HistoricalSegmentDto> segmentHistoryList = new List<HistoricalSegmentDto>();
 
             List<int> earlierSegmentIdList = await _context.SegmentTrace
                 .Where(st => st.FinalSegmentId == segmentId)
@@ -111,12 +111,12 @@ namespace ChainMates.Server.Services
 
             foreach (int earlierSegmentId in earlierSegmentIdList)
             {
-                SegmentForTraceIncludingCommentsDto segmentDto = await GetSegmentForTraceById(earlierSegmentId);
+                HistoricalSegmentDto segmentDto = await GetHistoricalSegmentById(earlierSegmentId);
                 segmentHistoryList.Add(segmentDto);
             }
 
 
-            return new SegmentHistoryIncludingCommentsDto
+            return new SegmentHistoryDto
             {
                 Id = segmentId,
                 StoryData = storyDto,
@@ -260,7 +260,7 @@ namespace ChainMates.Server.Services
         public async Task<List<int>> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
         {
 
-            var blockedSegmentIds = traces
+            var blockedSegmentIdList = traces
                 .Where(t => t.EarlierSegmentAuthorId == authorId)
                 .Select(t => t.FinalSegmentId)
                 .ToHashSet();
@@ -275,7 +275,7 @@ namespace ChainMates.Server.Services
                 .Where(t => t.FinalSegmentStatusId == 4)
                 .Select(t => t.FinalSegmentId)
                 .Distinct()
-                .Where(id => !blockedSegmentIds.Contains(id))
+                .Where(id => !blockedSegmentIdList.Contains(id))
                 .ToList();
                 
         }
@@ -283,7 +283,7 @@ namespace ChainMates.Server.Services
         public List<int> GetModeratableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
         {
 
-            var blockedSegmentIds = traces
+            var blockedSegmentIdList = traces
                 .Where(t => t.EarlierSegmentAuthorId == authorId)
                 .Select(t => t.FinalSegmentId)
                 .ToHashSet();
@@ -292,7 +292,7 @@ namespace ChainMates.Server.Services
                 .Where(t => t.FinalSegmentStatusId == 2)
                 .Select(t => t.FinalSegmentId)
                 .Distinct()
-                .Where(id => !blockedSegmentIds.Contains(id))
+                .Where(id => !blockedSegmentIdList.Contains(id))
                 .ToList();
 
         }

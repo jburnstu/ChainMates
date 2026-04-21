@@ -1,6 +1,6 @@
 ﻿namespace ChainMates.Server.DTOs.Comment
 {
-    public class CommentForTraceDto
+    public class HistoricalCommentDto
     {
 
         public int Id { get; set; }
@@ -8,7 +8,7 @@
 
         public string DisplayName { get; set; }
         public string Content { get; set; }
-        public List<CommentForTraceDto> ChildComments { get; set; } = new List<CommentForTraceDto>();
+        public List<HistoricalCommentDto> ChildComments { get; set; } = new List<HistoricalCommentDto>();
         
     }
 }
