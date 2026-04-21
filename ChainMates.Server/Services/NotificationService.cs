@@ -57,7 +57,7 @@ namespace ChainMates.Server.Services
         public async Task<List<Notification>> CreateNotifications(NotificationCreationDto dto, List<int> recipientIds)
         {
             Debug.WriteLine("Reached CreateNotifications");
-            Debug.WriteLine(recipientIds.First());
+            Debug.WriteLine(recipientIds.FirstOrDefault());
             var createdNotifications = recipientIds.Select(
                 recipientId => new Notification
                 {

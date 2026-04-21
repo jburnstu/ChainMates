@@ -53,20 +53,20 @@ public class InitialLoadController : ControllerBase
 
         authorInfo = await authorService.GetAuthorDtoById(authorId);
 
-        var activeWriteSegments = await segmentService.GetSegmentsByAuthorAndStatus(authorId, 1);
+        var activeWriteSegments = await segmentService.GetSegmentIdsByAuthorIdAndStatusId(authorId, 1);
 
-        foreach (Segment finalSegment in activeWriteSegments)
+        foreach (int finalSegmentId in activeWriteSegments)
         {
-            var activeSegmentHistoryDto = await segmentService.GetSegmentTraceBySegment(finalSegment.Id);
+            var activeSegmentHistoryDto = await segmentService.GetSegmentTraceBySegment(finalSegmentId);
 
             writeDicts.Add(activeSegmentHistoryDto);
         }
 
-        var activeReviewSegments = await segmentService.GetSegmentsByAuthorAndStatus(authorId, 3);
+        var activeReviewSegments = await segmentService.GetModeratedSegmentIdsByAuthorId(authorId);
 
-        foreach (Segment finalSegment in activeReviewSegments)
+        foreach (int finalSegmentId in activeReviewSegments)
         {
-            var activeSegmentHistoryDto = await segmentService.GetSegmentTraceBySegment(finalSegment.Id);
+            var activeSegmentHistoryDto = await segmentService.GetSegmentTraceBySegment(finalSegmentId);
             reviewDicts.Add(activeSegmentHistoryDto);
         }
 

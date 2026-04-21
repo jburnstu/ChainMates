@@ -47,21 +47,21 @@ namespace ChainMates.Server.Controllers
         //}
 
         // POST api/moderationassignments/
-        [Authorize]
-        [HttpPost("assignments")]
+        //[Authorize]
+        //[HttpPost("assignments")]
 
-        public async Task<IActionResult> PostModerationAssignmentAsync([FromBody] ModerationAssignmentDto dto)
-        {
-            int authorId = _currentUserService.UserId ?? 0;
+        //public async Task<IActionResult> PostModerationAssignmentAsync([FromBody] ModerationAssignmentDto dto)
+        //{
+        //    int authorId = _currentUserService.UserId ?? 0;
 
-            if (authorId == 0)
-            {
-                return Unauthorized();
-            }
-            await _service.CreateModerationAssignment(dto, authorId);
-            return Ok(dto);
+        //    if (authorId == 0)
+        //    {
+        //        return Unauthorized();
+        //    }
+        //    await _service.CreateModerationAssignment(dto, authorId);
+        //    return Ok(dto);
 
-        }
+        //}
 
 
 

@@ -34,27 +34,33 @@ namespace ChainMates.Server.Services
 
         public async Task<Segment> GetSegmentById(int segmentId)
         {
+            Debug.WriteLine("In getSegmentById");
+            Debug.WriteLine(segmentId);
             return await _context.Segment
                 .SingleAsync(s => s.Id == segmentId);
 
         }
 
 
-        public async Task<List<Segment>> GetSegmentsByAuthorAndStatus(int authorId, int segmentStatusId)
+        public async Task<List<int>> GetSegmentIdsByAuthorIdAndStatusId(int authorId, int segmentStatusId)
         {
-            return await _context.Segment
-                .Where(s => s.AuthorId == authorId)
-                .Where(s => s.SegmentStatusId == segmentStatusId)
-                .ToListAsync();
+            return await (from s in _context.Segment
+                          where s.AuthorId == authorId
+                          where s.SegmentStatusId == segmentStatusId
+                          select s.Id
+                          ).ToListAsync();
         }
 
-        public async Task<Segment> UpdateSegment(Segment segment, SegmentPatchDto dto)
+
+        public async Task<List<int>> GetModeratedSegmentIdsByAuthorId(int authorId)
         {
-            segment.SegmentStatusId = dto.SegmentStatusId ?? segment.SegmentStatusId;
-            segment.Content = dto.Content ?? segment.Content;
-            await _context.SaveChangesAsync();
-            return segment;
+            return await (from ma in _context.ModerationAssignment
+                          where ma.AuthorId == authorId
+                          where !ma.IsClosed 
+                          select ma.SegmentId
+                          ).ToListAsync();
         }
+
 
 
         public async Task<SegmentForTraceIncludingCommentsDto?> GetSegmentForTraceById(int segmentId)
@@ -126,16 +132,29 @@ namespace ChainMates.Server.Services
             Debug.WriteLine("CreateSegment");
             Debug.WriteLine("STORY ID:");
             Debug.WriteLine(dto.StoryId);
+
+            var storyId = dto.StoryId ?? 0;
+            if (dto.PreviousSegmentId != null)
+            {
+
+                Segment? previousSegment = await (from s in _context.Segment
+                                                  where s.Id == dto.PreviousSegmentId
+                                                  select s).FirstOrDefaultAsync();
+                previousSegment.SegmentStatusId = 5;
+                storyId = previousSegment.StoryId;
+
+            }
+
             var segment = new Segment
             {
                 AuthorId = authorId,
-                StoryId = dto.StoryId,
+                StoryId = storyId,
                 SegmentStatusId = dto.SegmentStatusId ?? 1,
                 PreviousSegmentId = dto.PreviousSegmentId,
                 Content = (dto.Content ?? "").ToString()
             };
 
-            _context.Segment.Add(segment);
+                _context.Segment.Add(segment);
             if (save == true)
             {
                 Debug.WriteLine("Save is true");
@@ -144,187 +163,113 @@ namespace ChainMates.Server.Services
             return segment;
         }
 
-        public async Task<ModerationAssignment> CreateModerationAssignment(ModerationAssignmentDto dto, int authorId)
+        public async Task<string> UpdateSegmentContent(int segmentId, string content)
+        {
+            var segment = await GetSegmentById(segmentId);
+            segment.Content = content;
+            await _context.SaveChangesAsync();
+            return content;
+        }
+        
+        public async Task<string> SubmitSegmentForModeration(int segmentId, string content)
+        {
+            Debug.WriteLine("in SubmitSegmentForModeration");
+            var segment = await GetSegmentById(segmentId);
+            segment.SegmentStatusId = 2;
+            segment.Content = content;
+            await _context.SaveChangesAsync();
+            return "Done!";
+        }
+
+
+        public async Task<ModerationAssignment> CreateModerationAssignment(int segmentId, int authorId)
         {
             Debug.WriteLine("CreateModerationAssignment");
 
             var moderationAssignment = new ModerationAssignment
             {
                 AuthorId = authorId,
-                SegmentId = dto.SegmentId,
+                SegmentId = segmentId,
                 IsClosed = false
             };
             _context.ModerationAssignment.Add(moderationAssignment);
 
-
-            var segment = await _context.Segment
-                .SingleAsync(s => s.Id == dto.SegmentId);
+            Debug.WriteLine(segmentId);
+            var segment = await GetSegmentById(segmentId);
             segment.SegmentStatusId = 3;
 
             await _context.SaveChangesAsync();
             return moderationAssignment;
 
         }
-        public async Task<Segment> CreateNewSegmentByAuthor(int authorId)
-        {
-            Debug.WriteLine("CreateNewSegmentByAuthor");
-            Segment segment;
-            int? previousSegmentId;
-            var query = _context.JoinableSegmentByAuthor
-               .Where(jsba => jsba.AuthorId == authorId)
-               .Select(jsba => jsba.SegmentId);
-
-            var count = await query.CountAsync();
-            if (count == 0)
-            {
-                Debug.WriteLine("Count 0 -- new story");
-                StoryService storyService = new StoryService(_context);
-                var newStory = await storyService.CreateRandomStory(authorId);
-                segment = await CreateSegment(new SegmentCreationDto
-                {
-                    StoryId = newStory.Id,
-                    SegmentStatusId = 1,
-                    PreviousSegmentId = null,
-                    Content = ""
-                },
-                authorId, false); //check this
-            }
-            else
-            {
-                Debug.WriteLine("count non-zero");
-                previousSegmentId = await query
-                    .Skip(_rnd.Next(count))
-                    .FirstOrDefaultAsync();
-                Debug.WriteLine("building off previousSegmentId", previousSegmentId);
-                var previousSegment = await _context.Segment
-                    .SingleAsync(s => s.Id == previousSegmentId);
-
-                segment = await CreateSegment(new SegmentCreationDto
-                {
-                    StoryId = previousSegment.StoryId,
-                    SegmentStatusId = 1,
-                    PreviousSegmentId = previousSegmentId,
-                    Content = ""
-                },
-                authorId, false);
-            }
-            return segment;
-        }
-
-        public async Task<Segment> EditSegmentContent(Segment segment, string content)
-        {
-            Debug.WriteLine("EditSegmentContent");
-            segment.Content = content;
-            //await _context.SaveChangesAsync();
-            return segment;
-        }
-
-        public async Task<Segment> SubmitSegmentForModeration(Segment segment)
-        {
-            Debug.WriteLine("SubmitSegmentForModeration");
-            segment.SegmentStatusId = 2;
-            //await _context.SaveChangesAsync();
-            return segment;
-        }
-
-        public async Task<ModerationAssignment> FindAndAssignModerator(Segment segment)
-        {
-            Debug.WriteLine("FindAndAssignModerator");
-
-            var query = _context.ModeratableSegmentByAuthor
-                .Where(msba => msba.SegmentId == segment.Id)
-                .Select(msba => msba.AuthorId);
-
-            var count = query.Count();
-            if (count == 0)
-            {
-                throw new Exception("No available moderator found for this segment.");
-            }
-            else
-            {
-                int randomAvailableModeratorId = await query
-                    .Skip(_rnd.Next(count))
-                    .FirstOrDefaultAsync();
-
-                var moderationAssignment = await CreateModerationAssignment(new ModerationAssignmentDto
-                {
-                    //AuthorId = randomAvailableModeratorId,
-                    SegmentId = segment.Id,
-                },
-                randomAvailableModeratorId);
-
-                return moderationAssignment;
-            }
-        }
-
-        public async Task<Segment> ApproveModeration(ModerationAssignment moderationAssignment)
+        
+        public async Task<int> ApproveModeration(int segmentId, int authorId)
         {
             Debug.WriteLine("ApproveModeration");
-            moderationAssignment.IsClosed = true;
-            var segment = moderationAssignment.Segment;
-            segment.SegmentStatusId = 4;
-            if (segment.PreviousSegmentId is not null)
-            {
-                segment.PreviousSegment.SegmentStatusId = 4;
-            }
-            //await _context.SaveChangesAsync();
-            return segment;
-        }
-
-        public async Task<Segment> ApproveModeration(ModerationAssignmentDto dto, int authorId)
-        {
-
-            var segment = await (from s in _context.Segment
-                                 where s.Id == dto.SegmentId
-                                 select s).FirstOrDefaultAsync();
-            segment.SegmentStatusId = 4;
-            if (segment.PreviousSegmentId is not null)
-            {
-                segment.PreviousSegment.SegmentStatusId = 4;
-            }
+            Debug.WriteLine(segmentId);
+            Debug.WriteLine(authorId);
             var moderationAssignment = await (from ma in _context.ModerationAssignment
-                                              where ma.AuthorId == authorId
-                                              where ma.SegmentId == dto.SegmentId
-                                              select ma)
-                                          .FirstOrDefaultAsync();
+                                        where ma.SegmentId == segmentId
+                                        where ma.AuthorId == authorId
+                                        select ma).FirstOrDefaultAsync();
+
             moderationAssignment.IsClosed = true;
+
+            Segment segment = await (from s in _context.Segment
+                                     where s.Id == moderationAssignment.SegmentId
+                                     select s).FirstOrDefaultAsync();
+            segment.SegmentStatusId = 4;
+
+
+            Segment? previousSegment = await (from s in _context.Segment
+                                         where s.Id == moderationAssignment.SegmentId
+                                         select s.PreviousSegment)
+                                         .FirstOrDefaultAsync();
+            if (previousSegment != null)
+            {
+                previousSegment.SegmentStatusId = 4;
+            }
             await _context.SaveChangesAsync();
-            return segment;
+            return segmentId;
         }
-
-        public async Task<Segment?> CreateSubmitAndApproveSegment(int authorId, string content)
+        public async Task<string> AbandonSegment(int segmentId, string content)
         {
-            try
+            var segment = await GetSegmentById(segmentId);
+
+            
+            segment.SegmentStatusId = 6;
+            segment.Content = content;
+            if (segment.PreviousSegmentId != null)
             {
-                Debug.WriteLine("CreateSubmitAndApproveSegment");
-                Segment segment = await CreateNewSegmentByAuthor(authorId);
-                segment = await EditSegmentContent(segment, content);
-                segment = await SubmitSegmentForModeration(segment);
-                ModerationAssignment moderationAssignment = await FindAndAssignModerator(segment);
-                Segment moderatedSegment = await ApproveModeration(moderationAssignment);
-                await _context.SaveChangesAsync();
-                return moderatedSegment;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error in CreateSubmitAndApproveSegment: {ex.Message}");
-                return null;
+                Segment? previousSegment = await GetSegmentById((int)segment.PreviousSegmentId);
+                previousSegment?.SegmentStatusId = 5;
             }
 
+            await _context.SaveChangesAsync();
+            return "Done!";
         }
+
+
 
         public async Task<List<SegmentTrace>> GetSegmentTraces()
         {
+        
             return await _context.SegmentTrace.ToListAsync();
         }
 
-        public List<int> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
+        public async Task<List<int>> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
         {
 
             var blockedSegmentIds = traces
                 .Where(t => t.EarlierSegmentAuthorId == authorId)
                 .Select(t => t.FinalSegmentId)
                 .ToHashSet();
+
+            //var lockedSegmentIds = await (from t in traces
+            //                              join s in _context.Segment
+            //                              on sbyte.Id = t.F
+                
+                
 
             return traces
                 .Where(t => t.FinalSegmentStatusId == 4)

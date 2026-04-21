@@ -1,6 +1,6 @@
 
-import React, { StrictMode, useState } from "react";
-import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext } from 'react-router-dom';
+import React, { StrictMode, useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useNavigate } from 'react-router-dom';
 
 import { getArrayObjByID } from "../supportFuncs/utilityFuncs";
 
@@ -15,17 +15,26 @@ import { SegmentDisplay } from "../segmentDisplay"
 export default { WorkshopTab };
 
 export function WorkshopTab(props) {
-
+    const navigate = useNavigate();
     let writeOrReview = props.writeOrReview;
     const { tabID } = useParams();
+
+
     const [wordCount, setWordCount] = useState(0);
     const [currentContentByStory, setCurrentContentByStory] = useOutletContext();
 
     console.log(tabID, props.dicts);
-
+    console.log(writeOrReview)
 
     let storyDict = getArrayObjByID(props.dicts, tabID);
+    if (storyDict == undefined) {
+        console.log("navigating....");
+        navigate(`/${writeOrReview}/`);
+    }
+    console.log(storyDict);
     let currentContent = currentContentByStory[tabID];
+
+
 
     let noSelections = {};
     storyDict.segmentHistoryList.forEach(dictInArray =>
@@ -59,7 +68,7 @@ export function WorkshopTab(props) {
                 storyDict.segmentHistoryList.map(segmentDict =>
                     <SegmentDisplay key={segmentDict.id}
                         id={segmentDict.id}
-                        isFinalSegment={segmentDict.id == tabID}
+                        isFinalSegment={writeOrReview =="write" && segmentDict.id == tabID} //Fixed to avoid any formatting of final segment in review tab -- will change this at some point
                         fixedContent={segmentDict.content}
                         currentContent={currentContent}
                         changeSelection={changeSegmentSelection}
@@ -67,22 +76,22 @@ export function WorkshopTab(props) {
                 )
             }
             footer={
-                props.type == "write"
+                props.writeOrReview == "write"
                     ?
                         ["SAVE", "SUBMIT", "ABANDON"].map(buttonType =>
                             <SubmissionButton
                                 key={buttonType}
                                 submissionType={buttonType}
-                                currentContent={props.currentContent}
-                                segmentID={props.segmentID}
+                                currentContent={currentContent}
+                                segmentID={tabID}
                                 removeCurrentStory={removeCurrentStory} />)
                     :
                         ["APPROVE"].map(buttonType =>
                             <SubmissionButton
                                 key={buttonType}
                                 submissionType={buttonType}
-                                currentContent={props.currentContent}
-                                segmentID={props.segmentID}
+                                currentContent={currentContent}
+                                segmentID={tabID}
                                 removeCurrentStory={removeCurrentStory} />)
             }
             rightSidebar={

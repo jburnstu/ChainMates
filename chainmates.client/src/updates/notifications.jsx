@@ -47,11 +47,11 @@ function NotificationPanel(props) {
     let content;
     switch (typeID) {
         case 1:
-            content = dto.Instigator.DisplayName + " started following you.";
+            content = dto.Instigator.DisplayName + " started following you!";
             // Nothing else
             break;
         case 2:
-            content = "Your segment was published!";
+            content = dto.Instigator.DisplayName + " published your segment!";
             // view segment
             break;
         case 3:
@@ -59,7 +59,7 @@ function NotificationPanel(props) {
             // view segment
             break;
         case 4:
-            content = dto.Instigator.DisplayName + " published a follow-up on your segment!";
+            content ="Someone added to " + dto.Story.Title + "!";
             // Want link to finished segment
             break;
         case 5:
