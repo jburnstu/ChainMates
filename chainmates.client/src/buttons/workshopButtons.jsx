@@ -14,8 +14,10 @@ async function getSegmentHistory(segmentID) {
     return await contactAPI(`segments/${segmentID}/history/`, "get", true);
 }
 
-async function createNewStory(storyParameters) {
-    // Creates both a story and a segment object; returns the new segment's historyDTO
+async function createNewStoryWithInitialSegment(storyParameters) {
+    // The API endpoint returns the initial segment that was created,
+    // not the story object itself
+
     let initialSegmentData = await contactAPI("stories/", "post", true,
         storyParameters
     );
@@ -23,7 +25,8 @@ async function createNewStory(storyParameters) {
 
 }
 
-async function uploadNewSegment(previousSegmentID) {
+async function uploadNewSegmentToStory(previousSegmentID) {
+    // Currently just uses the previoussegmentid to fingure out other details like storyid
 
     let createSegmentData = await contactAPI("segments/","post",true,
         {
@@ -79,15 +82,19 @@ function NewStoryOptionspanel(props) {
     function createNewStory() {
         props.close();
 
-        createNewStory(storyParameters)
+        createNewStoryWithInitialSegment(storyParameters)
             .then(function (value) {
                 props.addNewStory(value)
                     .then(() => {
-                        navigate(`/write/${value.id}/`)
+                        navigate(`/write/${value.id}/`) // Go to the story
                     })
             });
     }
 
+
+    // Note that these story parameters aren't actually used to encode anything yet
+    // -- it's an upcoming task. The handling of defaults / unused options also 
+    // awaiting some TLC.
     return (
         <form>
             <fieldset className="newStoryModalFieldset">
@@ -143,8 +150,7 @@ function NewStoryOptionspanel(props) {
 
 export function SubmissionButton(props) {
     let navigate = useNavigate();
-    console.log(props);
-    console.log(props.segmentID);
+
 
     async function handleSubmit(e) {
         let segmentHistoryData = await getSegmentHistory(props.segmentID);
@@ -152,7 +158,9 @@ export function SubmissionButton(props) {
         if (props.submissionType != "SAVE") {
             props.removeCurrentStory(segmentHistoryData);
         }
-        console.log(props.currentContent);
+
+        // This is here to sidestep (if not really solve) issues of blank and or 
+        // undefined content
         let currentContent = !props.currentContent ? "(Blank)" : props.currentContent;
 
 
@@ -174,8 +182,8 @@ export function SubmissionButton(props) {
                 navigate(`/write/`);
                 break;
             case "APPROVE":
-                console.log("In approval");
-                await contactAPI(`segments/moderationassignments/${props.segmentID}/approve`, "post", true);
+                await contactAPI(`segments/moderationassignments/${props.segmentID}/approve`, "post", true
+                );
                 navigate(`/review/`);
                 break;
             case "ABANDON":
@@ -196,10 +204,17 @@ export function SubmissionButton(props) {
 }
 
 export function ModalSelectSegmentFromOptionsButton(props) {
-    let navigate = useNavigate();
-    const numberOfChoices = 3;
+    // Combined the buttons for joining a segment and moderating a new segment, as
+    // the logic was exceptionally similar. This is starting to feel like not the best
+    // choice, hence a lot of swtich-case-ing. Really certain methods need to be taken
+    // out, and the buttons treated independently.
 
-    const [isOpen, setIsOpen] = useState(false);
+    let navigate = useNavigate();
+    const numberOfChoices = 3; //WARNING this may be set elsewhere too
+
+
+    ///////    Code to load up an array of options to join / moderate   ////////////////
+    ////////// respectively (they're loaded up in a separate component)    /////////////
     const [arrayOfAvailableStories, setArrayOfAvailableStories] = useState([]);
 
     let apiArrayToAccess;
@@ -213,14 +228,14 @@ export function ModalSelectSegmentFromOptionsButton(props) {
     }
 
     async function getSegmentsForModal() {
-        console.log("in getSegmentsForModal")
-        let availableIDArray = await contactAPI(`segments/${apiArrayToAccess}/`, "get")
-        console.log(availableIDArray);
-        let randomSegmentIDArray = await getRandomItem(availableIDArray, numberOfChoices, true);
-        let segmentHistoryDTOArray = [];
-        let segmentHistoryDTO;
-        console.log(randomSegmentIDArray);
+        // From the array of options (per this author), select n at random
+        let availabilityData = await contactAPI(`segments/${apiArrayToAccess}/`, "get")
+        let randomSegmentIDArray = await getRandomItem(availabilityData, numberOfChoices, true);
 
+
+        // Asynchronously fill an array with the chosen segments' histories
+        let segmentTraceDataArray = [];
+        let segmentTraceData;
         await Promise.all(randomSegmentIDArray.map(async (segmentID) => {
             segmentHistoryDTO = await getSegmentHistory(segmentID);
             segmentHistoryDTOArray.push(segmentHistoryDTO);
@@ -231,20 +246,14 @@ export function ModalSelectSegmentFromOptionsButton(props) {
         return segmentHistoryDTOArray;
     }
 
-    function createModal() {
-        getSegmentsForModal()
-            .then(function (value) {
-                setIsOpen(true);
-            })
-    }
-
+    //Handle the user's choice of segment to join / moderate 
     function selectStory(previousSegmentID) {
         setIsOpen(false);
 
         console.log(previousSegmentID);
         switch (props.type) {
             case "JOIN":
-                uploadNewSegment(previousSegmentID)
+                uploadNewSegmentToStory(previousSegmentID)
                     .then(function (value) {
                         props.addNewStory(value)
                             .then(() => {
@@ -263,7 +272,18 @@ export function ModalSelectSegmentFromOptionsButton(props) {
                 break;
         }
     }
-       
+
+
+    ////// Code to set up the modal itself /////////////
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    function createModal() {
+        getSegmentsForModal()
+            .then(function (value) {
+                setIsOpen(true);
+            })
+    }
 
     return (
         <>
@@ -281,17 +301,24 @@ export function ModalSelectSegmentFromOptionsButton(props) {
 }
 
 function SegmentDisplayInModal(props) {
-    console.log(props.storyDict);
+    // Display the first and last segment of the story being joined
     let firstSegment = props.storyDict.segmentHistoryList[0]
     let finalSegment = props.storyDict.segmentHistoryList.slice(-1)[0]
     firstSegment = (finalSegment == firstSegment) ? null : firstSegment
-
     const selectStory = () => props.selectStory(finalSegment.id);
 
     return (
         <button onClick={selectStory} className="displayStoryContainer">
-            <textarea value={(firstSegment != null) ? <textarea value={firstSegment.content} readOnly /> : null} readOnly />
-            <textarea value={finalSegment.content} readOnly />
+            {(firstSegment == null)
+                ? null
+                :
+                <label value="Begins:">
+                    <textarea value={firstSegment.content} readOnly />
+                </label>
+            }
+            <label value="Ends:">
+                <textarea value={finalSegment.content} readOnly />
+            </label>
         </button>
     )
 }
@@ -304,6 +331,8 @@ function ModalWindow(props) {
 
     return (
         createPortal(
+            // This is taken from an online example. It didn't work when I moved it to the CSS
+            // file, so here it stays for now!
             <div style={{
                 position: 'fixed',
                 top: 0,

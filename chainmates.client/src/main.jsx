@@ -9,6 +9,8 @@ createRoot(document.getElementById('root')).render(
 )
 
 
+// Taken from the internet to make textarea flexible in size. I'd like to
+// understand this enough that i can fine-tune it more
 document.querySelectorAll("textarea").forEach(function (textarea) {
     textarea.style.height = textarea.scrollHeight + "px";
     textarea.style.overflowY = "hidden";

@@ -5,12 +5,16 @@ import React, { useState } from "react";
 import { contactAPI } from "./utilityFuncs.jsx";
 export default { initialLoad, Login, Signup };
 
+/////   This document handles the logic for logging in / signing up to the app.         //////
+//////   DISCLOSURE: I used AI to generate the login and signup functions here (I've    //////
+///////  since edited and refactored them a bit) as at the time I dind't want to      ////////
+/////    focus on authentification, and just wanted something that worked.         ///////////
+//////   I've sinced made sur emy understanding has caught up with the implementation.   /////
 
 
 export async function initialLoad(callback) {
     await contactAPI("load", "get", true)
         .then(function (value) {
-            console.log(value);
             callback(value)
         });
 }
@@ -19,9 +23,9 @@ export function Login({ onLogin, switchToSignup}) {
     const [emailAddress, setEmailAddress] = useState("");
     const [password, setPassword] = useState("");
 
-
     const handleSubmit = async () => {
         await contactAPI("auth/login/", "post", true,
+        // At some point want to generalise this to take username too
                 { "EmailAddress": emailAddress, "Password": password });
 
         contactAPI("load/", "get", true)

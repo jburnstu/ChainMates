@@ -18,6 +18,8 @@ import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
 
 export default function App() {
 
+
+    ///////  Load initial data or shunt into login/signup facade ////////////
     const [data, setData] = useState(null);
     const [authMode, setAuthMode] = useState("login"); 
 
@@ -52,7 +54,11 @@ export default function App() {
         }
     }
 
-    const rootPath = "/chainmates/";
+    /////////////// This sectino uses the initially-loaded StartingURL to handle refreshes. /////////////////
+    /////////////// It's a  bit outdated (from when the app was in Django), not sure it's doing  ///////////
+    /////////////// quite what it needs to (not bugging at least though)           /////////////////////////
+     
+    const rootPath = "/chainmates/"; // not used right now
     const startingWriteOrReview = data.startingUrlDict.readOrWrite;
     let startingStoryID = data.startingUrlDict.storyId;
 
@@ -74,19 +80,12 @@ export default function App() {
         }
 
 
+    ///////////// The function used to add / remove tabs when stories are loaded / submitted /////////////
+    //////////// Passed down to various components (could be context perhaps?)             ///////////////
+
     async function changeStoryDicts(storyDict, writeOrReview = "write", addOrRemove = "add") {
 
-        let dataKey;
-        switch (writeOrReview) {
-            case "write":
-                dataKey = "writeDicts";
-                break;
-            case "review":
-                dataKey = "reviewDicts";
-                break;
-        }
-
-        let dictArrayToChange = data[dataKey];
+        let dictArrayToChange = data[`${writeOrReview}Dicts`];
         let newDictArray;
         switch (addOrRemove) {
             case "remove":
@@ -113,7 +112,7 @@ export default function App() {
     }
 
 
-    return (
+    return ( //Could be a separate browserroutes document at some point
             <BrowserRouter>
                 <Routes>
                     <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
@@ -162,12 +161,12 @@ function UniversalHeader(props) {
                     <Link to="stories"><button type="button">STORIES</button></Link>
                 </nav>
             </header >
-            <Outlet />
+            <Outlet />  {/*The rest of the app */}
         </div> 
     )
 }
 function RedirectToStartingURL(props) {
-
+    // The index route, purely here to send you to any URL that's specified in the initial load
     let navigate = useNavigate();
 
     useEffect(() => {
@@ -178,8 +177,9 @@ function RedirectToStartingURL(props) {
 }
 
 function HomeDashboard(props) {
+    // Loads up your own AuthorDashboard (same as everyone else with a couple tweaks)
     return (
-         <DashboardLayout 
+         <DashboardLayout
             leftSidebar={
                 null
             }
@@ -194,26 +194,27 @@ function HomeDashboard(props) {
 }
 
 function WorkshopDashboard(props) {
-    console.log(props.writeOrReview, props.dicts)
+
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
+
     const addNewTab = (tabID) => props.setDicts(tabID, props.writeOrReview, "add");
+    const getTabName = (tabID, index) =>
+        getArrayObjByID(props.dicts, tabID).storyData.title ?? `${index}.`;
 
-    const getTabName = (id, index) =>
-        getArrayObjByID(props.dicts, id).storyData.title ?? `${index}.`;
 
+    // Assign every outlet option its own "current content", so they can be saved in parallel
     let presavedCurrentContentByStory = {};
     props.dicts.forEach(dictInArray => {
         presavedCurrentContentByStory[dictInArray.id] =
             dictInArray.segmentHistoryList.slice(-1)[0].content;
     })
-
     const [currentContentByStory, setCurrentContentByStory] = useState(presavedCurrentContentByStory);
     const outlet = useOutlet([currentContentByStory, setCurrentContentByStory]);
 
     return (
         <DashboardLayout 
             leftSidebar={
-                (props.writeOrReview == "write")
+                (props.writeOrReview == "write") //better as switch case?
                     ?
                     <>
                         <StartNewStoryButton addNewStory={addNewTab} />
@@ -224,6 +225,7 @@ function WorkshopDashboard(props) {
             }
             tabsList={
                 arrayOfTabIDs.map((tabID, index) =>
+                 {/* I do this Link(button) thing a lot -- should probs find a better way at some point */ }
                     <Link to={tabID + "/"} key={index + tabID} className="tabLink">
                         <button className="tabButton">{getTabName(tabID, index)}
                         </button>
@@ -242,7 +244,7 @@ function SearchDashboard(props) {
     return (
          <DashboardLayout 
             leftSidebar={
-                (props.type == "authors") 
+                (props.type == "authors") // switch case?
                     ?
                     <AuthorSearchButton />
                     :
