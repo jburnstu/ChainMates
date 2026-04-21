@@ -148,7 +148,7 @@ namespace ChainMates.Server
         public int FinalAuthorId { get; set; }
         public int FinalSegmentStatusId { get; set; }
         public int EarlierSegmentId { get; set; }
-        public int EarlierSegmentContent { get; set; }
+        public string EarlierSegmentContent { get; set; }
         public int EarlierSegmentAuthorId { get; set; }
 
     }

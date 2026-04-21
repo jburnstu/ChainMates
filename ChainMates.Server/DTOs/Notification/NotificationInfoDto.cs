@@ -7,6 +7,11 @@ namespace ChainMates.Server.DTOs.Notification.Info
 {
     [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
     [JsonDerivedType(typeof(AuthorFollowedYou), "author_followed_you")]
+    [JsonDerivedType(typeof(AuthorApprovedYourSegmentDto), "author_approved_your_segment")]
+    [JsonDerivedType(typeof(StoryYouJoinedWasExtendedDto), "story_you_joined_was_extended")]
+    [JsonDerivedType(typeof(AuthorYouFollowPublishedSegmentDto), "author_you_follow_published_segment")]
+
+
     abstract public class NotificationInfoDto { }
 
     public class AuthorFollowedYou : NotificationInfoDto

@@ -7,55 +7,40 @@ import { contactAPI, getRandomItem } from "../supportFuncs/utilityFuncs";
 
 export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton };
 
-async function uploadNewSegment(previousSegmentID) {
 
-    let updatePreviousSegmentData = await contactAPI(`segments/${previousSegmentID}/`,"patch",true,
-        {
-            'segmentStatusId': 5
-        }
-    );
-    let createSegmentData = await contactAPI("segments/","post",true,
-        {
-            'storyId': updatePreviousSegmentData.storyId,
-            'segmentStatusId': 1,
-            'previousSegmentId': previousSegmentID
-        }
-    );
-    let getNewFullStoryInfoData = await contactAPI(`segments/traces/${createSegmentData.id}`, "get",true);
-    return getNewFullStoryInfoData
+async function getSegmentHistory(segmentID) {
+    return await contactAPI(`segments/traces/${segmentID}`, "get", true);
 }
 
 async function uploadNewStoryAndSegment(storyParameters) {
 
-    let storyCreationData = await contactAPI("stories/", "post",true,
+    let initialSegmentData = await contactAPI("stories/", "post", true,
         storyParameters
     );
-    let createSegmentData = await contactAPI("segments/", "post", true,
-        {
-            'storyId': storyCreationData.id
-        }
-    )
-    let getNewFullStoryInfoData = await contactAPI(`segments/traces/${createSegmentData.id}`, "get",true);
-    return getNewFullStoryInfoData
+    return await getSegmentHistory(initialSegmentData.id);
+
 }
 
-async function uploadNewModerationAssignment(previousSegmentID) {
-    await contactAPI("segments/", "patch",
+async function uploadNewSegment(previousSegmentID) {
+    console.log(previousSegmentID);
+
+    let createSegmentData = await contactAPI("segments/","post",true,
         {
-            "segmentStatusId": 3
+            'previousSegmentId': previousSegmentID
         }
     );
-    let moderationAssignmentCreationData = await contactAPI("moderationassignments/", "post",true,
-        {
-            'segmentId': previousSegmentID
-        }
-    )
-    return moderationAssignmentCreationData;
+    return await getSegmentHistory(createSegmentData.id); 
+}
+
+async function uploadNewModerationAssignment(id) {
+    console.log("IN MA FRONTEND", id);
+    await contactAPI(`segments/moderationassignments/${id}`,
+        "post", true);
+    return await getSegmentHistory(id);
 }
 
 export function StartNewStoryButton(props) {
     const [isOpen, setIsOpen] = useState(false);
-
     function createModal() {
         setIsOpen(true);
         console.log("modal clicked")
@@ -76,7 +61,6 @@ export function StartNewStoryButton(props) {
 
 function NewStoryOptionspanel(props) {
     let navigate = useNavigate();
-    const urlStub = `/chainlettersstories/`;
 
     const [storyParameters, setStoryParameters] = useState({});
     const [parameterChecks, setParameterChecks] = useState({});
@@ -91,17 +75,16 @@ function NewStoryOptionspanel(props) {
         const checked = e.target.checked;
         setParameterChecks(values => ({ ...values, [name]: checked }))
     }
+    function createNewStory() {
+        props.close();
 
-    function createNewStoryAndSegment() {
-        props.close()
         uploadNewStoryAndSegment(storyParameters)
             .then(function (value) {
                 props.addNewStory(value)
-                    .then(function (innerValue) {
+                    .then(() => {
                         navigate(`/write/${value.id}/`)
                     })
-            }
-            )
+            });
     }
 
     return (
@@ -152,57 +135,58 @@ function NewStoryOptionspanel(props) {
                     onChange={handleValueChange}></input>
                 </label>
             </fieldset>
-            <button type="button" onClick={createNewStoryAndSegment}>CREATE NEW STORY</button>
+            <button type="button" onClick={createNewStory}>CREATE NEW STORY</button>
         </form >
     )
 }
 
 export function SubmissionButton(props) {
     let navigate = useNavigate();
-
-    let segmentStatusID;
-    switch (props.submissionType) {
-        case "SAVE":
-            segmentStatusID = 1;
-            break;
-        case "SUBMIT":
-            segmentStatusID = 2;
-            break;
-        case "APPROVE":
-            segmentStatusID = 4;
-            break;
-        case "ABANDON":
-            segmentStatusID = 6;
-            break;
-    }
+    console.log(props);
+    console.log(props.segmentID);
 
     async function handleSubmit(e) {
-        let getNewFullStoryInfoData = await contactAPI(`segments/traces/${props.segmentID}`, "get");
+        let segmentHistoryData = await getSegmentHistory(props.segmentID);
 
         if (props.submissionType != "SAVE") {
-            props.removeCurrentStory(getNewFullStoryInfoData);
+            props.removeCurrentStory(segmentHistoryData);
         }
+        console.log(props.currentContent);
         let currentContent = !props.currentContent ? "(Blank)" : props.currentContent;
 
-        contactAPI(`segments/${props.segmentID}/`, "patch",
-            {
-                'segmentStatusId': segmentStatusID,
-                'content': currentContent
-            }
-        )
-        .then(
-            function (value) {
-                if (props.submissionType == "ABANDON") {
-                    if (value.previousSegmentId != null) {
-                        contactAPI(`segments/${value.previousSegmentId}/`, "patch",
-                            {
-                                'segmentStatusId': 4
-                            }
-                        )
+
+        switch (props.submissionType) {
+            case "SAVE":
+                await contactAPI(`segments/${props.segmentID}/`, "patch", true,
+                    {
+                        'content': currentContent
                     }
-                }
-            })
-        navigate(`/write`);
+                )
+                break;
+            case "SUBMIT":
+                console.log("Submit", props.segmentID)
+                await contactAPI(`segments/${props.segmentID}/submit/`, "post", true,
+                    {
+                        'content': currentContent
+                    }
+                )
+                navigate(`/write/`);
+                break;
+            case "APPROVE":
+                console.log("In approval");
+                await contactAPI(`segments/moderationassignments/${props.segmentID}/approve`, "post", true);
+                navigate(`/review/`);
+                break;
+            case "ABANDON":
+                await contactAPI(`segments/${props.segmentID}/abandon/`, "post", true,
+                    {
+                        'content': currentContent
+                    }
+                )
+                navigate(`/write/`);
+                break;
+        }
+     
     }
 
     return (
@@ -212,7 +196,6 @@ export function SubmissionButton(props) {
 
 export function ModalSelectSegmentFromOptionsButton(props) {
     let navigate = useNavigate();
-    const urlStub = `/chainlettersstories/`;
     const numberOfChoices = 3;
 
     const [isOpen, setIsOpen] = useState(false);
@@ -231,9 +214,12 @@ export function ModalSelectSegmentFromOptionsButton(props) {
     async function getSegmentsForModal() {
         console.log("in getSegmentsForModal")
         let availabilityData = await contactAPI(`segments/${apiArrayToAccess}/`, "get")
-        let randomSegmentIDArray = await getRandomItem(availabilityData, numberOfChoices);
+        console.log(availabilityData);
+        let randomSegmentIDArray = await getRandomItem(availabilityData, numberOfChoices, true);
         let segmentTraceDataArray = [];
         let segmentTraceData;
+        console.log(randomSegmentIDArray);
+
         await Promise.all(randomSegmentIDArray.map(async (segmentID) => {
             segmentTraceData = await contactAPI(`segments/traces/${segmentID}`, "get");
             segmentTraceDataArray.push(segmentTraceData);
@@ -253,14 +239,30 @@ export function ModalSelectSegmentFromOptionsButton(props) {
 
     function selectStory(previousSegmentID) {
         setIsOpen(false);
-        uploadNewSegment(previousSegmentID)
-            .then(function (value) {
-                props.addNewStory(value)
-                    .then(function (innerValue) {
-                        navigate(`/write/${value.id}`)
+
+        console.log(previousSegmentID);
+        switch (props.type) {
+            case "JOIN":
+                uploadNewSegment(previousSegmentID)
+                    .then(function (value) {
+                        props.addNewStory(value)
+                            .then(() => {
+                                navigate(`/write/${value.id}`)
+                            });
                     });
-            });
+                break;
+            case "MODERATE":
+                uploadNewModerationAssignment(previousSegmentID)
+                    .then(function (value) {
+                        props.addNewStory(value)
+                            .then(() => {
+                                navigate(`/review/${value.id}`)
+                            });
+                    });
+                break;
+        }
     }
+       
 
     return (
         <>
@@ -281,14 +283,14 @@ function SegmentDisplayInModal(props) {
     console.log(props.storyDict);
     let firstSegment = props.storyDict.segmentHistoryList[0]
     let finalSegment = props.storyDict.segmentHistoryList.slice(-1)[0]
-    finalSegment = (finalSegment == firstSegment) ? null : finalSegment
+    firstSegment = (finalSegment == firstSegment) ? null : firstSegment
 
     const selectStory = () => props.selectStory(finalSegment.id);
 
     return (
         <button onClick={selectStory} className="displayStoryContainer">
-            <textarea value={firstSegment.content} readOnly />
-            {(finalSegment != null) ? <textarea value={finalSegment.content} readOnly /> : null}
+            <textarea value={(firstSegment != null) ? <textarea value={firstSegment.content} readOnly /> : null} readOnly />
+            <textarea value={finalSegment.content} readOnly />
         </button>
     )
 }

@@ -66,14 +66,37 @@ namespace ChainMates.Server.Controllers
         // PATCH api/segments/5
         [Authorize]
         [HttpPatch("{id}")]
-        public async Task<IActionResult> PatchAsync(int id, [FromBody] SegmentPatchDto dto)
+        public async Task<IActionResult> PatchSaveAsync(int id, [FromBody] SegmentPatchDto dto)
         {
 
-            var segment = await _service.GetSegmentById(id);
-            var data = await _service.UpdateSegment(segment, dto);
+            var data = await _service.UpdateSegmentContent(id, dto.Content);
             return Ok(data);
 
         }
+
+        [Authorize]
+        [HttpPost("{id}/submit")]
+        public async Task<IActionResult> PostSubmitAsync(int id, [FromBody] SegmentPatchDto dto)
+        {
+            Debug.WriteLine("in PostSubmitAsync");
+
+            var data = await _service.SubmitSegmentForModeration(id,dto.Content);
+            return Ok(data);
+
+        }
+
+        [Authorize]
+        [HttpPost("{id}/abandon")]
+        public async Task<IActionResult> PostDeleteAsync(int id, [FromBody] SegmentPatchDto dto)
+        {
+
+            var data = await _service.AbandonSegment(id, dto.Content);
+
+            return Ok(data);
+
+        }
+
+
 
         // PATCH api/segments/5
         [Authorize]
@@ -112,9 +135,9 @@ namespace ChainMates.Server.Controllers
 
         // POST api/moderationassignments/
         [Authorize]
-        [HttpPost("moderationassignments")]
+        [HttpPost("moderationassignments/{segmentId}")]
 
-        public async Task<IActionResult> PostModerationAssignmentAsync([FromBody] ModerationAssignmentDto dto)
+        public async Task<IActionResult> PostModerationAssignmentAsync(int segmentId)
         {
             int authorId = _currentUserService.UserId ?? 0;
 
@@ -122,26 +145,29 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            await _service.CreateModerationAssignment(dto, authorId);
-            return Ok(dto);
+            Debug.WriteLine("IN PostModerationAssignmentAsync controller");
+            Debug.WriteLine(segmentId);
+            var moderationAssignment = await _service.CreateModerationAssignment(segmentId, authorId);
+            return Ok(moderationAssignment);
 
         }
 
         // POST api/moderationassignments/
         [Authorize]
-        [HttpPost("moderationassignments/{id}")]
+        [HttpPost("moderationassignments/{segmentId}/approve")]
 
-        public async Task<IActionResult> PatchModeration([FromBody] ModerationAssignmentDto dto)
+        public async Task<IActionResult> PostModerationApprove(int segmentId)
         {
+            Debug.WriteLine("In Patch Moderation");
             int authorId = _currentUserService.UserId ?? 0;
 
             if (authorId == 0)
             {
                 return Unauthorized();
             }
-            await _service.ApproveModeration(dto, authorId);
-            await _notificationService.NotifySegemntApproved(dto.SegmentId, authorId);
-            return Ok(dto);
+            await _service.ApproveModeration(segmentId, authorId);
+            await _notificationService.NotifySegemntApproved(segmentId, authorId);
+            return Ok(segmentId);
 
         }
 

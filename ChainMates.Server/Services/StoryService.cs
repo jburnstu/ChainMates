@@ -70,6 +70,21 @@ namespace ChainMates.Server.Services
             return story;
         }
 
+        public async Task<Segment> CreateStoryWithInitialSegment(StoryDto storyDto, int authorId)
+        {
+            var story = await CreateStory(storyDto, authorId);
+
+            SegmentService segmentService = new SegmentService(_context);
+            var initialSegment = await segmentService.CreateSegment(new DTOs.Segment.SegmentCreationDto
+            {
+                StoryId = story.Id
+            },story.AuthorId,true);
+
+            return initialSegment;
+
+
+        }
+
         public async Task<Story> GetStoryBySegment (int segmentId)
         {
             var story = await _context.Story

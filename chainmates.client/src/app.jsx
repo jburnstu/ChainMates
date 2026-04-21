@@ -194,6 +194,7 @@ function HomeDashboard(props) {
 }
 
 function WorkshopDashboard(props) {
+    console.log(props.writeOrReview, props.dicts)
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
     const addNewTab = (tabID) => props.setDicts(tabID, props.writeOrReview, "add");
 
