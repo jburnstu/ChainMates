@@ -32,20 +32,13 @@ export function AuthorSearchPage(props) {
         fetchData();
     }, [authorID]);
 
-
-    async function getRecentSegmentTraceDTOList() {
-        let recentSegmentByAuthorData = await contactAPI(`authors/${authorDict.id}/recentsegments/`, "get", true, {}, []);
-        console.log(recentSegmentByAuthorData);
-        return recentSegmentByAuthorData;
-    }
-
     let circleNotificationDTOList;
     let notificationDTOList;
 
     useEffect(() => {
         const fetchData = async () => {
-            let segmentHistoryDataArray = await getRecentSegmentTraceDTOList();
-            setRecentSegmentHistoryDTOList(segmentHistoryDataArray);
+            let segmentHistoryDTOList = await contactAPI(`authors/${authorDict.id}/recentsegments/`, "get", true, {}, []);
+            setRecentSegmentHistoryDTOList(segmentHistoryDTOList);
         }
         if (authorDict?.id) {
             fetchData();

@@ -205,9 +205,6 @@ namespace ChainMates.Server.Services
         
         public async Task<int> ApproveModeration(int segmentId, int authorId)
         {
-            Debug.WriteLine("ApproveModeration");
-            Debug.WriteLine(segmentId);
-            Debug.WriteLine(authorId);
             var moderationAssignment = await (from ma in _context.ModerationAssignment
                                         where ma.SegmentId == segmentId
                                         where ma.AuthorId == authorId
@@ -235,8 +232,6 @@ namespace ChainMates.Server.Services
         public async Task<string> AbandonSegment(int segmentId, string content)
         {
             var segment = await GetSegmentById(segmentId);
-
-            
             segment.SegmentStatusId = 6;
             segment.Content = content;
             if (segment.PreviousSegmentId != null)
@@ -264,12 +259,6 @@ namespace ChainMates.Server.Services
                 .Where(t => t.EarlierSegmentAuthorId == authorId)
                 .Select(t => t.FinalSegmentId)
                 .ToHashSet();
-
-            //var lockedSegmentIds = await (from t in traces
-            //                              join s in _context.Segment
-            //                              on sbyte.Id = t.F
-                
-                
 
             return traces
                 .Where(t => t.FinalSegmentStatusId == 4)
