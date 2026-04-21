@@ -117,7 +117,7 @@ namespace ChainMates.Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("moderatablesegments")]
+        [HttpGet("reviewablesegments")]
 
         public async Task<IActionResult> GetModeratableSegments()
         {
@@ -135,7 +135,7 @@ namespace ChainMates.Server.Controllers
 
         // POST api/moderationassignments/
         [Authorize]
-        [HttpPost("moderationassignments/{segmentId}")]
+        [HttpPost("reviewassignments/{segmentId}")]
 
         public async Task<IActionResult> PostModerationAssignmentAsync(int segmentId)
         {
@@ -154,7 +154,7 @@ namespace ChainMates.Server.Controllers
 
         // POST api/moderationassignments/
         [Authorize]
-        [HttpPost("moderationassignments/{segmentId}/approve")]
+        [HttpPost("reviewassignments/{segmentId}/approve")]
 
         public async Task<IActionResult> PostModerationApprove(int segmentId)
         {

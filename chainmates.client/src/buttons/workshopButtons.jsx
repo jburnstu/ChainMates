@@ -33,10 +33,10 @@ async function uploadNewSegment(previousSegmentID) {
     return await getSegmentHistory(createSegmentData.id); 
 }
 
-async function uploadNewModerationAssignment(id) {
+async function uploadNewReviewAssignment(id) {
     //returns the historyDTO of the moderated segment
 
-    await contactAPI(`segments/moderationassignments/${id}`,"post",true);
+    await contactAPI(`segments/reviewassignments/${id}`,"post",true);
     return await getSegmentHistory(id);
 }
 
@@ -175,7 +175,7 @@ export function SubmissionButton(props) {
                 break;
             case "APPROVE":
                 console.log("In approval");
-                await contactAPI(`segments/moderationassignments/${props.segmentID}/approve`, "post", true);
+                await contactAPI(`segments/reviewassignments/${props.segmentID}/approve`, "post", true);
                 navigate(`/review/`);
                 break;
             case "ABANDON":
@@ -203,11 +203,11 @@ export function ModalSelectSegmentFromOptionsButton(props) {
     const [arrayOfAvailableStories, setArrayOfAvailableStories] = useState([]);
 
     let apiArrayToAccess;
-    switch (props.type) {
-        case "MODERATE":
-            apiArrayToAccess = "moderatablesegments";
+    switch (props.writeOrReview) {
+        case "write":
+            apiArrayToAccess = "reviewablesegments";
             break;
-        case "JOIN":
+        case "review":
             apiArrayToAccess = "joinablesegments";
             break;
     }
@@ -242,8 +242,8 @@ export function ModalSelectSegmentFromOptionsButton(props) {
         setIsOpen(false);
 
         console.log(previousSegmentID);
-        switch (props.type) {
-            case "JOIN":
+        switch (props.writeOrReview) {
+            case "write":
                 uploadNewSegment(previousSegmentID)
                     .then(function (value) {
                         props.addNewStory(value)
@@ -252,8 +252,8 @@ export function ModalSelectSegmentFromOptionsButton(props) {
                             });
                     });
                 break;
-            case "MODERATE":
-                uploadNewModerationAssignment(previousSegmentID)
+            case "review":
+                uploadNewReviewAssignment(previousSegmentID)
                     .then(function (value) {
                         props.addNewStory(value)
                             .then(() => {
@@ -267,7 +267,11 @@ export function ModalSelectSegmentFromOptionsButton(props) {
 
     return (
         <>
-            <button onClick={createModal}>{props.type}
+            <button onClick={createModal}>
+                {(props.writeOrReview == "write")
+                    ? "JOIN"
+                    : "MODERATE"
+                }
             </ button >
             <ModalWindow isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <div className="allDisplayStoriesContainer">

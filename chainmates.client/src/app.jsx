@@ -217,10 +217,10 @@ function WorkshopDashboard(props) {
                     ?
                     <>
                         <StartNewStoryButton addNewStory={addNewTab} />
-                        <ModalSelectSegmentFromOptionsButton type="JOIN" addNewStory={addNewTab} />
+                        <ModalSelectSegmentFromOptionsButton writeOrReview={props.writeOrReview} addNewStory={addNewTab} />
                     </>
                     :
-                        <ModalSelectSegmentFromOptionsButton type="MODERATE" addNewStory={addNewTab} />
+                    <ModalSelectSegmentFromOptionsButton writeOrReview={props.writeOrReview} addNewStory={addNewTab} />
             }
             tabsList={
                 arrayOfTabIDs.map((tabID, index) =>
