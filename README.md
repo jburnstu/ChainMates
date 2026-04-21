@@ -55,13 +55,6 @@ If you're here because of a link from a job application -- thank you for having 
     - The *Comment* Entity / table, and the "inherited" tables (per type-of-object-commented), are a good example of *Class-Table Hierarchy* (or they will be when I get this to work in EFC... they might end up being json-ified as well).
 - **ChainMates\ChainMates.Test\** is the project I've set up for testing. As yet, the app hasn't really been fully-formed enough for this kind of testing to apply, but I wanted to set it up to demonstrate capability (and I'll be extending it soon).
 
-For the database, I've created the supporting file
-- **ChainMates/database_reference_material/**, which contains
-  - **full_ERD.png**, an image of the entity relationship diagram of the database which I designed and built,
-  - **schema_explanation.md**, a guide to the schema in words (as the ERD isn't the clearest),
-  - **views_backup.sql**, the SQL code I used to create the database's permanent views.
-    - see E.G. *segment_trace* for a complex recursive query.
-
 ### Development History
 The rough order in which this project came about:
 1. In Django:
