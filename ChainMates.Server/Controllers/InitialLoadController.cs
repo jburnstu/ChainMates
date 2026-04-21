@@ -53,7 +53,7 @@ public class InitialLoadController : ControllerBase
 
         authorInfo = await authorService.GetAuthorDtoById(authorId);
 
-        var activeWriteSegments = await segmentService.GetSegmentIdsByAuthorIdAndStatusId(authorId, 1);
+        var activeWriteSegments = await segmentService.GetSegmentIdsByAuthorIdAndStatusId(authorId, (int)ChainMates.Server.enums.SegmentStatus.InProgress);
 
         foreach (int finalSegmentId in activeWriteSegments)
         {

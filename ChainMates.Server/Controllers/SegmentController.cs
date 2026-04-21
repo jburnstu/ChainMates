@@ -21,31 +21,22 @@ namespace ChainMates.Server.Controllers
 
         public SegmentController(AppDbContext context, CurrentUserService currentUserService, NotificationService notificationService)
         {
-            Debug.WriteLine("in service constructor");
             _context = context;
             _service = new SegmentService(context);
             _currentUserService = currentUserService;
             _notificationService = notificationService;
         }
 
-        // GET: api/segments
-        [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            var data = _service.GetSegments();
-            return Ok(data);
-        }
 
-        // GET api/segments/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var data = await _service.GetSegmentById(id);
+            var data = await _service.GetSegment(id);
 
             return Ok(data);
         }
 
-        // POST api/segments
+
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] SegmentCreationDto dto)
@@ -63,7 +54,6 @@ namespace ChainMates.Server.Controllers
             }
         
 
-        // PATCH api/segments/5
         [Authorize]
         [HttpPatch("{id}")]
         public async Task<IActionResult> PatchSaveAsync(int id, [FromBody] SegmentPatchDto dto)
@@ -96,9 +86,6 @@ namespace ChainMates.Server.Controllers
 
         }
 
-
-
-        // PATCH api/segments/5
         [Authorize]
         [HttpGet("joinablesegments")]
 
@@ -133,7 +120,6 @@ namespace ChainMates.Server.Controllers
 
         }
 
-        // POST api/moderationassignments/
         [Authorize]
         [HttpPost("moderationassignments/{segmentId}")]
 
@@ -145,14 +131,11 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            Debug.WriteLine("IN PostModerationAssignmentAsync controller");
-            Debug.WriteLine(segmentId);
-            var moderationAssignment = await _service.CreateModerationAssignment(segmentId, authorId);
-            return Ok(moderationAssignment);
+            await _service.CreateModerationAssignment(segmentId, authorId);
+            return Ok("Done!"); // Nothing needed for now
 
         }
 
-        // POST api/moderationassignments/
         [Authorize]
         [HttpPost("moderationassignments/{segmentId}/approve")]
 
@@ -171,8 +154,6 @@ namespace ChainMates.Server.Controllers
 
         }
 
-
-        //GET api/segments/traces/5
 
         [HttpGet("{idForTrace}/history")]
         public async Task<IActionResult> GetSegmentHistory(int idForTrace)
