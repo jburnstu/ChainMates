@@ -14,7 +14,7 @@ export default { AuthorSearchPage }
 export function AuthorSearchPage(props) {
 
     const { authorID } = useParams();
-    const [recentSegmentTraceDTOList, setRecentSegmentTraceDTOList] = useState([]);
+    const [recentSegmentHistoryDTOList, setRecentSegmentHistoryDTOList] = useState([]);
     const [authorDict, setAuthorDict] = useState(null);
 
     useEffect(() => {
@@ -44,8 +44,8 @@ export function AuthorSearchPage(props) {
 
     useEffect(() => {
         const fetchData = async () => {
-            let segmentTraceDataArray = await getRecentSegmentTraceDTOList();
-            setRecentSegmentTraceDTOList(segmentTraceDataArray);
+            let segmentHistoryDataArray = await getRecentSegmentTraceDTOList();
+            setRecentSegmentHistoryDTOList(segmentHistoryDataArray);
         }
         if (authorDict?.id) {
             fetchData();
@@ -67,8 +67,8 @@ export function AuthorSearchPage(props) {
                     <div className="recentSegmentsContainer">
                         <header>Recent Segments</header>
                          <div className="recentSegmentsArray">
-                        {recentSegmentTraceDTOList.map(recentSegmentTraceDTO =>
-                            <RecentSegmentDisplay key={recentSegmentTraceDTO.id} segmentTraceInfo={recentSegmentTraceDTO} />)
+                        {recentSegmentHistoryDTOList.map(recentSegmentHistoryDTO =>
+                            <RecentSegmentDisplay key={recentSegmentHistoryDTO.id} segmentTraceInfo={recentSegmentHistoryDTO} />)
                             }
                         </div>
                     </div>

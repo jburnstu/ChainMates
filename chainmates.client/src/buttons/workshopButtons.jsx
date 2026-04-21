@@ -8,12 +8,14 @@ import { contactAPI, getRandomItem } from "../supportFuncs/utilityFuncs";
 export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton };
 
 
+
 async function getSegmentHistory(segmentID) {
-    return await contactAPI(`segments/traces/${segmentID}`, "get", true);
+    // Used universally to access this endpoint
+    return await contactAPI(`segments/${segmentID}/history/`, "get", true);
 }
 
-async function uploadNewStoryAndSegment(storyParameters) {
-
+async function createNewStory(storyParameters) {
+    // Creates both a story and a segment object; returns the new segment's historyDTO
     let initialSegmentData = await contactAPI("stories/", "post", true,
         storyParameters
     );
@@ -22,7 +24,6 @@ async function uploadNewStoryAndSegment(storyParameters) {
 }
 
 async function uploadNewSegment(previousSegmentID) {
-    console.log(previousSegmentID);
 
     let createSegmentData = await contactAPI("segments/","post",true,
         {
@@ -33,9 +34,9 @@ async function uploadNewSegment(previousSegmentID) {
 }
 
 async function uploadNewModerationAssignment(id) {
-    console.log("IN MA FRONTEND", id);
-    await contactAPI(`segments/moderationassignments/${id}`,
-        "post", true);
+    //returns the historyDTO of the moderated segment
+
+    await contactAPI(`segments/moderationassignments/${id}`,"post",true);
     return await getSegmentHistory(id);
 }
 
@@ -78,7 +79,7 @@ function NewStoryOptionspanel(props) {
     function createNewStory() {
         props.close();
 
-        uploadNewStoryAndSegment(storyParameters)
+        createNewStory(storyParameters)
             .then(function (value) {
                 props.addNewStory(value)
                     .then(() => {
@@ -213,21 +214,21 @@ export function ModalSelectSegmentFromOptionsButton(props) {
 
     async function getSegmentsForModal() {
         console.log("in getSegmentsForModal")
-        let availabilityData = await contactAPI(`segments/${apiArrayToAccess}/`, "get")
-        console.log(availabilityData);
-        let randomSegmentIDArray = await getRandomItem(availabilityData, numberOfChoices, true);
-        let segmentTraceDataArray = [];
-        let segmentTraceData;
+        let availableIDArray = await contactAPI(`segments/${apiArrayToAccess}/`, "get")
+        console.log(availableIDArray);
+        let randomSegmentIDArray = await getRandomItem(availableIDArray, numberOfChoices, true);
+        let segmentHistoryDTOArray = [];
+        let segmentHistoryDTO;
         console.log(randomSegmentIDArray);
 
         await Promise.all(randomSegmentIDArray.map(async (segmentID) => {
-            segmentTraceData = await contactAPI(`segments/traces/${segmentID}`, "get");
-            segmentTraceDataArray.push(segmentTraceData);
+            segmentHistoryDTO = await getSegmentHistory(segmentID);
+            segmentHistoryDTOArray.push(segmentHistoryDTO);
         }
         )
         )
-        await setArrayOfAvailableStories(segmentTraceDataArray);
-        return segmentTraceDataArray;
+        await setArrayOfAvailableStories(segmentHistoryDTOArray);
+        return segmentHistoryDTOArray;
     }
 
     function createModal() {
