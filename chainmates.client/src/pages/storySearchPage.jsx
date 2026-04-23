@@ -5,19 +5,29 @@ import { PageOrTabLayout } from "../layouts/layouts";
 import { contactAPI } from "../supportFuncs/utilityFuncs";
 
 export default { StorySearchPage, StorySubSearchPage };
+
+
+async function changeFinalSegment(finalSegmentID) {
+    await contactAPI(`segments/${finalSegmentID}/history`, "get")
+        .then(function (value) {
+            setFinalSegmentDTO(value);
+        })
+}
+
 export function StorySearchPage() {
 
     const { storyID } = useParams();
-    const [storyDict, setStoryDict] = useState(null);
+    const [storyInfo, setStoryInfo] = useState(null);
+    const [finalSegmentDTO, setFinalSegmentDTO] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
-            contactAPI(`stories/${storyID}`, "get", false)
+            await contactAPI(`stories/${storyID}`, "get", false)
                 .then(function (value) {
-                    setStoryDict(value);
+                    setStoryInfo(value);
                     console.log(value);
-                    let firstSegmentID = value.strucutre[0];
-                    navigate(`/stories/${storyID}/${firstSegmentID}/`);
+                    changeFinalSegment(value.structure[0][0]); // The first segment in the story is saved at 0 (in an array of one)
+                    //navigate(`/stories/${storyID}/${firstSegmentID}/`);
                 });
         }
         if (storyID) {
@@ -26,19 +36,18 @@ export function StorySearchPage() {
     }, [storyID]);
 
 
+
     ///////////////// Assign each segment an on-off selection for the Comments + Info sidebar ///////////////
     let noSelections = {};
-    storyDict.segmentHistoryList.forEach(dictInArray =>
+    finalSegmentDTO.forEach(dictInArray =>
         noSelections[dictInArray.id] = false);
     const [selectedSegmentDict, setSelectedSegmentDict] = useState(noSelections);
     function changeSegmentSelection(segmentID) {
         setSelectedSegmentDict({ ...selectedSegmentDict, [segmentID]: !selectedSegmentDict[segmentID] })
     }
 
-
-
-    if (!storyDict) {
-        if (storyDict != null) {
+    if (!storyInfo) {
+        if (storyInfo != null) {
             console.log("DIDN@T WORK");
         }
         return null;
@@ -47,24 +56,25 @@ export function StorySearchPage() {
     return (
         <PageOrTabLayout 
             topLine={
-                <StorySeachPageTopLine storyDict={storyDict} />
+                <StorySeachPageTopLine storyInfo={storyInfo} />
             }
-            mainContent ={ 
-                <>
-                    <div>{storyDict.title}</div>
-                    <div>{storyDict.author.displayName}</div>
-                    <Outlet />
-                </>
+            mainContent={
+                <SegmentSeriesDisplay segmentHistoryList={finalSegmentDTO.segmentHistoryList}
+                    editableID={null}
+                    currentContent={null}
+                    changeSelection={changeSegmentSelection}
+                    onChange={null}
+                /> 
             }
             footer={
                 <>
-                    <GoUpASegmentButton />
-                    <GoDownASegmentButton />
+                    <GoUpASegmentButton previousSegmentID={} />
+                    <GoDownASegmentButton structureDict={structure} />
                 </>
             }
             rightSidebar={
-                <Comments selections={selectedSegmentDict} storyDict={storyDict} />
-                null
+                <Comments selections={selectedSegmentDict} storyDict={storyInfo} />
+            
             }
         /> 
     )
@@ -72,40 +82,46 @@ export function StorySearchPage() {
 
 function StorySeachPageTopLine() { }
 
-
-export function StorySubSearchPage() 
-{ 
-    const { finalSegmentID } = useParams();
-
-    const getSegmentHistory = async (finalSegmentId) => {
-        return await contactAPI(`segments/${finalSegmentId}`, "get");
+function GoDownASegmentButton({ structureDict }) {
+    const [isOpen, setIsOpen] = useState(false);
+    function createModal() {
+        setIsOpen(true);
+        console.log("modal clicked")
     }
 
-    useEffect(() => {
-        const getSegmentHistory = async (finalSegmentID) => {
-            await contactAPI(`segments/${finalSegmentID}`, "get");
-        }
-        if (finalSegmentID) {
-            getSegmentHistory(finalSegmentID);
-        }
-    }, [finalSegmentID]);
+    return (
+        <>
+            <button onClick={createModal}> Start A New Story
+            </ button >
+            <ModalWindow isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                <div className="allDisplayStoriesContainer">
+                    <NewSegmentOptionspanel   close={() => setIsOpen(false)} />
+                </div>
+            </ModalWindow >
+        </>
+    )
 
+}
 
+function GoUpASegmentButton({previousSegmentID}) {
 
-
-        return (
-            <SegmentSeriesDisplay storyDict={storyDict}
-                editableID={null}
-                currentContent={null}
-                changeSelection={changeSegmentSelection}
-                onChange={null}
-            /> 
+    return (
+        <button onClick={() => changeFinalSegment(penultimateSegmentID)}/>
     )
 }
-function GoUpASegmentButton() {
-    const navigate = useNavigate();
 
-    const onClick = () => {
 
-    }
-}
+
+
+//export function StorySubSearchPage() {
+//    const { finalSegmentID } = useParams();
+
+//    return (
+//        <SegmentSeriesDisplay storyDict={storyDict}
+//            editableID={null}
+//            currentContent={null}
+//            changeSelection={changeSegmentSelection}
+//            onChange={null}
+//        />
+//    )
+//}

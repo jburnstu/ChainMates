@@ -1,11 +1,11 @@
 
 export default { SegmentDisplay, RecentSegmentDisplay };
 
-export function SegmentSeriesDisplay({ storyDict, editableID, currentContent, changeSegmentSelection,handleChange }) {
+export function SegmentSeriesDisplay({ segmentHistoryList, editableID, currentContent, changeSegmentSelection,handleChange }) {
 
     return (
         <div className="segmentSeriesContainer">
-            {storyDict.segmentHistoryList.map(segmentDict =>
+            {segmentHistoryList.map(segmentDict =>
                 <SegmentDisplay key={segmentDict.id}
                     id={segmentDict.id}
                     editableID={editableID}

@@ -146,7 +146,7 @@ export default function App() {
                         </Route>
                         <Route path="stories/" element={<SearchDashboard type="stories" />}>
                             <Route path=":storyID/" element={<StorySearchPage />}>
-                                <Route path=":finalSegmentID/" element={<StorySubSearchPage/>} />
+                                {/*<Route path=":finalSegmentID/" element={<StorySubSearchPage/>} />*/}
                             </Route>
                         </Route>
                     </Route>

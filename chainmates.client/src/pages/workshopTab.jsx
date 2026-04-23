@@ -62,12 +62,12 @@ export function WorkshopTab(props) {
                 <WorkshopStoryHeader storyDict={storyDict} wordCount={wordCount} />
             }
             mainContent={ 
-                <SegmentSeriesDisplay storyDict={storyDict}
+                <SegmentSeriesDisplay segmentHistoryList={storyDict.segmentHistoryList}
                     editableID={writeOrReview == "write" ? tabID : null}
                     currentContent={currentContent}
                     changeSelection={changeSegmentSelection}
                     onChange={handleChange}
-                /> 
+                /> y
             }
             footer={
                 props.writeOrReview == "write"
