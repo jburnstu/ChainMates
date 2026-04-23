@@ -43,9 +43,9 @@ function NotificationPanel(props) {
     let typeID = props.notificationDTO.notificationTypeId;
 
     const parentTypeRef = {
-        1: "Story",
-        2: "Segment",
-        3: "Comment"
+        1: "story",
+        2: "segment",
+        3: "comment"
     };
     console.log(dto);
     let headerContent;
@@ -88,7 +88,7 @@ function NotificationPanel(props) {
             content = (
                 <p>
                     <AuthorStringLink authorInfo={dto.Instigator} />
-                    " commented on your " + parentTypeRef[dto.CommentTypeId] + " ."
+                    " commented on your {parentTypeRef[dto.CommentTypeId]}."
                 </p>
             )
             break;

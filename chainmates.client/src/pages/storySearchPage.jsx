@@ -4,11 +4,12 @@ import { useParams } from 'react-router-dom';
 import { PageOrTabLayout } from "../layouts/layouts";
 import { contactAPI } from "../supportFuncs/utilityFuncs";
 
-export default { StorySearchPage };
+export default { StorySearchPage, StorySubSearchPage };
 export function StorySearchPage() {
 
     const { storyID } = useParams();
     const [storyDict, setStoryDict] = useState(null);
+    const [currentSegmentHistoryDTO, setCurrentSegmentHistoryDTO] = useState({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -16,6 +17,7 @@ export function StorySearchPage() {
                 .then(function (value) {
                     setStoryDict(value);
                 })
+             
         }
 
         if (storyID) {
@@ -39,10 +41,15 @@ export function StorySearchPage() {
                 <>
                     <div>{storyDict.title}</div>
                     <div>{storyDict.author.displayName}</div>
+                    <Outlet />
                 </>
             }
             footer={
-                null
+                <>
+                    <GoUpASegmentButton />
+                    <GoDownASegmentButton />
+
+                </>
             }
             rightSidebar={
                 //<Comments selections={selectedSegmentDict} storyDict={storyDict} />
@@ -53,3 +60,17 @@ export function StorySearchPage() {
 }
 
 function StorySeachPageTopLine() { }
+
+
+export function StorySubSearchPage() 
+{ }
+
+
+
+function GoUpASegmentButton() {
+    const navigate = useNavigate();
+
+    const onClick = () => {
+
+    }
+}

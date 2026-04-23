@@ -10,7 +10,7 @@ import { WorkshopTab } from "./pages/workshopTab";
 
 import { AuthorSearchButton, StorySearchButton } from "./buttons/searchButtons.jsx";
 import { AuthorSearchPage } from "./pages/authorSearchPage";
-import { StorySearchPage } from "./pages/storySearchPage";
+import { StorySearchPage, StorySubSearchPage } from "./pages/storySearchPage";
 import { contactAPI } from "./supportFuncs/utilityFuncs.jsx";
 
 import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
@@ -145,7 +145,9 @@ export default function App() {
                             <Route path=":authorID/" element={<AuthorSearchPage self={false} />} />
                         </Route>
                         <Route path="stories/" element={<SearchDashboard type="stories" />}>
-                            <Route path=":storyID/" element={<StorySearchPage />} />
+                            <Route path=":storyID/" element={<StorySearchPage />}>
+                                <Route path=":finalSegmentID/" element={<StorySubSearchPage/>} />
+                            </Route>
                         </Route>
                     </Route>
                     <Route path="*" element={<NoMatch />} />
