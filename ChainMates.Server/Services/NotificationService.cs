@@ -194,7 +194,7 @@ namespace ChainMates.Server.Services
 
             await CreateNotifications(new NotificationCreationDto
             {
-                NotificationTypeId = 4,
+                NotificationTypeId = 5,
                 Info = new AuthorAddedACommentDto
                 {
                     CommentTypeId = commentTypeId,

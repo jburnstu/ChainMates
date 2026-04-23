@@ -16,7 +16,6 @@ namespace ChainMates.Server.Controllers
         {
             _authorService = authorService;
             _currentUserService = currentUserService;
-            _notificationService = notificationService;
         }
 
         [HttpGet]

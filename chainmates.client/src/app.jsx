@@ -11,19 +11,27 @@ import { WorkshopTab } from "./pages/workshopTab";
 import { AuthorSearchButton, StorySearchButton } from "./buttons/searchButtons.jsx";
 import { AuthorSearchPage } from "./pages/authorSearchPage";
 import { StorySearchPage } from "./pages/storySearchPage";
-
+import { contactAPI } from "./supportFuncs/utilityFuncs.jsx";
 
 import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
 
 
 export default function App() {
 
-
+    console.log("In app")
     ///////  Load initial data or shunt into login/signup facade ////////////
     const [data, setData] = useState(null);
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
+        const initialLoad = async (callback) => {
+            console.log("In initial load");
+            await contactAPI("load", "get", true)
+                .then(function (value) {
+                    callback(value);
+                });
+        }
+        console.log("In app useEffect")
         initialLoad(setData);
         }, []);
 
@@ -107,7 +115,7 @@ export default function App() {
         }
         else { console.log("Successfully changed ", newDictArray, " to ", dictArrayToChange) };
 
-        setData(data => ({ ...data, [dataKey]: newDictArray }));
+        setData(data => ({ ...data, [`${writeOrReview}Dicts`]: newDictArray }));
         return newDictArray;
     }
 
@@ -156,8 +164,8 @@ function UniversalHeader(props) {
                 <nav>
                     <Link to="home" ><button type="button">HOME</button></Link>|{" "}
                     <Link to="write" ><button type="button">WRITE</button></Link>|{" "}
-                    <Link to="review"><button type="button">READ</button></Link>
-                    <Link to="authors"><button type="button">AUTHORS</button></Link>
+                    <Link to="review"><button type="button">READ</button></Link>|{" "}
+                    <Link to="authors"><button type="button">AUTHORS</button></Link>|{" "}
                     <Link to="stories"><button type="button">STORIES</button></Link>
                 </nav>
             </header >
@@ -225,7 +233,6 @@ function WorkshopDashboard(props) {
             }
             tabsList={
                 arrayOfTabIDs.map((tabID, index) =>
-                 {/* I do this Link(button) thing a lot -- should probs find a better way at some point */ }
                     <Link to={tabID + "/"} key={index + tabID} className="tabLink">
                         <button className="tabButton">{getTabName(tabID, index)}
                         </button>
