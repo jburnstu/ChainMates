@@ -23,7 +23,6 @@ namespace ChainMates.Server.Controllers
             _context = context;
             _service = new SegmentService(context);
             _currentUserService = currentUserService;
-            _notificationService = notificationService;
         }
 
 
@@ -122,7 +121,6 @@ namespace ChainMates.Server.Controllers
                 return Unauthorized();
             }
             await _service.ApproveModeration(segmentId, authorId);
-            await _notificationService.NotifySegmentApproved(segmentId, authorId);
             return Ok(segmentId);
 
         }

@@ -97,6 +97,8 @@ namespace ChainMates.Server.Services
                 AuthorRelationTypeId = 1
             };
             _context.AuthorRelation.Add(authorRelation);
+            NotificationService notificationService = new NotificationService(_context);
+            await notificationService.NotifyYouFollowedSomeone(authorToFollowId, authorId);
             await _context.SaveChangesAsync();
             return authorRelation;
         }

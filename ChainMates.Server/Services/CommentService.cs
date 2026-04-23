@@ -130,6 +130,9 @@ namespace ChainMates.Server.Services
                 CommentStatusId = 2,
                 Content = dto.Content
             });
+
+            NotificationService notificationService = new NotificationService(_context);
+            await notificationService.NotifyCommentPosted(dto.CommentTypeId, dto.ParentId, authorId);
             return dto;
         }
 

@@ -220,6 +220,9 @@ namespace ChainMates.Server.Services
             {
                 previousSegment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForAddition;
             }
+
+            NotificationService notificationService = new NotificationService(_context);
+            await notificationService.NotifySegmentApproved(segmentId, authorId);
             await _context.SaveChangesAsync();
             return segmentId;
         }

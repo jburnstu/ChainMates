@@ -11,7 +11,6 @@ namespace ChainMates.Server.Controllers
     {
         private readonly AuthorService _authorService;
         private readonly CurrentUserService _currentUserService;
-        private readonly NotificationService _notificationService;
         private readonly int numberOfRecentSegments = 3;
         public AuthorController(AuthorService authorService, CurrentUserService currentUserService, NotificationService notificationService)
         {
@@ -76,7 +75,6 @@ namespace ChainMates.Server.Controllers
             }
 
             var data = await _authorService.FollowAuthor(authorId, authorToFollowId);
-            await _notificationService.NotifyYouFollowedSomeone(authorToFollowId, authorId);
             return Ok(data);
         }
 
