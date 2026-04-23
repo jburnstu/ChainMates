@@ -67,7 +67,7 @@ export function WorkshopTab(props) {
                     currentContent={currentContent}
                     changeSelection={changeSegmentSelection}
                     onChange={handleChange}
-                /> y
+                /> 
             }
             footer={
                 props.writeOrReview == "write"

@@ -1,5 +1,30 @@
 
-export default { SegmentDisplay, RecentSegmentDisplay };
+export default { SegmentSeriesDisplay, RecentSegmentDisplay, SegmentDisplayInModal };
+
+export function SegmentDisplayInModal(props) {
+    // Display the first and last segment of the story being joined
+    let firstSegment = props.storyDict.segmentHistoryList[0]
+    let finalSegment = props.storyDict.segmentHistoryList.slice(-1)[0]
+    firstSegment = (finalSegment == firstSegment || props.onlyShowLast) ? null : firstSegment
+    const selectStory = () => props.selectStory(finalSegment.id);
+
+    return (
+        <button onClick={selectStory} className="displayStoryContainer">
+            {(firstSegment == null)
+                ? null
+                :
+                <label value="Begins:">
+                    <textarea value={firstSegment.content} readOnly />
+                </label>
+            }
+            <label value="Ends:">
+                <textarea value={finalSegment.content} readOnly />
+            </label>
+        </button>
+    )
+}
+
+
 
 export function SegmentSeriesDisplay({ segmentHistoryList, editableID, currentContent, changeSegmentSelection,handleChange }) {
 

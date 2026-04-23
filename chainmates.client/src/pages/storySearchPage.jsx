@@ -4,15 +4,9 @@ import { useParams } from 'react-router-dom';
 import { PageOrTabLayout } from "../layouts/layouts";
 import { contactAPI } from "../supportFuncs/utilityFuncs";
 
-export default { StorySearchPage, StorySubSearchPage };
+import { SegmentDisplayInModal } from "../segmentDisplay"
 
-
-async function changeFinalSegment(finalSegmentID) {
-    await contactAPI(`segments/${finalSegmentID}/history`, "get")
-        .then(function (value) {
-            setFinalSegmentDTO(value);
-        })
-}
+export default { StorySearchPage};
 
 export function StorySearchPage() {
 
@@ -20,9 +14,16 @@ export function StorySearchPage() {
     const [storyInfo, setStoryInfo] = useState(null);
     const [finalSegmentDTO, setFinalSegmentDTO] = useState(null);
 
+    async function changeFinalSegment(finalSegmentID) {
+        await contactAPI(`segments/${finalSegmentID}/history`, "get")
+            .then(function (value) {
+                setFinalSegmentDTO(value);
+            })
+    }
+
     useEffect(() => {
-        const fetchData = async () => {
-            await contactAPI(`stories/${storyID}`, "get", false)
+        const fetchData = async (storyID) => {
+            await contactAPI(`stories/${storyID}`, "get", true)
                 .then(function (value) {
                     setStoryInfo(value);
                     console.log(value);
@@ -30,8 +31,9 @@ export function StorySearchPage() {
                     //navigate(`/stories/${storyID}/${firstSegmentID}/`);
                 });
         }
+        console.log("In useeffect")
         if (storyID) {
-            fetchData();
+            fetchData(storyID);
         }
     }, [storyID]);
 
@@ -39,8 +41,11 @@ export function StorySearchPage() {
 
     ///////////////// Assign each segment an on-off selection for the Comments + Info sidebar ///////////////
     let noSelections = {};
-    finalSegmentDTO.forEach(dictInArray =>
-        noSelections[dictInArray.id] = false);
+    console.log(finalSegmentDTO)
+    if (finalSegmentDTO) {
+        finalSegmentDTO.segmentHistoryList.forEach(dictInArray =>
+            noSelections[dictInArray.id] = false);
+    }
     const [selectedSegmentDict, setSelectedSegmentDict] = useState(noSelections);
     function changeSegmentSelection(segmentID) {
         setSelectedSegmentDict({ ...selectedSegmentDict, [segmentID]: !selectedSegmentDict[segmentID] })
@@ -68,8 +73,10 @@ export function StorySearchPage() {
             }
             footer={
                 <>
-                    <GoUpASegmentButton previousSegmentID={} />
-                    <GoDownASegmentButton structureDict={structure} />
+                    <GoUpASegmentButton previousSegmentID={finalSegmentDTO.segmentHistoryList[-2].id}
+                        changeFinalSegment={changeFinalSegment} />
+                    <GoDownASegmentButton options={structure[finalSegmentDTO.id]}
+                        changeFinalSegment={changeFinalSegment}/>
                 </>
             }
             rightSidebar={
@@ -82,20 +89,45 @@ export function StorySearchPage() {
 
 function StorySeachPageTopLine() { }
 
-function GoDownASegmentButton({ structureDict }) {
+function GoDownASegmentButton({ possibleSegmentIDList }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [arrayOfAvailableSegments, setArrayOfAvailableSegments] = useState([]);
+
     function createModal() {
         setIsOpen(true);
         console.log("modal clicked")
     }
 
+    useEffect(() => {
+        async function getSegmentsForModal(possibleSegmentIDList) {
+            let possibleSegmentDTOList;
+            let segmentHistoryDTO;
+            await Promise.all(possibleSegmentIDList.map(async (segmentID) => {
+                segmentHistoryDTO = await contactAPI(`segments/${segmentID}/history`, "get", true);
+                possibleSegmentDTOList.push(segmentHistoryDTO);
+            }
+            )
+            )
+            await setArrayOfAvailableSegments(segmentHistoryDTOArray);
+            return segmentHistoryDTOArray;
+        }
+
+        getSegmentsForModal(possibleSegmentIDList)
+    },[possibleSegmentIDList])
+
     return (
         <>
-            <button onClick={createModal}> Start A New Story
+            <button onClick={createModal}> Continue Reading...
             </ button >
             <ModalWindow isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <div className="allDisplayStoriesContainer">
-                    <NewSegmentOptionspanel   close={() => setIsOpen(false)} />
+                    {arrayOfAvailableSegments.map(availableStory =>
+                        <SegmentDisplayInModal
+                            key={availableSegment.id}
+                            selectStory={() => props.changeFinalSegment(availableSegment.id)}
+                            storyDict={availableSegment}
+                        />
+                    )}
                 </div>
             </ModalWindow >
         </>
@@ -106,7 +138,7 @@ function GoDownASegmentButton({ structureDict }) {
 function GoUpASegmentButton({previousSegmentID}) {
 
     return (
-        <button onClick={() => changeFinalSegment(penultimateSegmentID)}/>
+        <button onClick={() => props.changeFinalSegment(penultimateSegmentID)}/>
     )
 }
 
