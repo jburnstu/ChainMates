@@ -4,6 +4,7 @@ using ChainMates.Server;
 using ChainMates.Server.DTOs.Story;
 using System.Diagnostics;
 using ChainMates.Server.DTOs.Author;
+using System.Runtime.Intrinsics.Arm;
 
 namespace ChainMates.Server.Services
 {
@@ -119,6 +120,24 @@ namespace ChainMates.Server.Services
 
         var story = await CreateStory(dto, authorId);
             return story;
+
+        }
+
+        internal async Task<Dictionary<int,List<int>>> GetStoryStructure(int storyId)
+        {
+            return await _context.Segment
+                .Where(s => s.StoryId == storyId)
+                .GroupJoin(
+                    _context.Segment,
+                    s => s.Id,
+                    s2 => s2.PreviousSegmentId,
+                    (s, futureSegments) => new
+                    {
+                        s.Id,
+                        FutureIds = futureSegments.Select(fs => fs.Id).ToList()
+                    }
+                )
+                .ToDictionaryAsync(x => x.Id, x => x.FutureIds);
 
         }
     }
