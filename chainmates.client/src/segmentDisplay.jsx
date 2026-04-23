@@ -1,5 +1,23 @@
 
 export default { SegmentDisplay, RecentSegmentDisplay };
+
+export function SegmentSeriesDisplay({ storyDict, editableID, currentContent, changeSegmentSelection,handleChange }) {
+
+    return (
+        <div className="segmentSeriesContainer">
+            {storyDict.segmentHistoryList.map(segmentDict =>
+                <SegmentDisplay key={segmentDict.id}
+                    id={segmentDict.id}
+                    editableID={editableID}
+                    fixedContent={segmentDict.content}
+                    currentContent={currentContent}
+                    changeSelection={changeSegmentSelection}
+                    onChange={handleChange} />
+            )}
+        </div>
+     )
+}
+
 export function SegmentDisplay(props) {
 
     // Used to display segments in workshop and story-search tabs. It handles the logic
@@ -11,15 +29,16 @@ export function SegmentDisplay(props) {
     let readOnly = true;
     let onChange = null;
     let value = props.fixedContent;
+    let onClick = null;
 
-    if (props.isFinalSegment) {
+    if (props.id == props.editableID) {
         readOnly = false;
         onChange = props.onChange;
         value = props.currentContent;
-    }
 
-    const onClick = () => {
-        props.changeSelection(props.id)
+        onClick = () => {
+            props.changeSelection(props.id)
+        }
     }
 
 
@@ -41,7 +60,7 @@ export function RecentSegmentDisplay(props) {
         <div className="recentSegmentDisplayContainer">
             <SegmentDisplay
                 id={finalSegment.id}
-                isFinalSegment={false}
+                editableID={null}
                 fixedContent={finalSegment.content}
                 currentContent={null}
                 changeSelection={null}

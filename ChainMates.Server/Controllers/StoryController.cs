@@ -42,14 +42,6 @@ namespace ChainMates.Server.Controllers
             return Ok(data);
         }
 
-        [HttpGet("{storyId}/structure")]
-        public async Task<IActionResult> GetStoryStructure(int storyId)
-        {
-            var data = await _service.GetStoryStructure(storyId);
-            return Ok(data);
-
-        }
-
         // POST api/<StoryController>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] StoryDto dto)

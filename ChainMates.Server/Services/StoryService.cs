@@ -34,13 +34,15 @@ namespace ChainMates.Server.Services
                           }).ToListAsync();
         }
 
-        public async Task<StoryInfoDto?> GetStoryById(int storyId)
+        public async Task<StoryInfoIncludingStructureDto?> GetStoryById(int storyId)
         {
+            var storyStructure = await GetStoryStructure(storyId);
+
             return await (from s in _context.Story
                           where s.Id == storyId
                           join a in _context.Author
                           on s.AuthorId equals a.Id
-                          select new StoryInfoDto
+                          select new StoryInfoIncludingStructureDto
                           {
                               Id = s.Id,
                               Author = new AuthorDto
@@ -48,7 +50,8 @@ namespace ChainMates.Server.Services
                                   Id = a.Id,
                                   DisplayName = a.DisplayName
                               },
-                              Title = s.Title
+                              Title = s.Title,
+                              Structure = storyStructure
                           }).FirstOrDefaultAsync();
         }
 

@@ -9,21 +9,33 @@ export function StorySearchPage() {
 
     const { storyID } = useParams();
     const [storyDict, setStoryDict] = useState(null);
-    const [currentSegmentHistoryDTO, setCurrentSegmentHistoryDTO] = useState({});
 
     useEffect(() => {
         const fetchData = async () => {
-            await contactAPI(`stories/${storyID}`, "get", false)
+            contactAPI(`stories/${storyID}`, "get", false)
                 .then(function (value) {
                     setStoryDict(value);
-                })
-             
+                    console.log(value);
+                    let firstSegmentID = value.strucutre[0];
+                    navigate(`/stories/${storyID}/${firstSegmentID}/`);
+                });
         }
-
         if (storyID) {
             fetchData();
         }
     }, [storyID]);
+
+
+    ///////////////// Assign each segment an on-off selection for the Comments + Info sidebar ///////////////
+    let noSelections = {};
+    storyDict.segmentHistoryList.forEach(dictInArray =>
+        noSelections[dictInArray.id] = false);
+    const [selectedSegmentDict, setSelectedSegmentDict] = useState(noSelections);
+    function changeSegmentSelection(segmentID) {
+        setSelectedSegmentDict({ ...selectedSegmentDict, [segmentID]: !selectedSegmentDict[segmentID] })
+    }
+
+
 
     if (!storyDict) {
         if (storyDict != null) {
@@ -48,11 +60,10 @@ export function StorySearchPage() {
                 <>
                     <GoUpASegmentButton />
                     <GoDownASegmentButton />
-
                 </>
             }
             rightSidebar={
-                //<Comments selections={selectedSegmentDict} storyDict={storyDict} />
+                <Comments selections={selectedSegmentDict} storyDict={storyDict} />
                 null
             }
         /> 
@@ -63,10 +74,34 @@ function StorySeachPageTopLine() { }
 
 
 export function StorySubSearchPage() 
-{ }
+{ 
+    const { finalSegmentID } = useParams();
+
+    const getSegmentHistory = async (finalSegmentId) => {
+        return await contactAPI(`segments/${finalSegmentId}`, "get");
+    }
+
+    useEffect(() => {
+        const getSegmentHistory = async (finalSegmentID) => {
+            await contactAPI(`segments/${finalSegmentID}`, "get");
+        }
+        if (finalSegmentID) {
+            getSegmentHistory(finalSegmentID);
+        }
+    }, [finalSegmentID]);
 
 
 
+
+        return (
+            <SegmentSeriesDisplay storyDict={storyDict}
+                editableID={null}
+                currentContent={null}
+                changeSelection={changeSegmentSelection}
+                onChange={null}
+            /> 
+    )
+}
 function GoUpASegmentButton() {
     const navigate = useNavigate();
 
