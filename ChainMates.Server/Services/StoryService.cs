@@ -125,7 +125,7 @@ namespace ChainMates.Server.Services
 
         internal async Task<Dictionary<int,List<int>>> GetStoryStructure(int storyId)
         {
-            return await _context.Segment
+            var dict = await _context.Segment
                 .Where(s => s.StoryId == storyId)
                 .GroupJoin(
                     _context.Segment,
@@ -138,6 +138,15 @@ namespace ChainMates.Server.Services
                     }
                 )
                 .ToDictionaryAsync(x => x.Id, x => x.FutureIds);
+
+            int firstSegmentId = await _context.Segment
+                .Where(s => s.StoryId == storyId && s.PreviousSegmentId == null)
+                .Select(s => s.Id)
+                .SingleOrDefaultAsync();
+
+            dict[0] = new List<int> { firstSegmentId };
+
+            return dict;
 
         }
     }
