@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { contactAPI } from "./utilityFuncs.jsx";
-export default { initialLoad, Login, Signup };
+export default { Login, Signup };
 
 /////   This document handles the logic for logging in / signing up to the app.         //////
 //////   DISCLOSURE: I used AI to generate the login and signup functions here (I've    //////

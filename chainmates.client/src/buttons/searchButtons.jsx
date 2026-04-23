@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import { contactAPI } from "../supportFuncs/utilityFuncs";
 
-export default { AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink, FollowButton, UnFollowButton };
+export default { AuthorStringLink, AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink, FollowButton, UnFollowButton };
 
 export function AuthorSearchButton() {
     // Currently just loads up all authors (no filtering)
@@ -85,6 +85,12 @@ export function AuthorNameLink({ authorInfo }) {
     )
 }
 
+export function AuthorStringLink({ authorInfo }) {
+    console.log(authorInfo)
+    return (
+        <Link to={`/authors/${authorInfo.Id}`}>{authorInfo.DisplayName}</Link>
+    )
+}
 export function StoryNameLink({ storyInfo }) {
     // Same as above
     return (

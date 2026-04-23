@@ -10,7 +10,7 @@ namespace ChainMates.Server.DTOs.Notification.Info
     [JsonDerivedType(typeof(AuthorApprovedYourSegmentDto), "author_approved_your_segment")]
     [JsonDerivedType(typeof(StoryYouJoinedWasExtendedDto), "story_you_joined_was_extended")]
     [JsonDerivedType(typeof(AuthorYouFollowPublishedSegmentDto), "author_you_follow_published_segment")]
-
+    [JsonDerivedType(typeof(AuthorAddedACommentDto), "author_added_a_comment")]
 
     abstract public class NotificationInfoDto { }
 

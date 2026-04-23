@@ -24,7 +24,6 @@ namespace ChainMates.Server.Controllers
             _context = context;
             _service = new CommentService(context);
             _currentUserService = currentUserService;
-            _notificationService = notificationService;
         }
 
 
@@ -43,8 +42,6 @@ namespace ChainMates.Server.Controllers
             Debug.WriteLine("InCommentController");
             Debug.WriteLine(dto.ParentId);
             var data = await _service.CreateAndSubmitComment(dto, authorId);
-            await _notificationService.NotifyCommentPosted(dto.CommentTypeId, dto.ParentId, authorId);
-
             return Ok(data);
 
         }

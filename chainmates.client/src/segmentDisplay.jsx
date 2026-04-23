@@ -34,7 +34,8 @@ export function RecentSegmentDisplay(props) {
     // Moving the display on the author-search page here for now too. Will eventually move
     // segment-selection functions here as well
 
-    let finalSegment = props.segmentTraceInfo.segmentHistoryList.slice(-1)[0]
+
+    let finalSegment = props.segmentHistoryInfo.segmentHistoryList.slice(-1)[0]
 
     return (
         <div className="recentSegmentDisplayContainer">
