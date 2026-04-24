@@ -19,6 +19,7 @@ namespace ChainMates.Server.Services
 
         private readonly AppDbContext _context;
         private readonly Random _rnd;
+
         private readonly IStoryService _storyService;
         private readonly ICommentService _commentService;
         private readonly INotificationService _notificationService;
@@ -118,7 +119,6 @@ namespace ChainMates.Server.Services
                 Id = segmentId,
                 StoryData = storyDto,
                 SegmentHistoryList = segmentHistoryList
-
             };
 
 
