@@ -12,9 +12,11 @@ namespace ChainMates.Server.Services
     {
 
         private readonly AppDbContext _context;
+        private readonly SegmentService _segmentService;
         public StoryService(AppDbContext context)
         {
             _context = context;
+            _segmentService = new SegmentService(_context); 
         }
 
         public async Task<List<StoryInfoDto>> GetStories()
@@ -69,8 +71,6 @@ namespace ChainMates.Server.Services
             };
             _context.Story.Add(story);
             await _context.SaveChangesAsync();
-            Debug.WriteLine("story.Id");
-            Debug.WriteLine(story.Id);
             return story;
         }
 
@@ -78,8 +78,7 @@ namespace ChainMates.Server.Services
         {
             var story = await CreateStory(storyDto, authorId);
 
-            SegmentService segmentService = new SegmentService(_context);
-            var initialSegment = await segmentService.CreateSegment(new DTOs.Segment.SegmentCreationDto
+            var initialSegment = await _segmentService.CreateSegment(new DTOs.Segment.SegmentCreationDto
             {
                 StoryId = story.Id
             },story.AuthorId,true);

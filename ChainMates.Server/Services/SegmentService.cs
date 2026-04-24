@@ -12,15 +12,19 @@ using ChainMates.Server.enums;
 
 namespace ChainMates.Server.Services
 {
-    public class SegmentService
+    public class SegmentService : ISegmentService
     {
 
         private readonly AppDbContext? _context;
         private readonly Random _rnd;
-        public SegmentService(AppDbContext context)
+        private readonly ICommentService _commentService;
+        private readonly INotificationService _notificationService;
+        public SegmentService(AppDbContext context, ICommentService commentService, INotificationService notificationService)
         {
             _context = context;
             _rnd = new Random();
+            _commentService = commentService;
+            _notificationService = notificationService;
         }
 
         public SegmentService()
@@ -253,7 +257,7 @@ namespace ChainMates.Server.Services
             return await _context.SegmentTrace.ToListAsync();
         }
 
-        public async Task<List<int>> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
+        public List<int> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
         {
             // Blocked if any previous segment was written by the author
             // Might also introduce "blocked if any future segment written by the author"
