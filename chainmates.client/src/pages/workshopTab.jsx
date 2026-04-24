@@ -61,16 +61,13 @@ export function WorkshopTab(props) {
             topLine={
                 <WorkshopStoryHeader storyDict={storyDict} wordCount={wordCount} />
             }
-            mainContent ={ 
-                storyDict.segmentHistoryList.map(segmentDict =>
-                    <SegmentDisplay key={segmentDict.id}
-                        id={segmentDict.id}
-                        isFinalSegment={writeOrReview =="write" && segmentDict.id == tabID} //Fixed to avoid any formatting of final segment in review tab -- will change this at some point
-                        fixedContent={segmentDict.content} 
-                        currentContent={currentContent}
-                        changeSelection={changeSegmentSelection}
-                        onChange={handleChange}/>
-                )
+            mainContent={ 
+                <SegmentSeriesDisplay segmentHistoryList={storyDict.segmentHistoryList}
+                    editableID={writeOrReview == "write" ? tabID : null}
+                    currentContent={currentContent}
+                    changeSelection={changeSegmentSelection}
+                    onChange={handleChange}
+                /> 
             }
             footer={
                 props.writeOrReview == "write"

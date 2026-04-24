@@ -4,6 +4,7 @@ using ChainMates.Server;
 using ChainMates.Server.DTOs.Story;
 using System.Diagnostics;
 using ChainMates.Server.DTOs.Author;
+using System.Runtime.Intrinsics.Arm;
 
 namespace ChainMates.Server.Services
 {
@@ -33,13 +34,15 @@ namespace ChainMates.Server.Services
                           }).ToListAsync();
         }
 
-        public async Task<StoryInfoDto?> GetStoryById(int storyId)
+        public async Task<StoryInfoIncludingStructureDto?> GetStoryById(int storyId)
         {
+            var storyStructure = await GetStoryStructure(storyId);
+
             return await (from s in _context.Story
                           where s.Id == storyId
                           join a in _context.Author
                           on s.AuthorId equals a.Id
-                          select new StoryInfoDto
+                          select new StoryInfoIncludingStructureDto
                           {
                               Id = s.Id,
                               Author = new AuthorDto
@@ -47,7 +50,8 @@ namespace ChainMates.Server.Services
                                   Id = a.Id,
                                   DisplayName = a.DisplayName
                               },
-                              Title = s.Title
+                              Title = s.Title,
+                              Structure = storyStructure
                           }).FirstOrDefaultAsync();
         }
 
@@ -119,6 +123,33 @@ namespace ChainMates.Server.Services
 
         var story = await CreateStory(dto, authorId);
             return story;
+
+        }
+
+        internal async Task<Dictionary<int,List<int>>> GetStoryStructure(int storyId)
+        {
+            var dict = await _context.Segment
+                .Where(s => s.StoryId == storyId)
+                .GroupJoin(
+                    _context.Segment,
+                    s => s.Id,
+                    s2 => s2.PreviousSegmentId,
+                    (s, futureSegments) => new
+                    {
+                        s.Id,
+                        FutureIds = futureSegments.Select(fs => fs.Id).ToList()
+                    }
+                )
+                .ToDictionaryAsync(x => x.Id, x => x.FutureIds);
+
+            int firstSegmentId = await _context.Segment
+                .Where(s => s.StoryId == storyId && s.PreviousSegmentId == null)
+                .Select(s => s.Id)
+                .SingleOrDefaultAsync();
+
+            dict[0] = new List<int> { firstSegmentId };
+
+            return dict;
 
         }
     }

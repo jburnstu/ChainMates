@@ -1,5 +1,48 @@
 
-export default { SegmentDisplay, RecentSegmentDisplay };
+export default { SegmentSeriesDisplay, RecentSegmentDisplay, SegmentDisplayInModal };
+
+export function SegmentDisplayInModal(props) {
+    // Display the first and last segment of the story being joined
+    let firstSegment = props.storyDict.segmentHistoryList[0]
+    let finalSegment = props.storyDict.segmentHistoryList.slice(-1)[0]
+    firstSegment = (finalSegment == firstSegment || props.onlyShowLast) ? null : firstSegment
+    const selectStory = () => props.selectStory(finalSegment.id);
+
+    return (
+        <button onClick={selectStory} className="displayStoryContainer">
+            {(firstSegment == null)
+                ? null
+                :
+                <label value="Begins:">
+                    <textarea value={firstSegment.content} readOnly />
+                </label>
+            }
+            <label value="Ends:">
+                <textarea value={finalSegment.content} readOnly />
+            </label>
+        </button>
+    )
+}
+
+
+
+export function SegmentSeriesDisplay({ segmentHistoryList, editableID, currentContent, changeSegmentSelection,handleChange }) {
+
+    return (
+        <div className="segmentSeriesContainer">
+            {segmentHistoryList.map(segmentDict =>
+                <SegmentDisplay key={segmentDict.id}
+                    id={segmentDict.id}
+                    editableID={editableID}
+                    fixedContent={segmentDict.content}
+                    currentContent={currentContent}
+                    changeSelection={changeSegmentSelection}
+                    onChange={handleChange} />
+            )}
+        </div>
+     )
+}
+
 export function SegmentDisplay(props) {
 
     // Used to display segments in workshop and story-search tabs. It handles the logic
@@ -11,15 +54,16 @@ export function SegmentDisplay(props) {
     let readOnly = true;
     let onChange = null;
     let value = props.fixedContent;
+    let onClick = null;
 
-    if (props.isFinalSegment) {
+    if (props.id == props.editableID) {
         readOnly = false;
         onChange = props.onChange;
         value = props.currentContent;
-    }
 
-    const onClick = () => {
-        props.changeSelection(props.id)
+        onClick = () => {
+            props.changeSelection(props.id)
+        }
     }
 
 
@@ -41,7 +85,7 @@ export function RecentSegmentDisplay(props) {
         <div className="recentSegmentDisplayContainer">
             <SegmentDisplay
                 id={finalSegment.id}
-                isFinalSegment={false}
+                editableID={null}
                 fixedContent={finalSegment.content}
                 currentContent={null}
                 changeSelection={null}

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import { contactAPI, getRandomItem } from "../supportFuncs/utilityFuncs";
 
-export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton };
+export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton, ModalWindow };
 
 
 
@@ -300,32 +300,9 @@ export function ModalSelectSegmentFromOptionsButton(props) {
     )
 }
 
-function SegmentDisplayInModal(props) {
-    // Display the first and last segment of the story being joined
-    let firstSegment = props.storyDict.segmentHistoryList[0]
-    let finalSegment = props.storyDict.segmentHistoryList.slice(-1)[0]
-    firstSegment = (finalSegment == firstSegment) ? null : firstSegment
-    const selectStory = () => props.selectStory(finalSegment.id);
-
-    return (
-        <button onClick={selectStory} className="displayStoryContainer">
-            {(firstSegment == null)
-                ? null
-                :
-                <label value="Begins:">
-                    <textarea value={firstSegment.content} readOnly />
-                </label>
-            }
-            <label value="Ends:">
-                <textarea value={finalSegment.content} readOnly />
-            </label>
-        </button>
-    )
-}
 
 
-
-function ModalWindow(props) {
+export function ModalWindow(props) {
 
     if (!(props.isOpen)) return null;
 

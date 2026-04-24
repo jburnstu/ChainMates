@@ -145,7 +145,9 @@ export default function App() {
                             <Route path=":authorID/" element={<AuthorSearchPage self={false} />} />
                         </Route>
                         <Route path="stories/" element={<SearchDashboard type="stories" />}>
-                            <Route path=":storyID/" element={<StorySearchPage />} />
+                            <Route path=":storyID/" element={<StorySearchPage />}>
+                                {/*<Route path=":finalSegmentID/" element={<StorySubSearchPage/>} />*/}
+                            </Route>
                         </Route>
                     </Route>
                     <Route path="*" element={<NoMatch />} />
