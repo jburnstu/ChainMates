@@ -156,7 +156,7 @@ namespace ChainMates.Server.Migrations
                     b.ToTable("segment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ChainMates.Server.SegmentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentStatusEnum", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -289,7 +289,7 @@ namespace ChainMates.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_segment_segment_previous_segment_id");
 
-                    b.HasOne("ChainMates.Server.SegmentStatus", "SegmentStatus")
+                    b.HasOne("ChainMates.Server.SegmentStatusEnum", "SegmentStatusEnum")
                         .WithMany("Segments")
                         .HasForeignKey("SegmentStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -307,7 +307,7 @@ namespace ChainMates.Server.Migrations
 
                     b.Navigation("PreviousSegment");
 
-                    b.Navigation("SegmentStatus");
+                    b.Navigation("SegmentStatusEnum");
 
                     b.Navigation("Story");
                 });
@@ -340,7 +340,7 @@ namespace ChainMates.Server.Migrations
                     b.Navigation("ModerationAssignments");
                 });
 
-            modelBuilder.Entity("ChainMates.Server.SegmentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentStatusEnum", b =>
                 {
                     b.Navigation("Segments");
                 });

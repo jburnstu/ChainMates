@@ -58,7 +58,7 @@ public class InitialLoadController : ControllerBase
 
         // Get segments of this author's that are "in progress" (change func to take the enum not the int?)
         var activeWriteSegments = await segmentService.GetSegmentIdsByAuthorIdAndStatusId(authorId,
-            (int)ChainMates.Server.enums.SegmentStatus.InProgress);
+            (int)ChainMates.Server.Enums.SegmentStatusEnum.InProgress);
         foreach (int finalSegmentId in activeWriteSegments)
         {
             var activeSegmentHistoryDto = await segmentService.GetSegmentHistoryBySegment(finalSegmentId);

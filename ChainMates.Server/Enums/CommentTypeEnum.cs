@@ -1,8 +1,8 @@
 ﻿using NuGet.Protocol.Plugins;
 
-namespace ChainMates.Server.enums
+namespace ChainMates.Server.Enums
 {
-    public enum CommentType
+    public enum CommentTypeEnum
     {
         Story = 1,
         Segment = 2,

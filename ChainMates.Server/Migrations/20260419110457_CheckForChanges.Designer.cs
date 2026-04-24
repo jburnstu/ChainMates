@@ -276,7 +276,7 @@ namespace ChainMates.Server.Migrations
                     b.ToTable("comment_status", "chain_mates");
                 });
 
-            modelBuilder.Entity("ChainMates.Server.CommentType", b =>
+            modelBuilder.Entity("ChainMates.Server.CommentTypeEnum", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -486,7 +486,7 @@ namespace ChainMates.Server.Migrations
                     b.ToTable("segment_comment", "chain_mates");
                 });
 
-            modelBuilder.Entity("ChainMates.Server.SegmentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentStatusEnum", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -684,7 +684,7 @@ namespace ChainMates.Server.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_comment_comment_status_comment_status_id");
 
-                    b.HasOne("ChainMates.Server.CommentType", "CommentType")
+                    b.HasOne("ChainMates.Server.CommentTypeEnum", "CommentTypeEnum")
                         .WithMany("Comments")
                         .HasForeignKey("CommentTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -710,7 +710,7 @@ namespace ChainMates.Server.Migrations
 
                     b.Navigation("CommentStatus");
 
-                    b.Navigation("CommentType");
+                    b.Navigation("CommentTypeEnum");
                 });
 
             modelBuilder.Entity("ChainMates.Server.CommentComment", b =>
@@ -792,7 +792,7 @@ namespace ChainMates.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_segment_segment_previous_segment_id");
 
-                    b.HasOne("ChainMates.Server.SegmentStatus", "SegmentStatus")
+                    b.HasOne("ChainMates.Server.SegmentStatusEnum", "SegmentStatusEnum")
                         .WithMany("Segments")
                         .HasForeignKey("SegmentStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -810,7 +810,7 @@ namespace ChainMates.Server.Migrations
 
                     b.Navigation("PreviousSegment");
 
-                    b.Navigation("SegmentStatus");
+                    b.Navigation("SegmentStatusEnum");
 
                     b.Navigation("Story");
                 });
@@ -931,7 +931,7 @@ namespace ChainMates.Server.Migrations
                     b.Navigation("Comments");
                 });
 
-            modelBuilder.Entity("ChainMates.Server.CommentType", b =>
+            modelBuilder.Entity("ChainMates.Server.CommentTypeEnum", b =>
                 {
                     b.Navigation("Comments");
                 });
@@ -955,7 +955,7 @@ namespace ChainMates.Server.Migrations
                     b.Navigation("ChildComments");
                 });
 
-            modelBuilder.Entity("ChainMates.Server.SegmentStatus", b =>
+            modelBuilder.Entity("ChainMates.Server.SegmentStatusEnum", b =>
                 {
                     b.Navigation("Segments");
                 });

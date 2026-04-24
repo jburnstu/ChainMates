@@ -1,8 +1,8 @@
 ﻿using NuGet.Protocol.Plugins;
 
-namespace ChainMates.Server.enums
+namespace ChainMates.Server.Enums
 {
-    public enum SegmentStatus
+    public enum SegmentStatusEnum
     {
         InProgress = 1,
         AvailableForModeration = 2,

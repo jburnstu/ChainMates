@@ -1,7 +1,7 @@
 ﻿using ChainMates.Server.DTOs.Comment;
 
 
-namespace ChainMates.Server.Services
+namespace ChainMates.Server.Services.Interfaces
 {
     public interface ICommentService
     {

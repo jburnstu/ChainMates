@@ -1,6 +1,6 @@
 ﻿using NuGet.Protocol.Plugins;
 
-namespace ChainMates.Server.enums
+namespace ChainMates.Server.Enums
 {
     public enum NotificationType
     {
