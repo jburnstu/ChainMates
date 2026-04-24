@@ -13,9 +13,13 @@ namespace ChainMates.Server.Services
     {
 
         private readonly AppDbContext _context;
-        public AuthorService(AppDbContext context)
+        private readonly INotificationService _notificationService;
+        private readonly ISegmentService _segmentService;
+
+        public AuthorService(AppDbContext context, ISegmentService segmentService)
         {
             _context = context;
+            _segmentService = segmentService;
         }
 
         public async Task<List<Author>> GetAuthors()
@@ -97,8 +101,7 @@ namespace ChainMates.Server.Services
                 AuthorRelationTypeId = 1
             };
             _context.AuthorRelation.Add(authorRelation);
-            NotificationService notificationService = new NotificationService(_context);
-            await notificationService.NotifyYouFollowedSomeone(authorToFollowId, authorId);
+            await _notificationService.NotifyYouFollowedSomeone(authorToFollowId, authorId);
             await _context.SaveChangesAsync();
             return authorRelation;
         }
@@ -119,7 +122,7 @@ namespace ChainMates.Server.Services
         public async Task<List<SegmentHistoryDto>> GetRecentSegmentHistoriesByAuthorId(int authorId, int numberOfSegments)
             //Used for the author-search page, where recent work is displayed
         {
-            var segmentService = new SegmentService(_context);
+
             var acceptedStatusIds = new[] { 4, 5 }; //not deleted, in moderation, etc
 
             var segmentIdList = await (from s in _context.Segment
@@ -132,7 +135,7 @@ namespace ChainMates.Server.Services
             List<SegmentHistoryDto> dtoList = new List<SegmentHistoryDto>();
             foreach (var segmentId in segmentIdList)
             {
-                var segmentTrace = await segmentService.GetSegmentHistoryBySegment(segmentId);
+                var segmentTrace = await _segmentService.GetSegmentHistoryBySegment(segmentId);
                 dtoList.Add(segmentTrace);
             }
             return dtoList;

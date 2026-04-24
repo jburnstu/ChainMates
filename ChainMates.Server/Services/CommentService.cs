@@ -10,15 +10,17 @@ using ChainMates.Server.enums;
 
 namespace ChainMates.Server.Services
 {
-    public class CommentService
+    public class CommentService : ICommentService
     {
 
         private readonly AppDbContext _context;
         private readonly Random _rnd;
-        public CommentService(AppDbContext context)
+        private readonly INotificationService _notificationService;
+        public CommentService(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
             _rnd = new Random();
+            _notificationService = notificationService;
         }
 
         // These generic comment getters aren't used yet because comments only ever get fed into SegmentHistoryDto for now
@@ -131,8 +133,7 @@ namespace ChainMates.Server.Services
                 Content = dto.Content
             });
 
-            NotificationService notificationService = new NotificationService(_context);
-            await notificationService.NotifyCommentPosted(dto.CommentTypeId, dto.ParentId, authorId);
+            await _notificationService.NotifyCommentPosted(dto.CommentTypeId, dto.ParentId, authorId);
             return dto;
         }
 

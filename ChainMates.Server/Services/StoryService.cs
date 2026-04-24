@@ -12,11 +12,11 @@ namespace ChainMates.Server.Services
     {
 
         private readonly AppDbContext _context;
-        private readonly SegmentService _segmentService;
-        public StoryService(AppDbContext context)
+        private readonly ISegmentService _segmentService;
+        public StoryService(AppDbContext context, ISegmentService segmentService)
         {
             _context = context;
-            _segmentService = new SegmentService(_context); 
+            _segmentService = segmentService;
         }
 
         public async Task<List<StoryInfoDto>> GetStories()
@@ -84,8 +84,6 @@ namespace ChainMates.Server.Services
             },story.AuthorId,true);
 
             return initialSegment;
-
-
         }
 
         public async Task<Story> GetStoryBySegment (int segmentId)

@@ -17,7 +17,7 @@ using ChainMates.Server.DTOs.Notification.Info;
 
 namespace ChainMates.Server.Services
 {
-    public class NotificationService
+    public class NotificationService : INotificationService
     {
 
         private readonly AppDbContext _context;

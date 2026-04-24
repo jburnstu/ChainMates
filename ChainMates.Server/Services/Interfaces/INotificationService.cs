@@ -9,6 +9,6 @@ namespace ChainMates.Server.Services
         Task<List<Notification>> CreateNotifications(NotificationCreationDto dto, List<int> recipientIds);
         Task<string> NotifySegmentApproved(int segmentId, int moderatorAuthorId);
         Task<string> NotifyCommentPosted(int commentTypeId, int parentId, int authorId);
-
+        Task<string> NotifyYouFollowedSomeone(int authorToFollowId, int authorId);
     }
 }
