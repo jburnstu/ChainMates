@@ -119,6 +119,11 @@ function GoDownASegmentButton(props) {
         }
     }, [props.possibleSegmentIDList])
 
+    const selectStory = async (segmentID) => {
+        props.changeFinalSegment(segmentID);
+        setIsOpen(false);
+    }
+
     return (
         <>
             <button onClick={createModal}> Continue Reading...
@@ -128,7 +133,8 @@ function GoDownASegmentButton(props) {
                     {arrayOfAvailableSegments.map(availableSegment =>
                         <SegmentDisplayInModal
                             key={availableSegment.id}
-                            selectStory={() => props.changeFinalSegment(availableSegment.id)}
+                            onlyShowLast
+                            selectStory={() => selectStory(availableSegment.id)}
                             storyDict={availableSegment}
                         />
                     )}
