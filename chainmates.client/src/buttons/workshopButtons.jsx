@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import { contactAPI, getRandomItem } from "../supportFuncs/utilityFuncs";
 
-export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton };
+export default { SubmissionButton, StartNewStoryButton, ModalSelectSegmentFromOptionsButton, ModalWindow };
 
 
 
@@ -302,7 +302,7 @@ export function ModalSelectSegmentFromOptionsButton(props) {
 
 
 
-function ModalWindow(props) {
+export function ModalWindow(props) {
 
     if (!(props.isOpen)) return null;
 

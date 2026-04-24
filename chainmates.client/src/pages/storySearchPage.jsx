@@ -3,8 +3,10 @@ import { useParams } from 'react-router-dom';
 
 import { PageOrTabLayout } from "../layouts/layouts";
 import { contactAPI } from "../supportFuncs/utilityFuncs";
+import { Comments } from "../updates/comments"
+import { ModalWindow} from "../buttons/workshopButtons"
 
-import { SegmentDisplayInModal } from "../segmentDisplay"
+import { SegmentDisplayInModal, SegmentSeriesDisplay } from "../segmentDisplay"
 
 export default { StorySearchPage};
 
@@ -25,8 +27,8 @@ export function StorySearchPage() {
         const fetchData = async (storyID) => {
             await contactAPI(`stories/${storyID}`, "get", true)
                 .then(function (value) {
-                    setStoryInfo(value);
                     console.log(value);
+                    setStoryInfo(value);
                     changeFinalSegment(value.structure[0][0]); // The first segment in the story is saved at 0 (in an array of one)
                     //navigate(`/stories/${storyID}/${firstSegmentID}/`);
                 });
@@ -51,12 +53,10 @@ export function StorySearchPage() {
         setSelectedSegmentDict({ ...selectedSegmentDict, [segmentID]: !selectedSegmentDict[segmentID] })
     }
 
-    if (!storyInfo) {
-        if (storyInfo != null) {
-            console.log("DIDN@T WORK");
-        }
+    if (!storyInfo || !finalSegmentDTO) {
         return null;
     }
+    console.log(finalSegmentDTO)
 
     return (
         <PageOrTabLayout 
@@ -73,14 +73,14 @@ export function StorySearchPage() {
             }
             footer={
                 <>
-                    <GoUpASegmentButton previousSegmentID={finalSegmentDTO.segmentHistoryList[-2].id}
+                    <GoUpASegmentButton previousSegmentList={finalSegmentDTO.segmentHistoryList}
                         changeFinalSegment={changeFinalSegment} />
-                    <GoDownASegmentButton options={structure[finalSegmentDTO.id]}
+                    <GoDownASegmentButton possibleSegmentIDList={storyInfo.structure[finalSegmentDTO.id]}
                         changeFinalSegment={changeFinalSegment}/>
                 </>
             }
             rightSidebar={
-                <Comments selections={selectedSegmentDict} storyDict={storyInfo} />
+                <Comments selections={selectedSegmentDict} storyDict={finalSegmentDTO} />
             
             }
         /> 
@@ -89,7 +89,8 @@ export function StorySearchPage() {
 
 function StorySeachPageTopLine() { }
 
-function GoDownASegmentButton({ possibleSegmentIDList }) {
+function GoDownASegmentButton(props) {
+    console.log(props.possibleSegmentIDList)
     const [isOpen, setIsOpen] = useState(false);
     const [arrayOfAvailableSegments, setArrayOfAvailableSegments] = useState([]);
 
@@ -100,20 +101,23 @@ function GoDownASegmentButton({ possibleSegmentIDList }) {
 
     useEffect(() => {
         async function getSegmentsForModal(possibleSegmentIDList) {
-            let possibleSegmentDTOList;
+            console.log(possibleSegmentIDList);
+            let possibleSegmentDTOList = [];
             let segmentHistoryDTO;
             await Promise.all(possibleSegmentIDList.map(async (segmentID) => {
                 segmentHistoryDTO = await contactAPI(`segments/${segmentID}/history`, "get", true);
                 possibleSegmentDTOList.push(segmentHistoryDTO);
+                console.log(segmentHistoryDTO);
             }
             )
             )
-            await setArrayOfAvailableSegments(segmentHistoryDTOArray);
-            return segmentHistoryDTOArray;
+            await setArrayOfAvailableSegments(possibleSegmentDTOList);
+            return possibleSegmentDTOList;
         }
-
-        getSegmentsForModal(possibleSegmentIDList)
-    },[possibleSegmentIDList])
+        if (props.possibleSegmentIDList != undefined) {
+            getSegmentsForModal(props.possibleSegmentIDList)
+        }
+    }, [props.possibleSegmentIDList])
 
     return (
         <>
@@ -121,7 +125,7 @@ function GoDownASegmentButton({ possibleSegmentIDList }) {
             </ button >
             <ModalWindow isOpen={isOpen} onClose={() => setIsOpen(false)}>
                 <div className="allDisplayStoriesContainer">
-                    {arrayOfAvailableSegments.map(availableStory =>
+                    {arrayOfAvailableSegments.map(availableSegment =>
                         <SegmentDisplayInModal
                             key={availableSegment.id}
                             selectStory={() => props.changeFinalSegment(availableSegment.id)}
@@ -135,10 +139,20 @@ function GoDownASegmentButton({ possibleSegmentIDList }) {
 
 }
 
-function GoUpASegmentButton({previousSegmentID}) {
+function GoUpASegmentButton(props) {
+    console.log("HERE",props.previousSegmentList)
 
+    let previousSegmentID = props.previousSegmentList.slice(-2)[0]?.id
     return (
-        <button onClick={() => props.changeFinalSegment(penultimateSegmentID)}/>
+        <button onClick={() => {
+            if (!previousSegmentID) {
+                console.log("No psi")
+                return;
+            }
+            props.changeFinalSegment(previousSegmentID);
+        }
+        }
+        />
     )
 }
 
