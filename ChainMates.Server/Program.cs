@@ -4,6 +4,7 @@ using ChainMates.Server;
 using ChainMates.Server.Services;
 using System.Diagnostics;
 using ChainMates.Server.Services.Interfaces;
+using ChainMates.Server.Rules;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<StoryService>();
 builder.Services.AddScoped<ISegmentService, SegmentService>();
+builder.Services.AddScoped<ISegmentRules, SegmentRules>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHttpContextAccessor();
@@ -46,7 +48,10 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-var app = builder.Build();
+try
+{
+    var app = builder.Build();
+
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -64,3 +69,11 @@ app.MapControllers();
 // Use configured URLs from environment/launchSettings. This lets the dev proxy
 // (and tools that set ASPNETCORE_HTTPS_PORT/ASPNETCORE_URLS) control the binding.
 app.Run();
+
+
+}
+catch (Exception e)
+{
+    Debug.WriteLine(e.ToString());
+    throw;
+}

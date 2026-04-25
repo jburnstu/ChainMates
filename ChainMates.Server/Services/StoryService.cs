@@ -8,7 +8,7 @@ using System.Runtime.Intrinsics.Arm;
 
 namespace ChainMates.Server.Services
 {
-    public class StoryService : IStoryService
+    public class StoryService
     {
 
         private readonly AppDbContext _context;
@@ -84,18 +84,6 @@ namespace ChainMates.Server.Services
             },story.AuthorId,true);
 
             return initialSegment;
-        }
-
-        public async Task<Story> GetStoryBySegment (int segmentId)
-        {
-            var story = await _context.Story
-                .Where(s => s.Segments.Any(seg => seg.Id == segmentId))
-                .FirstOrDefaultAsync();
-            if (story == null)
-            {
-                throw new Exception($"No story found for segment ID {segmentId}");
-            }
-            return story;
         }
 
         public async Task<Story> CreateRandomStory(int authorId, 

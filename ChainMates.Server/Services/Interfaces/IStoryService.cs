@@ -5,6 +5,6 @@ namespace ChainMates.Server.Services
 {
     public interface IStoryService
     {
-        Task<Story> GetStoryBySegment(int segmentId);
+
     }
 }

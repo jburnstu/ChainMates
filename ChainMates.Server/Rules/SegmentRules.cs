@@ -2,7 +2,7 @@
 
 namespace ChainMates.Server.Rules
 {
-    public class SegmentRules 
+    public class SegmentRules : ISegmentRules
     {
 
         public SegmentRules() { }

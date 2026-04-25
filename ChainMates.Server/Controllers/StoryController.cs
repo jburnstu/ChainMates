@@ -14,7 +14,7 @@ namespace ChainMates.Server.Controllers
 
         private readonly StoryService _storyService;
         private readonly CurrentUserService _currentUserService;
-        private readonly StoryService _storyService;
+
 
         public StoryController( CurrentUserService currentUserService, StoryService storyService)
         {
