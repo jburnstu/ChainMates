@@ -18,20 +18,17 @@ import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
 
 export default function App() {
 
-    console.log("In app")
     ///////  Load initial data or shunt into login/signup facade ////////////
     const [data, setData] = useState(null);
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
         const initialLoad = async (callback) => {
-            console.log("In initial load");
             await contactAPI("load", "get", true)
                 .then(function (value) {
                     callback(value);
                 });
         }
-        console.log("In app useEffect")
         initialLoad(setData);
         }, []);
 
@@ -39,12 +36,9 @@ export default function App() {
         return <div>Loading...</div>
     }
 
-    console.log(data);
     if (Object.keys(data).length == 0) {
-        console.log("IN HERE")
         switch (authMode) {
             case "login":
-                console.log("GONIG TO LOGIN")
                 return (
                     <Login
                         onLogin={setData}
@@ -124,9 +118,9 @@ export default function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
-                        <Route path="" relative element={<RedirectToStartingURL startingURL={startingURL} />}
+                        <Route path="" element={<RedirectToStartingURL startingURL={startingURL} />}
                             index/>
-                        <Route path="home/" relative element={<HomeDashboard authorDict={data.authorInfo} />}
+                        <Route path="home/" element={<HomeDashboard authorDict={data.authorInfo} />}
                         />
                         <Route path="write/" element={<WorkshopDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
                         >
@@ -149,6 +143,8 @@ export default function App() {
                                 {/*<Route path=":finalSegmentID/" element={<StorySubSearchPage/>} />*/}
                             </Route>
                         </Route>
+                        <Route path="settings/" element={<SettingsPage authorDict={data.authorInfo} />}
+                        />
                     </Route>
                     <Route path="*" element={<NoMatch />} />
                 </Routes>
@@ -157,6 +153,14 @@ export default function App() {
 }
 
 function UniversalHeader(props) {
+
+    function handleLogout() {
+        localStorage.removeItem("token");
+        sessionStorage.clear();
+        navigate("/login");
+    }
+
+
 
     return (
         <div className="container">
@@ -168,13 +172,17 @@ function UniversalHeader(props) {
                     <Link to="write" ><button type="button">WRITE</button></Link>|{" "}
                     <Link to="review"><button type="button">READ</button></Link>|{" "}
                     <Link to="authors"><button type="button">AUTHORS</button></Link>|{" "}
-                    <Link to="stories"><button type="button">STORIES</button></Link>
+                    <Link to="stories"><button type="button">STORIES</button></Link>|{" "}
+                    <button onClick={handleLogout}>LOGOUT</button>
                 </nav>
             </header >
             <Outlet />  {/*The rest of the app */}
         </div> 
     )
 }
+
+
+
 function RedirectToStartingURL(props) {
     // The index route, purely here to send you to any URL that's specified in the initial load
     let navigate = useNavigate();
@@ -269,6 +277,49 @@ function SearchDashboard(props) {
     )
 }
 
+function SettingsPage() {
+
+    const [newDisplayName, setNewDisplayName] = useState(props.authorInfo.displayName);
+    const [newEmailAddress, setNewEmailAddress] = useState(props.authorInfo.emailAddress);
+    const [newPassword, setNewPassword] = useState(props.authorInfo.password);
+
+    async function changeDisplayName(e) {
+        await contactAPI("/authors", "patch", "patch", {
+            displayName: 
+        }
+
+    }
+
+
+    return (
+        <div>
+            <label>Change Display Name
+                <input label="Change Display Name" type="input"
+                    value={newDisplayName}
+                    onChange={() => setNewDisplayName(value)}>
+                </input>
+                <button type="submit" onClick={changeDisplayName} />
+            </label>
+            <label>Change Email Address
+                <input label="Change Email Address" type="input"
+                    value={newEmailAddress}
+                    onChange={() => setNewEmailAddress(value)}>
+                </input>
+                <button type="submit" onClick={changeDisplayName} />
+            </label>
+            <label>Change Display Name
+                <input label="Change Display Name" type="input"
+                    value={newDisplayName}
+                    onChange={() => setNewDisplayName(value)}>
+                </input>
+                <button type="submit" onClick={changeDisplayName} />
+            </label>
+        </div>
+
+    )
+}
+
+
 function NoMatch() {
     return (
         <div style={{ padding: 20 }}>
@@ -278,25 +329,3 @@ function NoMatch() {
     );
 }
 
-
-//function Header() {
-//    const navigate = useNavigate();
-
-//    function handleLogout() {
-//        // 1. Clear auth data
-//        localStorage.removeItem("token");
-
-//        // 2. (optional) clear anything else
-//        // sessionStorage.clear();
-
-//        // 3. Redirect
-//        navigate("/login");
-//    }
-
-//    return (
-//        <div className="header">
-//            <h1>My App</h1>
-//            <button onClick={handleLogout}>Logout</button>
-//        </div>
-//    );
-//}
