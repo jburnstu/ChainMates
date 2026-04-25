@@ -163,20 +163,20 @@ namespace ChainMates.Server.Services
         {
             int recipientId;
 
-            var commentType = (Enums.CommentTypeEnum)commentTypeId;
+            var commentType = (CommentTypeEnum)commentTypeId;
             switch (commentType)
             { // These Enums aren't the cleanest -- at some point change to enum in the DTO?
-                case Enums.CommentTypeEnum.Story:
+                case CommentTypeEnum.Story:
                     recipientId = await (from s in _context.Story
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
                     break;
-                case Enums.CommentTypeEnum.Segment:
+                case CommentTypeEnum.Segment:
                     recipientId = await (from s in _context.Segment
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
                     break;
-                case Enums.CommentTypeEnum.Comment:
+                case CommentTypeEnum.Comment:
                 default:
                     recipientId = await (from s in _context.Comment
                                          where s.Id == parentId
