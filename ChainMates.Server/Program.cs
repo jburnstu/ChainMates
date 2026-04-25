@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using ChainMates.Server;
 using ChainMates.Server.Services;
 using System.Diagnostics;
+using ChainMates.Server.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +13,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<StoryService>();
-builder.Services.AddScoped<SegmentService>();
-builder.Services.AddScoped<CommentService>();
-builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<ISegmentService, SegmentService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
 

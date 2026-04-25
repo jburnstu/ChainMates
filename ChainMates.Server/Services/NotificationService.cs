@@ -14,6 +14,7 @@ using ChainMates.Server.DTOs.Notification;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Text.Json;
 using ChainMates.Server.DTOs.Notification.Info;
+using ChainMates.Server.Enums;
 
 namespace ChainMates.Server.Services
 {

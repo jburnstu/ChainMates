@@ -8,7 +8,7 @@ using System.Runtime.Intrinsics.Arm;
 
 namespace ChainMates.Server.Services
 {
-    public class StoryService
+    public class StoryService : IStoryService
     {
 
         private readonly AppDbContext _context;

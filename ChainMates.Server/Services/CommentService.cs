@@ -6,6 +6,7 @@ using ChainMates.Server.DTOs.Comment;
 using System;
 using System.Diagnostics;
 using ChainMates.Server.Enums;
+using ChainMates.Server.Services.Interfaces;
 
 
 namespace ChainMates.Server.Services

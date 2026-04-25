@@ -12,16 +12,14 @@ namespace ChainMates.Server.Controllers
     public class StoryController : ControllerBase
     {
 
-        private readonly AppDbContext _context;
-        private readonly StoryService _service;
+        private readonly StoryService _storyService;
         private readonly CurrentUserService _currentUserService;
+        private readonly StoryService _storyService;
 
-        public StoryController(AppDbContext context, CurrentUserService currentUserService)
+        public StoryController( CurrentUserService currentUserService, StoryService storyService)
         {
-            Debug.WriteLine("in service constructor");
-            _context = context;
-            _service = new StoryService(context);
             _currentUserService = currentUserService;
+            _storyService = storyService;
         }
 
 
@@ -29,7 +27,7 @@ namespace ChainMates.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStories()
         {
-            var data = await _service.GetStories();
+            var data = await _storyService.GetStories();
             return Ok(data);
         }
 
@@ -37,7 +35,7 @@ namespace ChainMates.Server.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStoryById(int id)
         {
-            var data = await _service.GetStoryById(id);
+            var data = await _storyService.GetStoryById(id);
 
             return Ok(data);
         }
@@ -52,7 +50,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            var data = await _service.CreateStoryWithInitialSegment(dto ,authorId);
+            var data = await _storyService.CreateStoryWithInitialSegment(dto ,authorId);
             return Ok(data);
 
         }

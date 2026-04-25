@@ -154,13 +154,6 @@ export default function App() {
 
 function UniversalHeader(props) {
 
-    function handleLogout() {
-        localStorage.removeItem("token");
-        sessionStorage.clear();
-        navigate("/login");
-    }
-
-
 
     return (
         <div className="container">
@@ -173,7 +166,7 @@ function UniversalHeader(props) {
                     <Link to="review"><button type="button">READ</button></Link>|{" "}
                     <Link to="authors"><button type="button">AUTHORS</button></Link>|{" "}
                     <Link to="stories"><button type="button">STORIES</button></Link>|{" "}
-                    <button onClick={handleLogout}>LOGOUT</button>
+                    <Link to="settings"><button type="button">SETTINGS</button></Link>
                 </nav>
             </header >
             <Outlet />  {/*The rest of the app */}
@@ -283,16 +276,32 @@ function SettingsPage() {
     const [newEmailAddress, setNewEmailAddress] = useState(props.authorInfo.emailAddress);
     const [newPassword, setNewPassword] = useState(props.authorInfo.password);
 
-    async function changeDisplayName(e) {
-        await contactAPI("/authors", "patch", "patch", {
-            displayName: 
-        }
-
+    function handleLogout() {
+        localStorage.removeItem("token");
+        sessionStorage.clear();
+        navigate("/login");
     }
 
+    async function changeDisplayName(e) {
+        await contactAPI("/authors", "patch", true, {
+            displayName: newDisplayName
+        });
+    }
+    async function changeEmailAddress(e) {
+        await contactAPI("/authors", "patch", true, {
+            emailAddress: newEmailAddress
+        });
+        handleLogout();
+    }
+    async function changePassword(e) {
+        await contactAPI("/authors", "patch", true, {
+            password: newPassword
+        });
+        handleLogout();
+    }
 
     return (
-        <div>
+        <fieldset>
             <label>Change Display Name
                 <input label="Change Display Name" type="input"
                     value={newDisplayName}
@@ -308,13 +317,14 @@ function SettingsPage() {
                 <button type="submit" onClick={changeDisplayName} />
             </label>
             <label>Change Display Name
-                <input label="Change Display Name" type="input"
-                    value={newDisplayName}
-                    onChange={() => setNewDisplayName(value)}>
+                <input label="Change Password" type="input"
+                    value={newPassword}
+                    onChange={() => setNewPassword(value)}>
                 </input>
-                <button type="submit" onClick={changeDisplayName} />
+                <button type="submit" onClick={changePassword} />
             </label>
-        </div>
+            <button onClick={handleLogout}>LOGOUT</button>
+        </fieldset>
 
     )
 }

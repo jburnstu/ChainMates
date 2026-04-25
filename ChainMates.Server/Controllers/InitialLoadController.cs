@@ -10,6 +10,7 @@ using System.Reflection.Emit;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Xml.Linq;
+using ChainMates.Server.Enums;
 
 [ApiController]
 [Route("chainmates/load")]
@@ -18,11 +19,9 @@ public class InitialLoadController : ControllerBase
     // here, since it pulls together so many services, but realistically I think at some point this should be moved into a
     // dedicated service, called from one endpoint in this file.
 {
-    private readonly AppDbContext _context;
     private readonly CurrentUserService _currentUserService;
-    protected AuthorService authorService;
-    protected SegmentService segmentService;
-    protected StoryService storyService;
+    private readonly AuthorService _authorService;
+    private readonly SegmentService _segmentService;
     protected List<SegmentHistoryDto> writeDicts;
     protected List<SegmentHistoryDto> reviewDicts;
     protected AuthorDto authorInfo;
@@ -30,13 +29,15 @@ public class InitialLoadController : ControllerBase
     protected RelationInfoDto relationInfoDto;
     public DashboardDto dashboardInfo;
 
-    public InitialLoadController(AppDbContext context, CurrentUserService currentUserService)
+    public InitialLoadController(
+        CurrentUserService currentUserService, 
+        AuthorService authorService, 
+        SegmentService segmentService
+        )
     {
-         _context = context;
         _currentUserService = currentUserService;
-        authorService = new AuthorService(_context);
-        storyService = new StoryService(_context);
-        segmentService = new SegmentService(_context);
+        _authorService = authorService; 
+        _segmentService = segmentService;
         writeDicts = new List<SegmentHistoryDto>();
         reviewDicts = new List<SegmentHistoryDto>();
     }
@@ -54,22 +55,22 @@ public class InitialLoadController : ControllerBase
             return Unauthorized();
         }
 
-        authorInfo = await authorService.GetAuthorDtoById(authorId);
+        authorInfo = await _authorService.GetAuthorDtoById(authorId);
 
         // Get segments of this author's that are "in progress" (change func to take the enum not the int?)
-        var activeWriteSegments = await segmentService.GetSegmentIdsByAuthorIdAndStatusId(authorId,
-            (int)ChainMates.Server.Enums.SegmentStatusEnum.InProgress);
+        var activeWriteSegments = await _segmentService.GetSegmentIdsByAuthorIdAndStatusId(authorId,
+            (int)SegmentStatusEnum.InProgress);
         foreach (int finalSegmentId in activeWriteSegments)
         {
-            var activeSegmentHistoryDto = await segmentService.GetSegmentHistoryBySegment(finalSegmentId);
+            var activeSegmentHistoryDto = await _segmentService.GetSegmentHistoryBySegment(finalSegmentId);
             writeDicts.Add(activeSegmentHistoryDto);
         }
 
         // Get segments currently assigned to this author (and not closed)
-        var activeReviewSegments = await segmentService.GetModeratedSegmentIdsByAuthorId(authorId);
+        var activeReviewSegments = await _segmentService.GetModeratedSegmentIdsByAuthorId(authorId);
         foreach (int finalSegmentId in activeReviewSegments)
         {
-            var activeSegmentHistoryDto = await segmentService.GetSegmentHistoryBySegment(finalSegmentId);
+            var activeSegmentHistoryDto = await _segmentService.GetSegmentHistoryBySegment(finalSegmentId);
             reviewDicts.Add(activeSegmentHistoryDto);
         }
 
@@ -81,9 +82,9 @@ public class InitialLoadController : ControllerBase
         };
 
         // Pass the user's followers /followees -- this isn't being used much yet
-        var authorsWhoYouFollow = await authorService.GetAuthorsWhoYouFollow(authorId);
-        var authorsWhoFollowYou = await authorService.GetAuthorsWhoFollowYou(authorId);
-        var circles = await authorService.GetCirclesByAuthorId(authorId);
+        var authorsWhoYouFollow = await _authorService.GetAuthorsWhoYouFollow(authorId);
+        var authorsWhoFollowYou = await _authorService.GetAuthorsWhoFollowYou(authorId);
+        var circles = await _authorService.GetCirclesByAuthorId(authorId);
 
         relationInfoDto = new RelationInfoDto
         {
