@@ -18,6 +18,7 @@ builder.Services.AddScoped<ISegmentService, SegmentService>();
 builder.Services.AddScoped<ISegmentRules, SegmentRules>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<InitialLoadService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
 

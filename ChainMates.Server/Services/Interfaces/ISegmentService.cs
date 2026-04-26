@@ -7,5 +7,8 @@ namespace ChainMates.Server.Services
     {
         Task<Segment> CreateSegment(SegmentCreationDto dto, int authorId, bool save);
         Task<SegmentHistoryDto> GetSegmentHistoryBySegment(int segmentId);
+        Task<List<int>> GetSegmentIdsByAuthorIdAndStatusId(int authorId, int segmentStatusId);
+
+        Task<List<int>> GetModeratedSegmentIdsByAuthorId(int authorId);
     }
 }

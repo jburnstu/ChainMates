@@ -12,7 +12,7 @@ namespace ChainMates.Server.Controllers
         private readonly AuthorService _authorService;
         private readonly CurrentUserService _currentUserService;
         private readonly int numberOfRecentSegments = 3;
-        public AuthorController(AuthorService authorService, CurrentUserService currentUserService, NotificationService notificationService)
+        public AuthorController(AuthorService authorService, CurrentUserService currentUserService)
         {
             _authorService = authorService;
             _currentUserService = currentUserService;
