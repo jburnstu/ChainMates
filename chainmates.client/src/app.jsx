@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Link, Outlet, Route, Routes, useNavigate, useOutlet } from 'react-router-dom';
+import { BrowserRouter, Link, Outlet, Route, Routes, useNavigate, useLocation, useOutlet } from 'react-router-dom';
 
-import { initialLoad, Login, Signup } from "./supportFuncs/authFuncs";
+//import { initialLoad, Login, Signup } from "./supportFuncs/authFuncs";
 import { getArrayObjByID } from "./supportFuncs/utilityFuncs";
 
 import { ModalSelectSegmentFromOptionsButton, StartNewStoryButton } from './buttons/workshopButtons.jsx';
@@ -15,71 +15,26 @@ import { contactAPI } from "./supportFuncs/utilityFuncs.jsx";
 
 import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
 
-
 export default function App() {
 
     ///////  Load initial data or shunt into login/signup facade ////////////
+    const [user, setUser] = useState(undefined);
     const [data, setData] = useState(null);
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
-        const initialLoad = async (callback) => {
-            await contactAPI("load", "get", true)
-                .then(function (value) {
-                    callback(value);
-                });
+        const initialLoad = async () => {
+            let initialLoadData = await contactAPI("load", "get", true);
+            setData(initialLoadData);
+            setUser(initialLoadData.authorInfo);
         }
-        initialLoad(setData);
+        initialLoad();
+
         }, []);
 
-    if (!data) {
+    if (user === null) {
         return <div>Loading...</div>
     }
-
-    if (Object.keys(data).length == 0) {
-        switch (authMode) {
-            case "login":
-                return (
-                    <Login
-                        onLogin={setData}
-                        switchToSignup={() => setAuthMode("signup")}
-                    />
-                );
-            case "signup":
-            default:
-                return (
-                    <Signup
-                        onSignup={setData}
-                        switchToLogin={() => setAuthMode("login")}
-                    />
-                );
-        }
-    }
-
-    /////////////// This sectino uses the initially-loaded StartingURL to handle refreshes. /////////////////
-    /////////////// It's a  bit outdated (from when the app was in Django), not sure it's doing  ///////////
-    /////////////// quite what it needs to (not bugging at least though)           /////////////////////////
-     
-    const rootPath = "/chainmates/"; // not used right now
-    const startingWriteOrReview = data.startingUrlDict.readOrWrite;
-    let startingStoryID = data.startingUrlDict.storyId;
-
-    let startingURL;
-    if (startingWriteOrReview == null) {
-        startingURL = "home";
-    }
-    else if (
-        (startingWriteOrReview == "write" &&
-            getArrayObjByID(data.writeDicts, startingStoryID) == undefined)
-        ||
-        (startingWriteOrReview == "review" &&
-            getArrayObjByID(data.reviewDicts, startingStoryID) == undefined)
-    ) {
-        startingURL = `${startingWriteOrReview}`;
-    }
-    else {
-        startingURL = `${startingWriteOrReview}/${startingStoryID}`;
-        }
 
 
     ///////////// The function used to add / remove tabs when stories are loaded / submitted /////////////
@@ -117,41 +72,80 @@ export default function App() {
     return ( //Could be a separate browserroutes document at some point
             <BrowserRouter>
                 <Routes>
-                    <Route path="" element={<UniversalHeader displayName={data.authorInfo.displayName} />}>
-                        <Route path="" element={<RedirectToStartingURL startingURL={startingURL} />}
-                            index/>
-                        <Route path="home/" element={<HomeDashboard authorDict={data.authorInfo} />}
-                        />
-                        <Route path="write/" element={<WorkshopDashboard writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
-                        >
-                            <Route path=":tabID/"
-                                element={<WorkshopTab writeOrReview="write" dicts={data.writeDicts} setDicts={changeStoryDicts} />}
+                <Route path="" element={<UniversalHeader displayName={user?.displayName} />} >
+                    <Route index path="login/" element={<Login onLogin={setData}
+                                                        />} />
+                    <Route path="signup/" element={<Signup onSignup={setData}
+                                    />} />
+                    <Route path="home/" element={
+                        <ProtectedRoute user={user} children={
+                            <HomeDashboard authorDict={data?.authorInfo} />
+                        } />} >
+                    </Route>
+                    <Route path="write/" element={
+                        <ProtectedRoute user={user} children={
+                            <WorkshopDashboard writeOrReview="write" dicts={data?.writeDicts} setDicts={changeStoryDicts} />
+                        } />} >
+                        <Route path=":tabID/"
+                            element={<WorkshopTab writeOrReview="write" dicts={data?.writeDicts} setDicts={changeStoryDicts} />}
                             />
-                        </Route>
-                        <Route path="review/" element={<WorkshopDashboard writeOrReview="review" dicts={data.reviewDicts}
-                            setDicts={changeStoryDicts} />}
-                        >
-                            <Route path=":tabID/"
-                                element={<WorkshopTab writeOrReview="review" dicts={data.reviewDicts} setDicts={changeStoryDicts} />}
+                    </Route>
+                    <Route path="review/" element={
+                        <ProtectedRoute user={user} children={
+                            <WorkshopDashboard writeOrReview="review" dicts={data?.reviewDicts} setDicts={changeStoryDicts} />
+                        } />} >
+                        <Route path=":tabID/"
+                            element={<WorkshopTab writeOrReview="review" dicts={data?.reviewDicts} setDicts={changeStoryDicts} />}
                             />
-                        </Route>
-                        <Route path="authors/" element={<SearchDashboard type="authors" />}>
-                            <Route path=":authorID/" element={<AuthorSearchPage self={false} />} />
-                        </Route>
-                        <Route path="stories/" element={<SearchDashboard type="stories" />}>
-                            <Route path=":storyID/" element={<StorySearchPage />}>
-                                {/*<Route path=":finalSegmentID/" element={<StorySubSearchPage/>} />*/}
-                            </Route>
-                        </Route>
-                        <Route path="settings/" element={<SettingsPage authorInfo={data.authorInfo} />}
+                    </Route>
+                    <Route path="authors/" element={
+                        <ProtectedRoute user={user} children={
+                            <SearchDashboard type="authors" />
+                        } />} >
+                        <Route path=":authorID/"
+                            element={<AuthorSearchPage />}
                         />
                     </Route>
-                    <Route path="*" element={<NoMatch />} />
+                    <Route path="stories/" element={
+                        <ProtectedRoute user={user} children={
+                            <SearchDashboard type="stories" />
+                        } />} >
+                        <Route path=":storyID/"
+                            element={<StorySearchPage />}
+                        />
+                    </Route>
+
+                    <Route path="settings/" element={
+                        <ProtectedRoute user={user} children={
+                            <SettingsPage authorInfo={data?.authorInfo} />
+                        } />} >
+                    </Route>
+
+                    </Route>
+                <Route path="*" element={<NoMatch />} />
                 </Routes>
             </BrowserRouter>
     );
 }
 
+
+function ProtectedRoute({ user, children }) {
+    const location = useLocation();
+
+    if (user === undefined) return <div>Loading...</div>;
+
+    if (!user) {
+        console.log("in !user branch")
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    return children;
+}
+
+function OptionalAuthRoute({ user, children }) {
+    if (user === undefined) return <div>Loading...</div>;
+    return children;
+}
 function UniversalHeader(props) {
 
 
@@ -161,12 +155,15 @@ function UniversalHeader(props) {
                 <h1>CHAIN MATES</h1>
                 <h1>Hi, {props.displayName}!</h1>
                 <nav>
+
                     <Link to="home" ><button type="button">HOME</button></Link>|{" "}
                     <Link to="write" ><button type="button">WRITE</button></Link>|{" "}
                     <Link to="review"><button type="button">READ</button></Link>|{" "}
                     <Link to="authors"><button type="button">AUTHORS</button></Link>|{" "}
                     <Link to="stories"><button type="button">STORIES</button></Link>|{" "}
-                    <Link to="settings"><button type="button">SETTINGS</button></Link>
+                    <Link to="settings"><button type="button">SETTINGS</button></Link>|{" "}
+                    <Link to="login"><button type="button">LOG IN</button></Link>
+
                 </nav>
             </header >
             <Outlet />  {/*The rest of the app */}
@@ -176,17 +173,76 @@ function UniversalHeader(props) {
 
 
 
-function RedirectToStartingURL(props) {
-    // The index route, purely here to send you to any URL that's specified in the initial load
-    let navigate = useNavigate();
+export function Login({ onLogin, switchToSignup }) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [emailAddress, setEmailAddress] = useState("");
+    const [password, setPassword] = useState("");
 
-    useEffect(() => {
-        console.log("initital navigate")
-        navigate(props.startingURL);
-    }, [navigate, props.startingURL])
 
+    const handleSubmit = async () => {
+        await contactAPI("auth/login/", "post", true,
+            // At some point want to generalise this to take username too
+            { "EmailAddress": emailAddress, "Password": password });
+
+        let initialLoadData = await contactAPI("load/", "get", true);
+        onLogin(initialLoadData);
+
+        const from = location.state?.from?.pathname || "/home";
+        navigate(from, { replace: true });
+
+    };
+
+
+    return (
+        <div>
+            <input placeholder="email" onChange={e => setEmailAddress(e.target.value)} />
+            <input type="password" onChange={e => setPassword(e.target.value)} />
+            <button onClick={handleSubmit}>Login</button>
+
+            <p onClick={() => navigate("signup/")} style={{ cursor: "pointer" }}>
+                Don't have an account? Sign up
+            </p>
+        </div>
+    );
 }
 
+
+export function Signup({ onSignup, switchToLogin }) {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [name, setName] = useState("");
+
+    const handleSubmit = async () => {
+        await contactAPI("auth/register", "post", true,
+            { "EmailAddress": email, "Password": password, "DisplayName": name }
+        )
+        const dashboardInfoData = await contactAPI("load", "get", true);
+        onSignup(dashboardInfoData);
+
+        const from = location.state?.from?.pathname || "/home";
+        navigate(from, { replace: true });
+    };
+
+    return (
+        <div>
+            <h2>Sign Up</h2>
+
+            <input placeholder="name" onChange={e => setName(e.target.value)} />
+            <input placeholder="email" onChange={e => setEmail(e.target.value)} />
+            <input type="password" onChange={e => setPassword(e.target.value)} />
+
+            <button onClick={handleSubmit}>Create Account</button>
+
+            <p onClick={() => navigate("login/")} style={{ cursor: "pointer" }}>
+                Already have an account? Log in
+            </p>
+        </div>
+    );
+}
 function HomeDashboard(props) {
     // Loads up your own AuthorDashboard (same as everyone else with a couple tweaks)
     return (
@@ -340,3 +396,70 @@ function NoMatch() {
     );
 }
 
+
+
+
+
+/////////////// This sectino uses the initially-loaded StartingURL to handle refreshes. /////////////////
+/////////////// It's a  bit outdated (from when the app was in Django), not sure it's doing  ///////////
+/////////////// quite what it needs to (not bugging at least though)           /////////////////////////
+
+//const rootPath = "/chainmates/"; // not used right now
+//const startingWriteOrReview = data.startingUrlDict.readOrWrite;
+//let startingStoryID = data.startingUrlDict.storyId;
+
+//let startingURL;
+//if (startingWriteOrReview == null) {
+//    startingURL = "home";
+//}
+//else if (
+//    (startingWriteOrReview == "write" &&
+//        getArrayObjByID(data.writeDicts, startingStoryID) == undefined)
+//    ||
+//    (startingWriteOrReview == "review" &&
+//        getArrayObjByID(data.reviewDicts, startingStoryID) == undefined)
+//) {
+//    startingURL = `${startingWriteOrReview}`;
+//}
+//else {
+//    startingURL = `${startingWriteOrReview}/${startingStoryID}`;
+//}
+
+
+
+//<Route path="" element={<RedirectToStartingURL startingURL={startingURL} />}
+//    index />
+
+
+
+//if (Object.keys(data).length == 0) {
+//    switch (authMode) {
+//        case "login":
+//            return (
+//                <Login
+//                    onLogin={setData}
+//                    switchToSignup={() => setAuthMode("signup")}
+//                />
+//            );
+//        case "signup":
+//        default:
+//            return (
+//                <Signup
+//                    onSignup={setData}
+//                    switchToLogin={() => setAuthMode("login")}
+//                />
+//            );
+//    }
+//}
+
+
+//function RedirectToStartingURL(props) {
+//    // The index route, purely here to send you to any URL that's specified in the initial load
+//    let navigate = useNavigate();
+
+//    useEffect(() => {
+//        console.log("initital navigate")
+//        navigate(props.startingURL);
+//    }, [navigate, props.startingURL])
+
+//}
