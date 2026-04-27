@@ -143,7 +143,7 @@ export default function App() {
                                 {/*<Route path=":finalSegmentID/" element={<StorySubSearchPage/>} />*/}
                             </Route>
                         </Route>
-                        <Route path="settings/" element={<SettingsPage authorDict={data.authorInfo} />}
+                        <Route path="settings/" element={<SettingsPage authorInfo={data.authorInfo} />}
                         />
                     </Route>
                     <Route path="*" element={<NoMatch />} />
@@ -270,31 +270,32 @@ function SearchDashboard(props) {
     )
 }
 
-function SettingsPage() {
+function SettingsPage(props) {
+    const navigate = useNavigate();
 
-    const [newDisplayName, setNewDisplayName] = useState(props.authorInfo.displayName);
-    const [newEmailAddress, setNewEmailAddress] = useState(props.authorInfo.emailAddress);
-    const [newPassword, setNewPassword] = useState(props.authorInfo.password);
+    const [newDisplayName, setNewDisplayName] = useState("");
+    const [newEmailAddress, setNewEmailAddress] = useState("");
+    const [newPassword, setNewPassword] = useState("");
 
     function handleLogout() {
         localStorage.removeItem("token");
         sessionStorage.clear();
-        navigate("/login");
+        navigate("/");
     }
 
     async function changeDisplayName(e) {
-        await contactAPI("/authors", "patch", true, {
+        await contactAPI("authors/", "patch", true, {
             displayName: newDisplayName
         });
     }
     async function changeEmailAddress(e) {
-        await contactAPI("/authors", "patch", true, {
+        await contactAPI("authors/", "patch", true, {
             emailAddress: newEmailAddress
         });
         handleLogout();
     }
     async function changePassword(e) {
-        await contactAPI("/authors", "patch", true, {
+        await contactAPI("authors/", "patch", true, {
             password: newPassword
         });
         handleLogout();
@@ -305,23 +306,23 @@ function SettingsPage() {
             <label>Change Display Name
                 <input label="Change Display Name" type="input"
                     value={newDisplayName}
-                    onChange={() => setNewDisplayName(value)}>
+                    onChange={(e) => setNewDisplayName(e.target.value)}>
                 </input>
-                <button type="submit" onClick={changeDisplayName} />
+                <button type="submit" onClick={changeDisplayName} >{"->"}</button>
             </label>
             <label>Change Email Address
                 <input label="Change Email Address" type="input"
                     value={newEmailAddress}
-                    onChange={() => setNewEmailAddress(value)}>
+                    onChange={(e) => setNewEmailAddress(e.target.value)}>
                 </input>
-                <button type="submit" onClick={changeDisplayName} />
+                <button type="submit" onClick={changeDisplayName} >{"->"}</button>
             </label>
             <label>Change Display Name
                 <input label="Change Password" type="input"
                     value={newPassword}
-                    onChange={() => setNewPassword(value)}>
+                    onChange={(e) => setNewPassword(e.target.value)}>
                 </input>
-                <button type="submit" onClick={changePassword} />
+                <button type="submit" onClick={changePassword} >{"->"}</button>
             </label>
             <button onClick={handleLogout}>LOGOUT</button>
         </fieldset>

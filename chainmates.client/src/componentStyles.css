@@ -276,6 +276,13 @@ div.container {
     }
 }
 
+    fieldset {
+        display: flex;
+        flex-direction: column;
+        background-color: var(--col-1-A);
+        border-color: var(--col-4)
+    }
+
     .modalPortal {
         position: 'fixed';
         top: 0;

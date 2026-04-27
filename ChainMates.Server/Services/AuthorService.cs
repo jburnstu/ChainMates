@@ -27,6 +27,9 @@ namespace ChainMates.Server.Services
             return await _context.Author.ToListAsync();
         }
 
+
+
+
         public async Task<AuthorDto?> GetAuthorById(int authorId)
         {
             return await (from a in _context.Author
@@ -59,6 +62,19 @@ namespace ChainMates.Server.Services
                 Password = dto.Password
             };
             _context.Author.Add(author);
+            await _context.SaveChangesAsync();
+            return author;
+        }
+
+        public async Task<Author> UpdateAuthor(int authorId, AuthorPatchDto dto)
+        {
+            var author = await (from a in _context.Author
+                                where a.Id == authorId
+                                select a
+                                ).FirstAsync();
+            author.DisplayName = dto.DisplayName ?? author.DisplayName;
+            author.EmailAddress = dto.EmailAddress ?? author.EmailAddress;
+            author.Password = dto.Password ?? author.Password;
             await _context.SaveChangesAsync();
             return author;
         }
