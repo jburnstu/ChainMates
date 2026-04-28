@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 
 import { PageOrTabLayout } from "../layouts/layouts";
-import { contactAPI } from "../supportFuncs/utilityFuncs";
+import { contactAPI } from "../utilityFuncs.jsx";
 import { Comments } from "../updates/comments"
 import { ModalWindow} from "../buttons/workshopButtons"
 

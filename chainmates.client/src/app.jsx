@@ -3,15 +3,16 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter, Link, Outlet, Route, Routes, useNavigate, useLocation, useOutlet, Navigate } from 'react-router-dom';
 
 //import { initialLoad, Login, Signup } from "./supportFuncs/authFuncs";
-import { getArrayObjByID } from "./supportFuncs/utilityFuncs";
-
 import { ModalSelectSegmentFromOptionsButton, StartNewStoryButton } from './buttons/workshopButtons.jsx';
 import { WorkshopTab } from "./pages/workshopTab";
 
 import { AuthorSearchButton, StorySearchButton } from "./buttons/searchButtons.jsx";
 import { AuthorSearchPage } from "./pages/authorSearchPage";
 import { StorySearchPage } from "./pages/storySearchPage";
-import { contactAPI } from "./supportFuncs/utilityFuncs.jsx";
+import { Login, Signup } from "./pages/loginAndSignupPages";
+import { SettingsPage } from "./pages/settingsPage";
+
+import { contactAPI, getArrayObjByID } from "./utilityFuncs.jsx";
 
 import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
 
@@ -79,14 +80,18 @@ export default function App() {
         return newDictArray;
     }
 
+    const onLogin = (initialData) => {
+        setData(initialData);
+        setUser(initialData.authorInfo);
+    }
 
     return ( //Could be a separate browserroutes document at some point
             <BrowserRouter>
                 <Routes>
                 <Route path="" element={<UniversalHeader displayName={user?.displayName} handleLogout={handleLogout} />} >
-                    <Route index path="login/" element={<Login onLogin={setData}
+                    <Route index path="login/" element={<Login onLogin={onLogin}
                                                         />} />
-                    <Route path="signup/" element={<Signup onSignup={setData}
+                    <Route path="signup/" element={<Signup onLogin={onLogin}
                                     />} />
                     <Route path="home/" element={
                         <ProtectedRoute user={user} children={
@@ -196,80 +201,6 @@ function UniversalHeader(props) {
     )
 }
 
-
-
-export function Login({ onLogin, switchToSignup }) {
-    console.log("IN LOGIN")
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [emailAddress, setEmailAddress] = useState("");
-    const [password, setPassword] = useState("");
-
-
-    const handleSubmit = async () => {
-        await contactAPI("auth/login/", "post", true,
-            // At some point want to generalise this to take username too
-            { "EmailAddress": emailAddress, "Password": password });
-
-        let initialLoadData = await contactAPI("load/", "get", true);
-        onLogin(initialLoadData);
-
-        const from = location.state?.from?.pathname || "/home";
-        console.log(from);
-        navigate(from, { replace: true });
-
-    };
-
-
-    return (
-        <div>
-            <input placeholder="email" onChange={e => setEmailAddress(e.target.value)} />
-            <input type="password" onChange={e => setPassword(e.target.value)} />
-            <button onClick={handleSubmit}>Login</button>
-
-            <p onClick={() => navigate("/signup/")} style={{ cursor: "pointer" }}>
-                Don't have an account? Sign up
-            </p>
-        </div>
-    );
-}
-
-
-export function Signup({ onSignup, switchToLogin }) {
-    const navigate = useNavigate();
-    const location = useLocation();
-
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [name, setName] = useState("");
-
-    const handleSubmit = async () => {
-        await contactAPI("auth/register", "post", true,
-            { "EmailAddress": email, "Password": password, "DisplayName": name }
-        )
-        const dashboardInfoData = await contactAPI("load", "get", true);
-        onSignup(dashboardInfoData);
-
-        const from = location.state?.from?.pathname || "/home";
-        navigate(from, { replace: true });
-    };
-
-    return (
-        <div>
-            <h2>Sign Up</h2>
-
-            <input placeholder="name" onChange={e => setName(e.target.value)} />
-            <input placeholder="email" onChange={e => setEmail(e.target.value)} />
-            <input type="password" onChange={e => setPassword(e.target.value)} />
-
-            <button onClick={handleSubmit}>Create Account</button>
-
-            <p onClick={() => navigate("/login/")} style={{ cursor: "pointer" }}>
-                Already have an account? Log in
-            </p>
-        </div>
-    );
-}
 function HomeDashboard(props) {
     console.log("HOME");
     // Loads up your own AuthorDashboard (same as everyone else with a couple tweaks)
@@ -356,66 +287,6 @@ function SearchDashboard(props) {
     )
 }
 
-function SettingsPage(props) {
-    const navigate = useNavigate();
-
-    const [newDisplayName, setNewDisplayName] = useState("");
-    const [newEmailAddress, setNewEmailAddress] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-
-
-    const handleLogout = () => {
-        props.handleLogout();
-        navigate("/login");
-    }
-
-    async function changeDisplayName(e) {
-        await contactAPI("authors/", "patch", true, {
-            displayName: newDisplayName
-        });
-    }
-    async function changeEmailAddress(e) {
-        await contactAPI("authors/", "patch", true, {
-            emailAddress: newEmailAddress
-        });
-        handleLogout();
-    }
-    async function changePassword(e) {
-        await contactAPI("authors/", "patch", true, {
-            password: newPassword
-        });
-        handleLogout();
-    }
-
-    return (
-        <fieldset>
-            <label>Change Display Name
-                <input label="Change Display Name" type="input"
-                    value={newDisplayName}
-                    onChange={(e) => setNewDisplayName(e.target.value)}>
-                </input>
-                <button type="submit" onClick={changeDisplayName} >{"->"}</button>
-            </label>
-            <label>Change Email Address
-                <input label="Change Email Address" type="input"
-                    value={newEmailAddress}
-                    onChange={(e) => setNewEmailAddress(e.target.value)}>
-                </input>
-                <button type="submit" onClick={changeEmailAddress} >{"->"}</button>
-            </label>
-            <label>Change Password
-                <input label="Change Password" type="input"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}>
-                </input>
-                <button type="submit" onClick={changePassword} >{"->"}</button>
-            </label>
-            <button onClick={handleLogout}>LOGOUT</button>
-        </fieldset>
-
-    )
-}
-
 
 function NoMatch() {
     return (
@@ -425,71 +296,3 @@ function NoMatch() {
         </div>
     );
 }
-
-
-
-
-
-/////////////// This sectino uses the initially-loaded StartingURL to handle refreshes. /////////////////
-/////////////// It's a  bit outdated (from when the app was in Django), not sure it's doing  ///////////
-/////////////// quite what it needs to (not bugging at least though)           /////////////////////////
-
-//const rootPath = "/chainmates/"; // not used right now
-//const startingWriteOrReview = data.startingUrlDict.readOrWrite;
-//let startingStoryID = data.startingUrlDict.storyId;
-
-//let startingURL;
-//if (startingWriteOrReview == null) {
-//    startingURL = "home";
-//}
-//else if (
-//    (startingWriteOrReview == "write" &&
-//        getArrayObjByID(data.writeDicts, startingStoryID) == undefined)
-//    ||
-//    (startingWriteOrReview == "review" &&
-//        getArrayObjByID(data.reviewDicts, startingStoryID) == undefined)
-//) {
-//    startingURL = `${startingWriteOrReview}`;
-//}
-//else {
-//    startingURL = `${startingWriteOrReview}/${startingStoryID}`;
-//}
-
-
-
-//<Route path="" element={<RedirectToStartingURL startingURL={startingURL} />}
-//    index />
-
-
-
-//if (Object.keys(data).length == 0) {
-//    switch (authMode) {
-//        case "login":
-//            return (
-//                <Login
-//                    onLogin={setData}
-//                    switchToSignup={() => setAuthMode("signup")}
-//                />
-//            );
-//        case "signup":
-//        default:
-//            return (
-//                <Signup
-//                    onSignup={setData}
-//                    switchToLogin={() => setAuthMode("login")}
-//                />
-//            );
-//    }
-//}
-
-
-//function RedirectToStartingURL(props) {
-//    // The index route, purely here to send you to any URL that's specified in the initial load
-//    let navigate = useNavigate();
-
-//    useEffect(() => {
-//        console.log("initital navigate")
-//        navigate(props.startingURL);
-//    }, [navigate, props.startingURL])
-
-//}
