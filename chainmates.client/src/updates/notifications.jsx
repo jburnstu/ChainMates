@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 
-import { contactAPI } from "../supportFuncs/utilityFuncs";
+import { contactAPI } from "../utilityFuncs";
 
 
 import { AuthorStringLink } from "../buttons/searchButtons";

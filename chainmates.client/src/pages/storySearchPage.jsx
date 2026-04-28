@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 
 import { PageOrTabLayout } from "../layouts/layouts";
-import { contactAPI } from "../supportFuncs/utilityFuncs";
+import { contactAPI } from "../utilityFuncs.jsx";
 import { Comments } from "../updates/comments"
 import { ModalWindow} from "../buttons/workshopButtons"
 
@@ -17,7 +17,7 @@ export function StorySearchPage() {
     const [finalSegmentDTO, setFinalSegmentDTO] = useState(null);
 
     async function changeFinalSegment(finalSegmentID) {
-        await contactAPI(`segments/${finalSegmentID}/history`, "get")
+        await contactAPI(`segments/${finalSegmentID}/history/`, "get",false)
             .then(function (value) {
                 setFinalSegmentDTO(value);
             })

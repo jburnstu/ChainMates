@@ -53,9 +53,11 @@ namespace ChainMates.Server.Services
 
         public async Task<Story> GetStoryBySegment(int segmentId)
         {
+            Debug.WriteLine("in get story by segment");
             var story = await _context.Story
                 .Where(s => s.Segments.Any(seg => seg.Id == segmentId))
                 .FirstOrDefaultAsync();
+            Debug.WriteLine(story.Id);
             return story;
         }
 

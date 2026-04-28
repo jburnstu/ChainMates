@@ -16,10 +16,10 @@ namespace ChainMates.Server.Controllers
         private readonly SegmentService _segmentService;
         private readonly CurrentUserService _currentUserService;
 
-        public SegmentController(CurrentUserService currentUserService, SegmentService segmentService)
+        public SegmentController(CurrentUserService currentUserService, ISegmentService segmentService)
         {
             _currentUserService = currentUserService;
-            _segmentService = segmentService;
+            _segmentService = (SegmentService)segmentService;
         }
 
 

@@ -2,7 +2,7 @@
 import React, { StrictMode, useState } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useNavigate } from 'react-router-dom';
 
-import { getArrayObjByID } from "../supportFuncs/utilityFuncs";
+import { getArrayObjByID } from "..//utilityFuncs";
 
 import { SubmissionButton } from '../buttons/workshopButtons';
 
@@ -27,7 +27,7 @@ export function WorkshopTab(props) {
         console.log("navigating....");
         navigate(`/${writeOrReview}/`);
     }
-  
+
 
     ////// Handle changes to the text in the active ie final segment (if this is a write-tab) ///////////////
     const [currentContentByStory, setCurrentContentByStory] = useOutletContext();
@@ -57,41 +57,41 @@ export function WorkshopTab(props) {
 
 
     return (
-        <PageOrTabLayout 
+        <PageOrTabLayout
             topLine={
                 <WorkshopStoryHeader storyDict={storyDict} wordCount={wordCount} />
             }
-            mainContent={ 
+            mainContent={
                 <SegmentSeriesDisplay segmentHistoryList={storyDict.segmentHistoryList}
                     editableID={writeOrReview == "write" ? tabID : null}
                     currentContent={currentContent}
                     changeSelection={changeSegmentSelection}
                     onChange={handleChange}
-                /> 
+                />
             }
             footer={
                 props.writeOrReview == "write"
                     ?
-                        ["SAVE", "SUBMIT", "ABANDON"].map(buttonType =>
-                            <SubmissionButton
-                                key={buttonType}
-                                submissionType={buttonType}
-                                currentContent={currentContent}
-                                segmentID={tabID}
-                                removeCurrentStory={removeCurrentStory} />)
+                    ["SAVE", "SUBMIT", "ABANDON"].map(buttonType =>
+                        <SubmissionButton
+                            key={buttonType}
+                            submissionType={buttonType}
+                            currentContent={currentContent}
+                            segmentID={tabID}
+                            removeCurrentStory={removeCurrentStory} />)
                     :
-                        ["APPROVE"].map(buttonType =>
-                            <SubmissionButton
-                                key={buttonType}
-                                submissionType={buttonType}
-                                currentContent={currentContent}
-                                segmentID={tabID}
-                                removeCurrentStory={removeCurrentStory} />)
+                    ["APPROVE"].map(buttonType =>
+                        <SubmissionButton
+                            key={buttonType}
+                            submissionType={buttonType}
+                            currentContent={currentContent}
+                            segmentID={tabID}
+                            removeCurrentStory={removeCurrentStory} />)
             }
             rightSidebar={
                 <Comments selections={selectedSegmentDict} storyDict={storyDict} />
             }
-        /> 
+        />
     )
 }
 

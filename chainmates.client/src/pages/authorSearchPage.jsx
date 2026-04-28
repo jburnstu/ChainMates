@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import { Awards, CircleNotifications } from "../drafts/drafts";
 import { PageOrTabLayout } from "../layouts/layouts";
 import { RecentSegmentDisplay } from "../segmentDisplay";
-import { contactAPI } from "../supportFuncs/utilityFuncs";
+import { contactAPI } from "../utilityFuncs";
 import { FollowButton, UnFollowButton } from "../buttons/searchButtons";
 import { Activity } from "../updates/activity";
 import { Notifications } from "../updates/notifications";
