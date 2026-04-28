@@ -15,7 +15,9 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<StoryService>();
 builder.Services.AddScoped<ISegmentService, SegmentService>();
+builder.Services.AddScoped<SegmentService>();
 builder.Services.AddScoped<ISegmentRules, SegmentRules>();
+
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<InitialLoadService>();

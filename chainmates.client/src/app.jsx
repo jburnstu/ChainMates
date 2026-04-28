@@ -23,20 +23,24 @@ export default function App() {
     const [authMode, setAuthMode] = useState("login"); 
 
     useEffect(() => {
+        console.log("IN APP USEEFFECT");
         const initialLoad = async () => {
             let initialLoadData = await contactAPI("load", "get", true);
             setData(initialLoadData);
             setUser(initialLoadData.authorInfo);
         }
-        initialLoad();
+        if (data === null) {
+            initialLoad();
+        }
 
-        }, [user]);
+        });
 
     if (user === null) {
         return <div>Loading...</div>
     }
 
     async function handleLogout() {
+        console.log("in app handle logout");
         await contactAPI("auth/logout/", "post", true);
 
         setUser(null);
@@ -140,7 +144,7 @@ function ProtectedRoute({ user, children }) {
     const location = useLocation();
     //const navigate = useNavigate();
 
-    console.log(user);
+    console.log("IN PROTECTED ROUTE CHECK" ,user);
 
     if (user === null) return <div>Loading...</div>;
 
@@ -154,6 +158,7 @@ function ProtectedRoute({ user, children }) {
 }
 
 function OptionalAuthRoute({ user, children }) {
+    console.log("IN OPTIONAL ROUTE CHECK", user);
     if (user === null) return <div>Loading...</div>;
     return children;
 }
@@ -165,7 +170,7 @@ function UniversalHeader(props) {
         navigate("/login");
     }
 
-    console.log(props.displayName);
+    console.log("IN UNIVERSAL HEADER",props.displayName);
     return (
         <div className="container">
             <header className="universalHeader">
@@ -194,6 +199,7 @@ function UniversalHeader(props) {
 
 
 export function Login({ onLogin, switchToSignup }) {
+    console.log("IN LOGIN")
     const navigate = useNavigate();
     const location = useLocation();
     const [emailAddress, setEmailAddress] = useState("");
@@ -265,6 +271,7 @@ export function Signup({ onSignup, switchToLogin }) {
     );
 }
 function HomeDashboard(props) {
+    console.log("HOME");
     // Loads up your own AuthorDashboard (same as everyone else with a couple tweaks)
     return (
          <DashboardLayout
@@ -282,6 +289,7 @@ function HomeDashboard(props) {
 }
 
 function WorkshopDashboard(props) {
+    console.log(`IN ${props.writeOrReview} dashboard`);
 
     let arrayOfTabIDs = props.dicts.map(dict => dict.id);
 
@@ -327,6 +335,7 @@ function WorkshopDashboard(props) {
 }
 
 function SearchDashboard(props) {
+    console.log(`in ${props.type} search page`)
     const outlet = useOutlet();
     return (
          <DashboardLayout 
@@ -392,9 +401,9 @@ function SettingsPage(props) {
                     value={newEmailAddress}
                     onChange={(e) => setNewEmailAddress(e.target.value)}>
                 </input>
-                <button type="submit" onClick={changeDisplayName} >{"->"}</button>
+                <button type="submit" onClick={changeEmailAddress} >{"->"}</button>
             </label>
-            <label>Change Display Name
+            <label>Change Password
                 <input label="Change Password" type="input"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}>

@@ -17,7 +17,7 @@ export function StorySearchPage() {
     const [finalSegmentDTO, setFinalSegmentDTO] = useState(null);
 
     async function changeFinalSegment(finalSegmentID) {
-        await contactAPI(`segments/${finalSegmentID}/history`, "get")
+        await contactAPI(`segments/${finalSegmentID}/history/`, "get",false)
             .then(function (value) {
                 setFinalSegmentDTO(value);
             })
