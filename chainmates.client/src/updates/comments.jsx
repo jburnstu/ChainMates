@@ -1,7 +1,7 @@
 
 import React, { StrictMode, useState } from "react";
 
-import { contactAPI } from "../supportFuncs/utilityFuncs";
+import { contactAPI } from "../utilityFuncs";
 
 export default { Comments };
 

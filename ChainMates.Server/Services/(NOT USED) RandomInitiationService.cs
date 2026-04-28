@@ -35,8 +35,8 @@
 //            if (count == 0)
 //            {
 //                Debug.WriteLine("Count 0 -- new story");
-//                StoryService storyService = new StoryService(_context);
-//                var newStory = await storyService.CreateRandomStory(authorId);
+//                StoryService _storyService = new StoryService(_context);
+//                var newStory = await _storyService.CreateRandomStory(authorId);
 //                segment = await CreateSegment(new SegmentCreationDto
 //                {
 //                    StoryId = newStory.Id,

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 
-import { contactAPI } from "../supportFuncs/utilityFuncs";
+import { contactAPI } from "../utilityFuncs";
 
 export default { AuthorStringLink, AuthorSearchButton, AuthorNameLink, StorySearchButton, StoryNameLink, FollowButton, UnFollowButton };
 

@@ -13,20 +13,14 @@ namespace ChainMates.Server.Controllers
     public class CommentController : ControllerBase
     {
 
-        private readonly AppDbContext _context;
-        private readonly CommentService _service;
+        private readonly CommentService _commentService;
         private readonly CurrentUserService _currentUserService;
-        private readonly NotificationService _notificationService;
 
-        public CommentController(AppDbContext context, CurrentUserService currentUserService, NotificationService notificationService)
+        public CommentController( CurrentUserService currentUserService, CommentService commentService)
         {
-            Debug.WriteLine("in service constructor");
-            _context = context;
-            _service = new CommentService(context);
+            _commentService = commentService;
             _currentUserService = currentUserService;
         }
-
-
 
         // POST api/<StoryController>
         [Authorize]
@@ -39,9 +33,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            Debug.WriteLine("InCommentController");
-            Debug.WriteLine(dto.ParentId);
-            var data = await _service.CreateAndSubmitComment(dto, authorId);
+            var data = await _commentService.CreateAndSubmitComment(dto, authorId);
             return Ok(data);
 
         }

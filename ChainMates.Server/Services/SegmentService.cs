@@ -20,16 +20,14 @@ namespace ChainMates.Server.Services
         private readonly AppDbContext _context;
         private readonly Random _rnd;
 
-        private readonly IStoryService _storyService;
         private readonly ICommentService _commentService;
         private readonly INotificationService _notificationService;
 
         private readonly ISegmentRules _segmentRules;
-        public SegmentService(AppDbContext context, IStoryService storyService, ICommentService commentService, INotificationService notificationService, ISegmentRules segmentRules)
+        public SegmentService(AppDbContext context, ICommentService commentService, INotificationService notificationService, ISegmentRules segmentRules)
         {
             _context = context;
             _rnd = new Random();
-            _storyService = storyService;
             _commentService = commentService;
             _notificationService = notificationService;
             _segmentRules = segmentRules;
@@ -52,6 +50,16 @@ namespace ChainMates.Server.Services
                           ).ToListAsync();
         }
 
+
+        public async Task<Story> GetStoryBySegment(int segmentId)
+        {
+            Debug.WriteLine("in get story by segment");
+            var story = await _context.Story
+                .Where(s => s.Segments.Any(seg => seg.Id == segmentId))
+                .FirstOrDefaultAsync();
+            Debug.WriteLine(story.Id);
+            return story;
+        }
 
         public async Task<List<int>> GetModeratedSegmentIdsByAuthorId(int authorId)
         {
@@ -87,7 +95,7 @@ namespace ChainMates.Server.Services
 
         public async Task<SegmentHistoryDto?> GetSegmentHistoryBySegment(int segmentId)
         {
-            var story = await _storyService.GetStoryBySegment(segmentId);
+            var story = await GetStoryBySegment(segmentId);
 
             var storyComments = await _commentService.GetStoryCommentAndChildrenForHistory(story.Id);
             var storyDto = new StoryIncludingCommentsDto

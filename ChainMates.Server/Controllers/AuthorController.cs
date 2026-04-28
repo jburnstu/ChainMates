@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ChainMates.Server.Services;
 using Microsoft.AspNetCore.Authorization;
+using ChainMates.Server.DTOs.Author;
 
 namespace ChainMates.Server.Controllers
 {
@@ -12,7 +13,7 @@ namespace ChainMates.Server.Controllers
         private readonly AuthorService _authorService;
         private readonly CurrentUserService _currentUserService;
         private readonly int numberOfRecentSegments = 3;
-        public AuthorController(AuthorService authorService, CurrentUserService currentUserService, NotificationService notificationService)
+        public AuthorController(AuthorService authorService, CurrentUserService currentUserService)
         {
             _authorService = authorService;
             _currentUserService = currentUserService;
@@ -28,7 +29,7 @@ namespace ChainMates.Server.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAuthorById(int id)
         {
-            var data = await _authorService.GetAuthorById(id);
+            var data = await _authorService.GetAuthorDtoById(id);
             return Ok(data);
         }
 
@@ -125,6 +126,19 @@ namespace ChainMates.Server.Controllers
         }
 
 
+        [Authorize]
+        [HttpPatch]
+        public async Task<IActionResult> PatchAuthorDetails([FromBody] AuthorPatchDto dto)
+        {
+            int authorId = _currentUserService.UserId ?? 0;
+
+            if (authorId == 0)
+            {
+                return Unauthorized();
+            }
+            var data = await _authorService.UpdateAuthor(authorId, dto);
+            return Ok(data);
+        }
 
 
     }

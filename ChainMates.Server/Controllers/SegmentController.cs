@@ -13,23 +13,20 @@ namespace ChainMates.Server.Controllers
     public class SegmentController : ControllerBase
     {
 
-        private readonly AppDbContext _context;
-        private readonly SegmentService _service;
+        private readonly SegmentService _segmentService;
         private readonly CurrentUserService _currentUserService;
-        private readonly NotificationService _notificationService;
 
-        public SegmentController(AppDbContext context, CurrentUserService currentUserService, NotificationService notificationService)
+        public SegmentController(CurrentUserService currentUserService, ISegmentService segmentService)
         {
-            _context = context;
-            _service = new SegmentService(context);
             _currentUserService = currentUserService;
+            _segmentService = (SegmentService)segmentService;
         }
 
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var data = await _service.GetSegment(id);
+            var data = await _segmentService.GetSegment(id);
 
             return Ok(data);
         }
@@ -49,7 +46,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            Segment segment = await _service.CreateSegment(dto, authorId, true);
+            Segment segment = await _segmentService.CreateSegment(dto, authorId, true);
             return Ok(segment);
 
             }
@@ -60,7 +57,7 @@ namespace ChainMates.Server.Controllers
         public async Task<IActionResult> PatchSaveAsync(int id, [FromBody] SegmentPatchDto dto)
         {
 
-            var data = await _service.UpdateSegmentContent(id, dto.Content);
+            var data = await _segmentService.UpdateSegmentContent(id, dto.Content);
             return Ok(data);
 
         }
@@ -71,7 +68,7 @@ namespace ChainMates.Server.Controllers
         {
             Debug.WriteLine("in PostSubmitAsync");
 
-            var data = await _service.SubmitSegmentForModeration(id,dto.Content);
+            var data = await _segmentService.SubmitSegmentForModeration(id,dto.Content);
             return Ok(data);
 
         }
@@ -81,7 +78,7 @@ namespace ChainMates.Server.Controllers
         public async Task<IActionResult> PostDeleteAsync(int id, [FromBody] SegmentPatchDto dto)
         {
 
-            var data = await _service.AbandonSegment(id, dto.Content);
+            var data = await _segmentService.AbandonSegment(id, dto.Content);
 
             return Ok(data);
 
@@ -103,7 +100,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            await _service.CreateModerationAssignment(segmentId, authorId);
+            await _segmentService.CreateModerationAssignment(segmentId, authorId);
             return Ok("Done!"); // Nothing needed for now
 
         }
@@ -120,7 +117,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            await _service.ApproveModeration(segmentId, authorId);
+            await _segmentService.ApproveModeration(segmentId, authorId);
             return Ok(segmentId);
 
         }
@@ -131,7 +128,7 @@ namespace ChainMates.Server.Controllers
         [HttpGet("{idForTrace}/history")]
         public async Task<IActionResult> GetSegmentHistory(int idForTrace)
         {
-            var data = await _service.GetSegmentHistoryBySegment(idForTrace);
+            var data = await _segmentService.GetSegmentHistoryBySegment(idForTrace);
             return Ok(data);
         }
 
@@ -149,7 +146,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            var data = _service.GetJoinableSegmentIdsByAuthor(authorId);
+            var data = _segmentService.GetJoinableSegmentIdsByAuthor(authorId);
             return Ok(data);
 
         }
@@ -165,7 +162,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            var data = _service.GetModeratableSegmentIdsByAuthor(authorId);
+            var data = _segmentService.GetModeratableSegmentIdsByAuthor(authorId);
             return Ok(data);
 
         }

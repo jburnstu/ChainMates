@@ -12,13 +12,13 @@
 //    public class RandomInitiationController : ControllerBase
 //    {
 //        private readonly AppDbContext _context;
-//        private readonly RandomInitiationService _service;
+//        private readonly RandomInitiationService _storyService;
 
 //        public RandomInitiationController (AppDbContext context)
 //        {
 //            Debug.WriteLine("in service constructor");
 //            _context = context;
-//            _service = new RandomInitiationService(context);
+//            _storyService = new RandomInitiationService(context);
 //        }
 
 
@@ -27,7 +27,7 @@
 //        public async Task<IActionResult> Post([FromBody] RandomCreationDto dto)
 //        {
 //            Debug.WriteLine("INSIDE POST");
-//            await _service.CreateRandomAuthorsAndSegments(dto);
+//            await _storyService.CreateRandomAuthorsAndSegments(dto);
 //            return Ok(dto);
 
 //        }
