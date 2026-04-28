@@ -3,6 +3,7 @@ using ChainMates.Server;
 using ChainMates.Server.DTOs.Notification.Info;
 using EFCore.NamingConventions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
 using Npgsql;
@@ -27,11 +28,20 @@ namespace ChainMates.Server
         public List<ModerationAssignment> ModerationAssignments { get; set; } = new();
         public List<Comment> Comments { get; set; } = new();
 
-        public List<AuthorRelation> PrimaryRelations { get; set; }
-        public List<AuthorRelation> SecondaryRelations { get; set; }
+        public List<AuthorRelation> PrimaryRelations { get; set; } = new();
+        public List<AuthorRelation> SecondaryRelations { get; set; } = new();
         public List<CircleAssignment> CircleAssignments { get; set; } = new();
 
         public List<Notification> ReceivedNotifications { get; set; } = new();
+
+        public List<Tag> Tags { get; set; } = new();
+        public List<TagAssignment> TagAssignments { get; set; } = new();
+        public List<Like> Likes { get; set; } = new();
+
+        public List<Message> SentMessages { get; set; } = new();
+        public List<Message> ReceivedMessages { get; set; } = new();
+
+
         //public List<Notification> InstigatedNotifications { get; set; } = new();
     }
     public class Story
@@ -69,6 +79,9 @@ namespace ChainMates.Server
         public List<Segment> FollowingSegments { get; set; } = new();
         public List<ModerationAssignment> ModerationAssignments { get; set; } = new();
         public List<SegmentComment> Comments { get; set; } = new();
+
+        public List<TagAssignment> TagAssignments { get; set; } = new();
+        public List<SegmentLike> SegmentLikes { get; set; } = new();
     }
     public class SegmentStatus
     {
@@ -109,6 +122,8 @@ namespace ChainMates.Server
         public int Id { get; set; }
         public string Description { get; set; }
         public List<Comment> Comments { get; set; }
+
+
     }
     public class CommentType
     {
@@ -124,6 +139,8 @@ namespace ChainMates.Server
         public Comment Comment { get; set; }
         public List<Comment> ChildComments { get; set; }
         public Story ParentStory { get; set; }
+
+        public CommentType CommentType { get; set; }
     }
     public class SegmentComment
     {
@@ -134,6 +151,8 @@ namespace ChainMates.Server
         public Comment Comment { get; set; }
         public List<Comment> ChildComments { get; set; }
         public Segment ParentSegment { get; set; }
+
+        public CommentType CommentType { get; set; }
     }
     public class CommentComment
     {
@@ -143,6 +162,8 @@ namespace ChainMates.Server
         public Comment Comment { get; set; }
         public List<Comment> ChildComments { get; set; }
         public Comment ParentComment { get; set; }
+
+        public CommentType CommentType { get; set; }
     }
 
     // The only actively-used view in the DB -- it reformats which segments follow on from which others
@@ -158,17 +179,17 @@ namespace ChainMates.Server
     }
 
     // These two functions aren't being used right now -- whether a segment is available is now determined at the servie layer.
-    public class JoinableSegmentByAuthor
-    {
-        public int AuthorId { get; set; }
-        public int SegmentId { get; set; }
-    }
+    //public class JoinableSegmentByAuthor
+    //{
+    //    public int AuthorId { get; set; }
+    //    public int SegmentId { get; set; }
+    //}
 
-    public class ModeratableSegmentByAuthor
-    {
-        public int AuthorId { get; set; }
-        public int SegmentId { get; set; }
-    }
+    //public class ModeratableSegmentByAuthor
+    //{
+    //    public int AuthorId { get; set; }
+    //    public int SegmentId { get; set; }
+    //}
 
     public class AuthorRelation { 
         public int AuthorId { get; set; }
@@ -230,30 +251,102 @@ namespace ChainMates.Server
 
         
         }
+
+
+    public class Message
+    {
+        public int Id { get; set; }
+        public string Content { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        public int AuthorId { get; set; }
+        public int ReceivingAuthorId { get; set; }
+        public Author Author { get; set; }
+        public Author ReceivingAuthor { get; set; }
+
+    }
+
+    public class Tag
+    {
+        public int Id { get; set; }
+        public string Description { get; set; }
+
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        public int AuthorId { get; set; }
+        public Author Author { get; set; }
+        public List<TagAssignment> TagAssignments { get; set; }
+
+    }
+
+    public class TagAssignment
+    {
+        public int AuthorId { get; set; }
+        public int TagId { get; set; }
+        public int SegmentId { get; set; }
+
+
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        public Author Author { get; set; }
+        public Tag Tag { get; set; }
+        public Segment Segment { get; set; }
+    }
+
+    public class Like
+    {
+        public int Id { get; set; }
+        public int AuthorId { get; set; }
+        public int LikeTypeId { get; set; }
+
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+
+        public Author Author { get; set; }
+        public LikeType LikeType { get; set; }
+
+        public SegmentLike? SegmentLike { get; set; }
+
+    }
+
+    public class LikeType {
+        public int Id { get; set; }
+        public string Description { get; set; }
+        
+        public List<Like> Likes { get; set; }
+
+     }
+
+
+    public class SegmentLike
+    {
+        public int LikeId { get; set; }
+        public int LikeTypeId { get; set; }
+        public int ParentSegmentId { get; set; }
+
+        public Like Like { get; set; }
+        public Segment ParentSegment { get; set; }
+        public LikeType LikeType { get; set; }
+
+    }
+
+
     public class AppDbContext : DbContext
     {
         public DbSet<Author> Author { get; set; }
         public DbSet<Story> Story { get; set; }
         public DbSet<Segment> Segment { get; set; }
-        public DbSet<SegmentStatus> SegmentStatus { get; set; }
         public DbSet<ModerationAssignment> ModerationAssignment { get; set; }
 
 
         public DbSet<SegmentTrace> SegmentTrace { get; set; }
-        public DbSet<JoinableSegmentByAuthor> JoinableSegmentByAuthor { get; set; }
-        public DbSet<ModeratableSegmentByAuthor> ModeratableSegmentByAuthor { get; set; }
+        //public DbSet<JoinableSegmentByAuthor> JoinableSegmentByAuthor { get; set; }
+        //public DbSet<ModeratableSegmentByAuthor> ModeratableSegmentByAuthor { get; set; }
 
 
         public DbSet<Comment> Comment { get; set; }
-        public DbSet<CommentStatus> CommentStatus { get; set; }
-        public DbSet<CommentType> CommentType { get; set; }
         public DbSet<StoryComment> StoryComment { get; set; }
         public DbSet<SegmentComment> SegmentComment { get; set; }
         public DbSet<CommentComment> CommentComment { get; set; }
 
 
         public DbSet<AuthorRelation> AuthorRelation { get; set; }
-        public DbSet<AuthorRelationType> AuthorRelationType { get; set; }
 
 
         public DbSet<Circle> Circle { get; set; }
@@ -261,15 +354,14 @@ namespace ChainMates.Server
 
 
         public DbSet<Notification> Notification { get; set; }
-        public DbSet<NotificationType> NotificationType { get; set; }
 
-        //public DbSet<SegmentCommentBySegment> SegmentCommentBySegment { get; set; }
-        //public DbSet<SegmentCommentByComment> SegmentCommentByComment { get; set; }
+        public DbSet<Message> Message { get; set; }
 
-        //public DbSet<CommentCommentBySegment> CommentCommentBySegment { get; set; }
+        public DbSet<Tag> Tag { get; set; }
+        public DbSet<TagAssignment> TagAssignment { get; set; }
 
-        //public DbSet<SegmentCommentCommentByComment> SegmentCommentCommentByComment { get; set; }
-
+        public DbSet<Like> Like { get; set; }
+        public DbSet<SegmentLike> SegmentLike { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
@@ -512,31 +604,113 @@ namespace ChainMates.Server
                                 //    .WithMany(ia => ia.InstigatedNotifications)
                                 //    .HasForeignKey(n => n.InstigatorAuthorId);
                             });
-                
 
-                    modelBuilder.Entity<SegmentTrace>()
-                        .HasNoKey()
-                        .ToView("segment_trace");
+                    modelBuilder.Entity<Tag>(
+                        nestedBuilder =>
+                        {
+                            nestedBuilder
+                                .HasOne(t => t.Author)
+                                .WithMany(a => a.Tags)
+                                .HasForeignKey(t => t.AuthorId)
+                                .OnDelete(DeleteBehavior.Cascade);
+                        });
 
-                    modelBuilder.Entity<JoinableSegmentByAuthor>()
-                        .HasNoKey()
-                        .ToView("joinable_segment_by_author");
 
-                    modelBuilder.Entity<ModeratableSegmentByAuthor>()
-                        .HasNoKey()
-                        .ToView("moderatable_segment_by_author");
+                    modelBuilder.Entity<TagAssignment>(
+                        nestedBuilder =>
+                        {
+                            nestedBuilder
+                                .HasKey(ta => new { ta.AuthorId, ta.TagId, ta.SegmentId });
 
-                    //        modelBuilder.Entity<SegmentCommentBySegment>()
-                    //.HasNoKey();
+                            nestedBuilder
+                                .HasOne(ta => ta.Tag)
+                                .WithMany(t => t.TagAssignments)
+                                .HasForeignKey(ta => ta.TagId)
+                                .OnDelete(DeleteBehavior.Cascade);
 
-                    //        modelBuilder.Entity<SegmentCommentByComment>()
-                    //.HasNoKey();
+                            nestedBuilder
+                                .HasOne(ta => ta.Segment)
+                                .WithMany(s => s.TagAssignments)
+                                .HasForeignKey(ta => ta.SegmentId)
+                                .OnDelete(DeleteBehavior.Cascade);
 
-                    //        modelBuilder.Entity<CommentCommentBySegment>()
-                    //.HasNoKey();
+                            nestedBuilder
+                                .HasOne(ta => ta.Author)
+                                .WithMany(a => a.TagAssignments)
+                                .HasForeignKey(ta => ta.AuthorId)
+                                .OnDelete(DeleteBehavior.Cascade);
+                        });
 
-                    //        modelBuilder.Entity<SegmentCommentCommentByComment>()
-                    //.HasNoKey();
+
+
+                    modelBuilder.Entity<Message>(
+                        nestedBuilder =>
+                        {
+                            nestedBuilder
+                                .HasOne(m => m.Author)
+                                .WithMany(a => a.SentMessages)
+                                .HasForeignKey(m => m.AuthorId)
+                                .OnDelete(DeleteBehavior.Restrict);
+
+                            nestedBuilder
+                                .HasOne(m => m.ReceivingAuthor)
+                                .WithMany(a => a.ReceivedMessages)
+                                .HasForeignKey(m => m.ReceivingAuthorId)
+                                .OnDelete(DeleteBehavior.Restrict);
+
+                        });
+
+
+            modelBuilder.Entity<Like>(
+                nestedBuilder =>
+                {
+                    nestedBuilder
+                         .HasKey(l => l.Id);
+
+                    nestedBuilder
+                         .HasAlternateKey(l => new { l.Id, l.LikeTypeId });
+
+                    nestedBuilder
+                         .HasOne(l => l.Author)
+                         .WithMany(a => a.Likes)
+                         .HasForeignKey(l => l.AuthorId)
+                         .OnDelete(DeleteBehavior.Restrict);
+
+                    nestedBuilder
+                         .HasOne(l => l.LikeType)
+                         .WithMany(lt => lt.Likes)
+                         .HasForeignKey(l => l.LikeTypeId)
+                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity<SegmentLike>(
+                nestedBuilder =>
+                {
+                    nestedBuilder
+                        .HasKey(sl => new { sl.LikeId, sl.LikeTypeId });
+
+                    nestedBuilder
+                        .HasOne(sl => sl.ParentSegment)
+                        .WithMany(s => s.SegmentLikes)
+                        .HasForeignKey(sl => sl.ParentSegmentId)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    nestedBuilder
+                        .HasOne(sl => sl.Like)
+                        .WithOne(l => l.SegmentLike)
+                        .HasPrincipalKey<Like>(l => new { l.Id, l.LikeTypeId })
+                        .HasForeignKey<SegmentLike>(sl => new { sl.LikeId, sl.LikeTypeId })
+                        .IsRequired()
+                        .OnDelete(DeleteBehavior.Restrict);
+    });
+
+
+
+
+            modelBuilder.Entity<SegmentTrace>()
+                                        .HasNoKey()
+                                        .ToView("segment_trace");
+
                 }
         }
     }

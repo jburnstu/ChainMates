@@ -1,5 +1,5 @@
 
-import React, { StrictMode, useState, useEffect } from "react";
+import React, { StrictMode, useState } from "react";
 import { BrowserRouter, Routes, Route, Link, Outlet, NavLink, useParams, useOutletContext, useNavigate } from 'react-router-dom';
 
 import { getArrayObjByID } from "../supportFuncs/utilityFuncs";
