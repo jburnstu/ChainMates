@@ -225,7 +225,7 @@ namespace ChainMates.Server.Services
                                          .FirstOrDefaultAsync();
             if (previousSegment != null)
             {
-                previousSegment.SegmentStatusId = (int)Enums.SegmentStatusEnum.AvailableForAddition;
+                previousSegment.SegmentStatusId = (int)SegmentStatusEnum.AvailableForAddition;
             }
 
             await _notificationService.NotifySegmentApproved(segmentId, authorId);
