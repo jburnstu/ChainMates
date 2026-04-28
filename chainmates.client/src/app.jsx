@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Link, Outlet, Route, Routes, useNavigate, useLocation, useOutlet } from 'react-router-dom';
+import { BrowserRouter, Link, Outlet, Route, Routes, useNavigate, useLocation, useOutlet, Navigate } from 'react-router-dom';
 
 //import { initialLoad, Login, Signup } from "./supportFuncs/authFuncs";
 import { getArrayObjByID } from "./supportFuncs/utilityFuncs";
@@ -18,7 +18,7 @@ import { DashboardLayout, PageOrTabLayout } from "./layouts/layouts";
 export default function App() {
 
     ///////  Load initial data or shunt into login/signup facade ////////////
-    const [user, setUser] = useState(undefined);
+    const [user, setUser] = useState(null);
     const [data, setData] = useState(null);
     const [authMode, setAuthMode] = useState("login"); 
 
@@ -30,10 +30,17 @@ export default function App() {
         }
         initialLoad();
 
-        }, []);
+        }, [user]);
 
     if (user === null) {
         return <div>Loading...</div>
+    }
+
+    async function handleLogout() {
+        await contactAPI("auth/logout/", "post", true);
+
+        setUser(null);
+        setData(null);
     }
 
 
@@ -72,7 +79,7 @@ export default function App() {
     return ( //Could be a separate browserroutes document at some point
             <BrowserRouter>
                 <Routes>
-                <Route path="" element={<UniversalHeader displayName={user?.displayName} />} >
+                <Route path="" element={<UniversalHeader displayName={user?.displayName} handleLogout={handleLogout} />} >
                     <Route index path="login/" element={<Login onLogin={setData}
                                                         />} />
                     <Route path="signup/" element={<Signup onSignup={setData}
@@ -99,7 +106,7 @@ export default function App() {
                             />
                     </Route>
                     <Route path="authors/" element={
-                        <ProtectedRoute user={user} children={
+                        <OptionalAuthRoute user={user} children={
                             <SearchDashboard type="authors" />
                         } />} >
                         <Route path=":authorID/"
@@ -107,7 +114,7 @@ export default function App() {
                         />
                     </Route>
                     <Route path="stories/" element={
-                        <ProtectedRoute user={user} children={
+                        <OptionalAuthRoute user={user} children={
                             <SearchDashboard type="stories" />
                         } />} >
                         <Route path=":storyID/"
@@ -117,7 +124,7 @@ export default function App() {
 
                     <Route path="settings/" element={
                         <ProtectedRoute user={user} children={
-                            <SettingsPage authorInfo={data?.authorInfo} />
+                            <SettingsPage authorInfo={data?.authorInfo} handleLogout={handleLogout} />
                         } />} >
                     </Route>
 
@@ -131,11 +138,15 @@ export default function App() {
 
 function ProtectedRoute({ user, children }) {
     const location = useLocation();
+    //const navigate = useNavigate();
 
-    if (user === undefined) return <div>Loading...</div>;
+    console.log(user);
+
+    if (user === null) return <div>Loading...</div>;
 
     if (!user) {
         console.log("in !user branch")
+        //navigate("/login");
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
@@ -143,12 +154,18 @@ function ProtectedRoute({ user, children }) {
 }
 
 function OptionalAuthRoute({ user, children }) {
-    if (user === undefined) return <div>Loading...</div>;
+    if (user === null) return <div>Loading...</div>;
     return children;
 }
 function UniversalHeader(props) {
+    const navigate = useNavigate();
 
+    const handleLogout = () => {
+        props.handleLogout();
+        navigate("/login");
+    }
 
+    console.log(props.displayName);
     return (
         <div className="container">
             <header className="universalHeader">
@@ -162,7 +179,10 @@ function UniversalHeader(props) {
                     <Link to="authors"><button type="button">AUTHORS</button></Link>|{" "}
                     <Link to="stories"><button type="button">STORIES</button></Link>|{" "}
                     <Link to="settings"><button type="button">SETTINGS</button></Link>|{" "}
-                    <Link to="login"><button type="button">LOG IN</button></Link>
+                    {props.displayName
+                        ? <button type="button" onClick={handleLogout}>LOG OUT</button>
+                        : <Link to="login"><button type="button">LOG IN</button></Link>       
+                    }
 
                 </nav>
             </header >
@@ -189,6 +209,7 @@ export function Login({ onLogin, switchToSignup }) {
         onLogin(initialLoadData);
 
         const from = location.state?.from?.pathname || "/home";
+        console.log(from);
         navigate(from, { replace: true });
 
     };
@@ -200,7 +221,7 @@ export function Login({ onLogin, switchToSignup }) {
             <input type="password" onChange={e => setPassword(e.target.value)} />
             <button onClick={handleSubmit}>Login</button>
 
-            <p onClick={() => navigate("signup/")} style={{ cursor: "pointer" }}>
+            <p onClick={() => navigate("/signup/")} style={{ cursor: "pointer" }}>
                 Don't have an account? Sign up
             </p>
         </div>
@@ -237,7 +258,7 @@ export function Signup({ onSignup, switchToLogin }) {
 
             <button onClick={handleSubmit}>Create Account</button>
 
-            <p onClick={() => navigate("login/")} style={{ cursor: "pointer" }}>
+            <p onClick={() => navigate("/login/")} style={{ cursor: "pointer" }}>
                 Already have an account? Log in
             </p>
         </div>
@@ -333,10 +354,10 @@ function SettingsPage(props) {
     const [newEmailAddress, setNewEmailAddress] = useState("");
     const [newPassword, setNewPassword] = useState("");
 
-    function handleLogout() {
-        localStorage.removeItem("token");
-        sessionStorage.clear();
-        navigate("/");
+
+    const handleLogout = () => {
+        props.handleLogout();
+        navigate("/login");
     }
 
     async function changeDisplayName(e) {
