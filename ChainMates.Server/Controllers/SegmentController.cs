@@ -149,8 +149,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            var traces = await _service.GetSegmentTraces();
-            var data = _service.GetJoinableSegmentIdsByAuthor(authorId, traces);
+            var data = _service.GetJoinableSegmentIdsByAuthor(authorId);
             return Ok(data);
 
         }
@@ -166,8 +165,7 @@ namespace ChainMates.Server.Controllers
             {
                 return Unauthorized();
             }
-            var traces = await _service.GetSegmentTraces();
-            var data = _service.GetModeratableSegmentIdsByAuthor(authorId, traces);
+            var data = _service.GetModeratableSegmentIdsByAuthor(authorId);
             return Ok(data);
 
         }

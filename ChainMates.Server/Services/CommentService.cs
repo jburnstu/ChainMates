@@ -5,20 +5,22 @@ using ChainMates.Server;
 using ChainMates.Server.DTOs.Comment;
 using System;
 using System.Diagnostics;
-using ChainMates.Server.enums;
+using ChainMates.Server.Enums;
 
 
 namespace ChainMates.Server.Services
 {
-    public class CommentService
+    public class CommentService : ICommentService
     {
 
         private readonly AppDbContext _context;
         private readonly Random _rnd;
-        public CommentService(AppDbContext context)
+        private readonly INotificationService _notificationService;
+        public CommentService(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
             _rnd = new Random();
+            _notificationService = notificationService;
         }
 
         // These generic comment getters aren't used yet because comments only ever get fed into SegmentHistoryDto for now
@@ -53,10 +55,10 @@ namespace ChainMates.Server.Services
             _context.Comment.Add(comment);
             await _context.SaveChangesAsync();
 
-            var commentType = (enums.CommentType)dto.CommentTypeId;
+            var commentType = (Enums.CommentTypeEnum)dto.CommentTypeId;
             switch (commentType)
             {
-                case enums.CommentType.Story:
+                case Enums.CommentTypeEnum.Story:
                     var storyComment = new StoryComment
                     {
                         CommentId = comment.Id,
@@ -65,7 +67,7 @@ namespace ChainMates.Server.Services
                     };
                     await _context.StoryComment.AddAsync(storyComment);
                     break;
-                case enums.CommentType.Segment:
+                case Enums.CommentTypeEnum.Segment:
                     var segmentComment = new SegmentComment
                     {
                         CommentId = comment.Id,
@@ -74,7 +76,7 @@ namespace ChainMates.Server.Services
                     };
                     await _context.SegmentComment.AddAsync(segmentComment);
                     break;
-                case enums.CommentType.Comment:
+                case Enums.CommentTypeEnum.Comment:
                     var commentComment = new CommentComment
                     {
                         CommentId = comment.Id,
@@ -131,8 +133,7 @@ namespace ChainMates.Server.Services
                 Content = dto.Content
             });
 
-            NotificationService notificationService = new NotificationService(_context);
-            await notificationService.NotifyCommentPosted(dto.CommentTypeId, dto.ParentId, authorId);
+            await _notificationService.NotifyCommentPosted(dto.CommentTypeId, dto.ParentId, authorId);
             return dto;
         }
 
@@ -150,7 +151,7 @@ namespace ChainMates.Server.Services
                                        select new HistoricalCommentDto
                                        {
                                            Id = c.Id,
-                                           CommentTypeId = (int)enums.CommentType.Story,
+                                           CommentTypeId = (int)Enums.CommentTypeEnum.Story,
                                            DisplayName = a.DisplayName,
                                            Content = c.Content
                                        }
@@ -169,7 +170,7 @@ namespace ChainMates.Server.Services
                                            InnerDto = new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = (int)enums.CommentType.Comment,
+                                               CommentTypeId = (int)Enums.CommentTypeEnum.Comment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }
@@ -198,7 +199,7 @@ namespace ChainMates.Server.Services
                                        select new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = (int)enums.CommentType.Segment,
+                                               CommentTypeId = (int)Enums.CommentTypeEnum.Segment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }                                      
@@ -217,7 +218,7 @@ namespace ChainMates.Server.Services
                                            InnerDto = new HistoricalCommentDto
                                            {
                                                Id = c.Id,
-                                               CommentTypeId = (int)enums.CommentType.Comment,
+                                               CommentTypeId = (int)Enums.CommentTypeEnum.Comment,
                                                DisplayName = a.DisplayName,
                                                Content = c.Content
                                            }

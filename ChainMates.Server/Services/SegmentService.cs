@@ -8,29 +8,32 @@ using ChainMates.Server.DTOs.Segment;
 using ChainMates.Server.DTOs.Story;
 using System;
 using System.Diagnostics;
-using ChainMates.Server.enums;
+using ChainMates.Server.Enums;
+using ChainMates.Server.Services.Interfaces;
+using ChainMates.Server.Rules;
 
 namespace ChainMates.Server.Services
 {
-    public class SegmentService
+    public class SegmentService : ISegmentService
     {
 
-        private readonly AppDbContext? _context;
+        private readonly AppDbContext _context;
         private readonly Random _rnd;
-        public SegmentService(AppDbContext context)
+
+        private readonly IStoryService _storyService;
+        private readonly ICommentService _commentService;
+        private readonly INotificationService _notificationService;
+
+        private readonly ISegmentRules _segmentRules;
+        public SegmentService(AppDbContext context, IStoryService storyService, ICommentService commentService, INotificationService notificationService, ISegmentRules segmentRules)
         {
             _context = context;
             _rnd = new Random();
+            _storyService = storyService;
+            _commentService = commentService;
+            _notificationService = notificationService;
+            _segmentRules = segmentRules;
         }
-
-        public SegmentService()
-            // This contextless service exists for testing. It does prompt a whole load of null warnings,
-            // which suggests separating out the database calls here into a repository layer and only 
-            // leaving methods that can be given an object array.
-        {
-            _rnd = new Random();
-        }
-
 
         public async Task<Segment> GetSegment(int segmentId)
         {
@@ -64,8 +67,7 @@ namespace ChainMates.Server.Services
         public async Task<HistoricalSegmentDto?> GetHistoricalSegment(int segmentId)
             // The DTO that is nested inside another segment's info when its history is needed
         {
-            CommentService commentService = new CommentService(_context);
-            var childComments = await commentService.GetHistoricalSegmentCommentAndChildren(segmentId);
+            var childComments = await _commentService.GetHistoricalSegmentCommentAndChildren(segmentId);
 
             return await _context.Segment
                 .Where(st => st.Id == segmentId)
@@ -85,11 +87,9 @@ namespace ChainMates.Server.Services
 
         public async Task<SegmentHistoryDto?> GetSegmentHistoryBySegment(int segmentId)
         {
-            StoryService storyService = new StoryService(_context);
-            var story = await storyService.GetStoryBySegment(segmentId);
+            var story = await _storyService.GetStoryBySegment(segmentId);
 
-            CommentService commentService = new CommentService(_context);
-            var storyComments = await commentService.GetStoryCommentAndChildrenForHistory(story.Id);
+            var storyComments = await _commentService.GetStoryCommentAndChildrenForHistory(story.Id);
             var storyDto = new StoryIncludingCommentsDto
             {
                 Title = story.Title,
@@ -119,7 +119,6 @@ namespace ChainMates.Server.Services
                 Id = segmentId,
                 StoryData = storyDto,
                 SegmentHistoryList = segmentHistoryList
-
             };
 
 
@@ -134,7 +133,7 @@ namespace ChainMates.Server.Services
                 Segment? previousSegment = await (from s in _context.Segment
                                                   where s.Id == dto.PreviousSegmentId
                                                   select s).FirstOrDefaultAsync();
-                previousSegment.SegmentStatusId = (int)enums.SegmentStatus.LockedForAddition;
+                previousSegment.SegmentStatusId = (int)SegmentStatusEnum.LockedForAddition;
                 storyId = previousSegment.StoryId;
 
             }
@@ -143,7 +142,7 @@ namespace ChainMates.Server.Services
             {
                 AuthorId = authorId,
                 StoryId = storyId,
-                SegmentStatusId = dto.SegmentStatusId ?? (int)enums.SegmentStatus.InProgress,
+                SegmentStatusId = dto.SegmentStatusId ?? (int)SegmentStatusEnum.InProgress,
                 PreviousSegmentId = dto.PreviousSegmentId,
                 Content = (dto.Content ?? "").ToString()
             };
@@ -167,7 +166,7 @@ namespace ChainMates.Server.Services
         public async Task<string> SubmitSegmentForModeration(int segmentId, string content)
         {
             var segment = await GetSegment(segmentId);
-            segment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForModeration;
+            segment.SegmentStatusId = (int)SegmentStatusEnum.AvailableForModeration;
             segment.Content = content;
             await _context.SaveChangesAsync();
             return "Done!";
@@ -189,7 +188,7 @@ namespace ChainMates.Server.Services
             // Currently moderation is tracked both by moderationassignment objects and by segmentstatusid.
             // This isn't ideal, but it's slightly for posterity in case segments need to be reviewed
             // multiple times in the future.
-            segment.SegmentStatusId = (int)enums.SegmentStatus.LockedForModeration;
+            segment.SegmentStatusId = (int)SegmentStatusEnum.LockedForModeration;
 
             await _context.SaveChangesAsync();
             return moderationAssignment;
@@ -209,7 +208,7 @@ namespace ChainMates.Server.Services
             Segment segment = await (from s in _context.Segment
                                      where s.Id == moderationAssignment.SegmentId
                                      select s).FirstOrDefaultAsync();
-            segment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForAddition;
+            segment.SegmentStatusId = (int)SegmentStatusEnum.AvailableForAddition;
 
             // Same for previous segment if exists
             Segment? previousSegment = await (from s in _context.Segment
@@ -218,11 +217,10 @@ namespace ChainMates.Server.Services
                                          .FirstOrDefaultAsync();
             if (previousSegment != null)
             {
-                previousSegment.SegmentStatusId = (int)enums.SegmentStatus.AvailableForAddition;
+                previousSegment.SegmentStatusId = (int)Enums.SegmentStatusEnum.AvailableForAddition;
             }
 
-            NotificationService notificationService = new NotificationService(_context);
-            await notificationService.NotifySegmentApproved(segmentId, authorId);
+            await _notificationService.NotifySegmentApproved(segmentId, authorId);
             await _context.SaveChangesAsync();
             return segmentId;
         }
@@ -230,14 +228,14 @@ namespace ChainMates.Server.Services
         public async Task<string> AbandonSegment(int segmentId, string content)
         {
             var segment = await GetSegment(segmentId);
-            segment.SegmentStatusId = (int)enums.SegmentStatus.Abandoned;
+            segment.SegmentStatusId = (int)SegmentStatusEnum.Abandoned;
             segment.Content = content;
 
             // If there's a previous segment, it becomes available again
             if (segment.PreviousSegmentId != null)
             {
                 Segment? previousSegment = await GetSegment((int)segment.PreviousSegmentId);
-                previousSegment?.SegmentStatusId = (int)enums.SegmentStatus.AvailableForAddition;
+                previousSegment?.SegmentStatusId = (int)SegmentStatusEnum.AvailableForAddition;
             }
 
             await _context.SaveChangesAsync();
@@ -245,47 +243,16 @@ namespace ChainMates.Server.Services
         }
 
 
-
-        public async Task<List<SegmentTrace>> GetSegmentTraces()
+        public async Task<List<int>> GetJoinableSegmentIdsByAuthor(int authorId)
         {
-            // used in the joinable/moderatable checks. The idea is that this could eventually be separated
-            // into a repository layer, where the DB isn't required.
-            return await _context.SegmentTrace.ToListAsync();
+            var traces = await _context.SegmentTrace.ToListAsync();
+            return _segmentRules.GetJoinableSegmentIdsByAuthor(authorId, traces);
         }
 
-        public async Task<List<int>> GetJoinableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
+        public async Task<List<int>> GetModeratableSegmentIdsByAuthor(int authorId)
         {
-            // Blocked if any previous segment was written by the author
-            // Might also introduce "blocked if any future segment written by the author"
-            var blockedSegmentIdList = traces
-                .Where(t => t.EarlierSegmentAuthorId == authorId)
-                .Select(t => t.FinalSegmentId)
-                .ToHashSet();
-
-            return traces
-                .Where(t => t.FinalSegmentStatusId == (int)enums.SegmentStatus.AvailableForAddition)
-                .Select(t => t.FinalSegmentId)
-                .Distinct()
-                .Where(id => !blockedSegmentIdList.Contains(id))
-                .ToList();
-                
-        }
-
-        public List<int> GetModeratableSegmentIdsByAuthor(int authorId, List<SegmentTrace> traces)
-        {
-            // Blocked if any previous segment was written by the author
-            var blockedSegmentIdList = traces
-                .Where(t => t.EarlierSegmentAuthorId == authorId)
-                .Select(t => t.FinalSegmentId)
-                .ToHashSet();
-
-            return traces
-                .Where(t => t.FinalSegmentStatusId == (int)enums.SegmentStatus.AvailableForModeration)
-                .Select(t => t.FinalSegmentId)
-                .Distinct()
-                .Where(id => !blockedSegmentIdList.Contains(id))
-                .ToList();
-
+            var traces = await _context.SegmentTrace.ToListAsync();
+            return _segmentRules.GetModeratableSegmentIdsByAuthor(authorId, traces);
         }
 
     }

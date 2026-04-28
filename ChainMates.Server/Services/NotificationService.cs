@@ -17,7 +17,7 @@ using ChainMates.Server.DTOs.Notification.Info;
 
 namespace ChainMates.Server.Services
 {
-    public class NotificationService
+    public class NotificationService : INotificationService
     {
 
         private readonly AppDbContext _context;
@@ -163,20 +163,20 @@ namespace ChainMates.Server.Services
         {
             int recipientId;
 
-            var commentType = (enums.CommentType)commentTypeId;
+            var commentType = (CommentTypeEnum)commentTypeId;
             switch (commentType)
-            { // These enums aren't the cleanest -- at some point change to enum in the DTO?
-                case enums.CommentType.Story:
+            { // These Enums aren't the cleanest -- at some point change to enum in the DTO?
+                case CommentTypeEnum.Story:
                     recipientId = await (from s in _context.Story
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
                     break;
-                case enums.CommentType.Segment:
+                case CommentTypeEnum.Segment:
                     recipientId = await (from s in _context.Segment
                                          where s.Id == parentId
                                          select s.AuthorId).FirstOrDefaultAsync();
                     break;
-                case enums.CommentType.Comment:
+                case CommentTypeEnum.Comment:
                 default:
                     recipientId = await (from s in _context.Comment
                                          where s.Id == parentId
